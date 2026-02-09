@@ -51,8 +51,6 @@ This application uses a classic **Queued Message Handler (QMH)** style:
 
 ## Screenshot: Main Block Diagram (QMH)
 
-Add a screenshot of the main block diagram to the repo (recommended path below), then it will render here:
-
 ![Main Block Diagram — Queued Message Handler](docs/images/main-block-diagram-qmh.png)
 
 ---
