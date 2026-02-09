@@ -26,6 +26,21 @@ The code is intentionally **simple and readable** to model best practices and ma
 
 ---
 
+## Installation & Setup
+
+This project is intentionally lightweight—there’s no installer.
+
+### Requirements
+- **LabVIEW 2020 or later**
+- **NI-VISA** (required for device communications)
+
+### Steps
+1. Download (or clone) this repository:
+   ```bash
+   git clone https://github.com/elijah286/mini-system-manager.git
+
+---
+
 ## Supported Revidyne systems (examples)
 
 Revidyne offers multiple small systems that connect to a PC via USB and can be monitored/controlled with string-based commands. Examples include:
