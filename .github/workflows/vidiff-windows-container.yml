@@ -19,6 +19,14 @@ on:
       - '**/*.ctl'
       - '.github/labview/**'
       - '.github/workflows/vidiff-windows-container.yml'
+  workflow_dispatch:
+    inputs:
+      base_sha:
+        description: 'Base commit SHA to diff from'
+        required: true
+      head_sha:
+        description: 'Head commit SHA to diff to'
+        required: true
 
 permissions:
   contents: read
@@ -38,14 +46,20 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             echo "base_sha=${{ github.event.pull_request.base.sha }}" >> "$GITHUB_OUTPUT"
+            echo "head_sha=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "base_sha=${{ github.event.inputs.base_sha }}" >> "$GITHUB_OUTPUT"
+            echo "head_sha=${{ github.event.inputs.head_sha }}" >> "$GITHUB_OUTPUT"
           else
             echo "base_sha=${{ github.event.before }}" >> "$GITHUB_OUTPUT"
+            echo "head_sha=${{ github.sha }}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Checkout current branch
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ steps.refs.outputs.head_sha }}
           path: pr
 
       - name: Checkout base ref
@@ -59,7 +73,7 @@ jobs:
         shell: bash
         run: |
           cd pr
-          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMR "${{ steps.refs.outputs.base_sha }}" "${{ github.sha }}" -- '*.vi' '*.ctl' || true)
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMR "${{ steps.refs.outputs.base_sha }}" "${{ steps.refs.outputs.head_sha }}" -- '*.vi' '*.ctl' || true)
 
           if [ -z "$CHANGED_FILES" ]; then
             echo "No changed LabVIEW files detected."
