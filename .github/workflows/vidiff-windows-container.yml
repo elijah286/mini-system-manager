@@ -96,24 +96,36 @@ jobs:
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Pull LabVIEW container image
+      - name: Cache LabVIEW container image
         if: steps.changed-files.outputs.has_changes == 'true'
-        run: docker pull ${{ env.LABVIEW_CONTAINER_IMAGE }}
+        id: cache-image
+        uses: actions/cache@v4
+        with:
+          path: labview-image.tar
+          key: labview-container-${{ env.LABVIEW_CONTAINER_IMAGE }}
+
+      - name: Load or pull LabVIEW container image
+        if: steps.changed-files.outputs.has_changes == 'true'
+        run: |
+          if (Test-Path "labview-image.tar") {
+            Write-Host "Loading cached image..."
+            docker load -i labview-image.tar
+          } else {
+            Write-Host "Pulling image..."
+            docker pull ${{ env.LABVIEW_CONTAINER_IMAGE }}
+            docker save -o labview-image.tar ${{ env.LABVIEW_CONTAINER_IMAGE }}
+          }
 
       - name: Run VIDiff
         if: steps.changed-files.outputs.has_changes == 'true'
         shell: pwsh
         run: |
-          $files = "${{ steps.changed-files.outputs.files_csv }}" -split ',' | Where-Object { $_ -ne '' }
-          foreach ($file in $files) {
-            Write-Host "::group::Running VIDiff for $file"
-            docker run --rm `
-              -v "${{ github.workspace }}\pr:C:\workspace" `
-              -v "${{ github.workspace }}\base:C:\workspace-base" `
-              ${{ env.LABVIEW_CONTAINER_IMAGE }} `
-              powershell -File "C:\workspace\.github\labview\vidiff.ps1" -WorkspaceRoot "C:\workspace" -WorkspaceBaseRoot "C:\workspace-base" -VIFiles "$file"
-            Write-Host "::endgroup::"
-          }
+          $files = "${{ steps.changed-files.outputs.files_csv }}"
+          docker run --rm `
+            -v "${{ github.workspace }}\pr:C:\workspace" `
+            -v "${{ github.workspace }}\base:C:\workspace-base" `
+            ${{ env.LABVIEW_CONTAINER_IMAGE }} `
+            powershell -File "C:\workspace\.github\labview\vidiff.ps1" -WorkspaceRoot "C:\workspace" -WorkspaceBaseRoot "C:\workspace-base" -VIFiles $($files -split ',' | ForEach-Object { '"' + $_ + '"' })
 
       - name: Upload VIDiff reports
         if: steps.changed-files.outputs.has_changes == 'true'
