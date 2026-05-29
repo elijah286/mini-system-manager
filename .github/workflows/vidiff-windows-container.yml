@@ -125,6 +125,7 @@ jobs:
           else
             echo "" > metadata/pr_number
           fi
+          echo "${{ steps.refs.outputs.head_sha }}" > metadata/head_sha
           echo "windows" > metadata/platform
 
       - name: Upload metadata

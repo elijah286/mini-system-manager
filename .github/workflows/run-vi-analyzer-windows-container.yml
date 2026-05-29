@@ -18,6 +18,10 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: 'Commit SHA to analyze (defaults to HEAD of branch)'
+        required: false
 
 permissions:
   contents: write
@@ -32,8 +36,21 @@ jobs:
     runs-on: windows-2022
 
     steps:
+      - name: Determine target commit
+        id: target
+        shell: bash
+        run: |
+          if [ -n "${{ github.event.inputs.commit_sha }}" ]; then
+            echo "sha=${{ github.event.inputs.commit_sha }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "sha=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.target.outputs.sha }}
+          fetch-depth: 0
 
       - name: Pull LabVIEW container image
         run: docker pull ${{ env.LABVIEW_CONTAINER_IMAGE }}
@@ -57,8 +74,9 @@ jobs:
         if: always()
         shell: bash
         run: |
+          TARGET_SHA="${{ steps.target.outputs.sha }}"
           REPORT="${{ github.workspace }}/vi-analyzer-results/Results.txt"
-          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          SHORT_SHA=$(echo "${TARGET_SHA}" | cut -c1-7)
           DEPLOY_DIR="pages-content/vi-analyzer/${SHORT_SHA}"
           mkdir -p "$DEPLOY_DIR"
 
@@ -82,7 +100,7 @@ jobs:
           </head>
           <body>
             <h1>VI Analyzer Report — ${SHORT_SHA}</h1>
-            <p>Commit: <code>${{ github.sha }}</code></p>
+            <p>Commit: <code>${TARGET_SHA}</code></p>
             <pre>${CONTENT}</pre>
           </body>
           </html>
@@ -114,10 +132,11 @@ jobs:
         if: always()
         shell: bash
         run: |
-          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          TARGET_SHA="${{ steps.target.outputs.sha }}"
+          SHORT_SHA=$(echo "${TARGET_SHA}" | cut -c1-7)
           REPORT_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/vi-analyzer/vi-analyzer/${SHORT_SHA}/"
           curl -s -X POST \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.sha }}" \
+            "https://api.github.com/repos/${{ github.repository }}/statuses/${TARGET_SHA}" \
             -d "{\"state\":\"success\",\"target_url\":\"${REPORT_URL}\",\"description\":\"View VI Analyzer report\",\"context\":\"VI Analyzer Report\"}"

@@ -49,17 +49,25 @@ jobs:
           PR_NUMBER=$(tr -d '[:space:]' < metadata/pr_number)
           PLATFORM=$(tr -d '[:space:]' < metadata/platform)
 
+          if [ -f metadata/head_sha ]; then
+            HEAD_SHA=$(tr -d '[:space:]' < metadata/head_sha)
+          else
+            HEAD_SHA="${{ github.event.workflow_run.head_sha }}"
+          fi
+
+          SHORT_SHA=$(echo "${HEAD_SHA}" | cut -c1-7)
+
           if [ -n "$PR_NUMBER" ]; then
             echo "pr_number=${PR_NUMBER}" >> "$GITHUB_OUTPUT"
             echo "label=pr-${PR_NUMBER}" >> "$GITHUB_OUTPUT"
             echo "is_pr=true" >> "$GITHUB_OUTPUT"
           else
-            SHORT_SHA=$(echo "${{ github.event.workflow_run.head_sha }}" | cut -c1-7)
             echo "pr_number=" >> "$GITHUB_OUTPUT"
             echo "label=push-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
             echo "is_pr=false" >> "$GITHUB_OUTPUT"
           fi
 
+          echo "head_sha=${HEAD_SHA}" >> "$GITHUB_OUTPUT"
           echo "platform=${PLATFORM}" >> "$GITHUB_OUTPUT"
           echo "skip=false" >> "$GITHUB_OUTPUT"
 
@@ -163,7 +171,7 @@ jobs:
         run: |
           LABEL="${{ steps.meta.outputs.label }}"
           PLATFORM="${{ steps.meta.outputs.platform }}"
-          HEAD_SHA="${{ github.event.workflow_run.head_sha }}"
+          HEAD_SHA="${{ steps.meta.outputs.head_sha }}"
           REPORT_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/vidiff/${LABEL}/${PLATFORM}/"
           curl -s -X POST \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
