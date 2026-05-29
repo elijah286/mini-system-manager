@@ -17,15 +17,11 @@ on:
   push:
     branches:
       - main
-    paths:
-      - '**/*.vi'
-      - '**/*.ctl'
-      - '**/*.lvproj'
-      - '**/*.lvlib'
-      - '**/*.lvlps'
-      - '.github/labview/**'
-      - '.github/workflows/run-vi-analyzer-windows-container.yml'
   workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
 
 env:
   LABVIEW_CONTAINER_IMAGE: nationalinstruments/labview:latest-windows
@@ -55,3 +51,60 @@ jobs:
         with:
           name: vi-analyzer-report-windows
           path: ${{ github.workspace }}\vi-analyzer-results\
+
+      - name: Generate HTML report
+        if: always()
+        shell: bash
+        run: |
+          REPORT="${{ github.workspace }}/vi-analyzer-results/Results.txt"
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          DEPLOY_DIR="pages-content/vi-analyzer/${SHORT_SHA}"
+          mkdir -p "$DEPLOY_DIR"
+
+          if [ -f "$REPORT" ]; then
+            CONTENT=$(sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g' "$REPORT")
+          else
+            CONTENT="No report file was generated."
+          fi
+
+          cat > "$DEPLOY_DIR/index.html" <<ENDHTML
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <title>VI Analyzer Report — ${SHORT_SHA}</title>
+            <style>
+              body { font-family: monospace; margin: 2em; background: #f8f8f8; }
+              h1 { font-family: sans-serif; }
+              pre { background: #fff; border: 1px solid #ddd; padding: 1em; overflow-x: auto; }
+            </style>
+          </head>
+          <body>
+            <h1>VI Analyzer Report — ${SHORT_SHA}</h1>
+            <p>Commit: <code>${{ github.sha }}</code></p>
+            <pre>${CONTENT}</pre>
+          </body>
+          </html>
+          ENDHTML
+
+          # Build an index of all reports
+          cat > "pages-content/vi-analyzer/index.html" <<ENDINDEX
+          <!DOCTYPE html>
+          <html>
+          <head><meta charset="utf-8"><title>VI Analyzer Reports</title></head>
+          <body>
+            <h1>VI Analyzer Reports</h1>
+            <ul><li><a href="${SHORT_SHA}/">${SHORT_SHA} — $(date -u +%Y-%m-%d)</a></li></ul>
+            <p><em>Older reports are available at their commit-SHA path.</em></p>
+          </body>
+          </html>
+          ENDINDEX
+
+      - name: Deploy report to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./pages-content
+          destination_dir: vi-analyzer
+          keep_files: true
