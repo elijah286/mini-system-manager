@@ -34,6 +34,9 @@ env:
 jobs:
   run-vi-analyzer-windows:
     runs-on: windows-2022
+    concurrency:
+      group: pages-deploy
+      cancel-in-progress: false
 
     steps:
       - name: Determine target commit

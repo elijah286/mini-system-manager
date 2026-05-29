@@ -1,5 +1,11 @@
 # Mini System Manager (Revidyne)
 
+![Mass Compile](https://github.com/elijah286/mini-system-manager/actions/workflows/masscompile-windows-container.yml/badge.svg)
+![VI Analyzer](https://github.com/elijah286/mini-system-manager/actions/workflows/run-vi-analyzer-windows-container.yml/badge.svg)
+![VIDiff](https://github.com/elijah286/mini-system-manager/actions/workflows/vidiff-windows-container.yml/badge.svg)
+
+[![Reports Dashboard](https://img.shields.io/badge/Reports-Dashboard-blue?logo=github)](https://elijah286.github.io/mini-system-manager/)
+
 **Repository:** `github.com/elijah286/mini-system-manager`  
 **Purpose:** A simple, readable LabVIEW-based “mini system manager” for connecting to **Revidyne** educational hardware systems (available via **revidyne.com**).
 
