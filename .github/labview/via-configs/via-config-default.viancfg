@@ -6,7 +6,7 @@
 <TargetIndex>0</TargetIndex>
 <ItemsToAnalyze>
 	<Item>
-		<Path>"."</Path>
+		<Path>"C:\workspace"</Path>
 		<Removed>FALSE</Removed>
 	</Item>
 </ItemsToAnalyze>
