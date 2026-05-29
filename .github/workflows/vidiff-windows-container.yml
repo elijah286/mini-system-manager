@@ -30,6 +30,7 @@ on:
 
 permissions:
   contents: read
+  statuses: write
 
 env:
   LABVIEW_CONTAINER_IMAGE: nationalinstruments/labview:latest-windows
@@ -37,7 +38,7 @@ env:
 jobs:
   run-vidiff:
     name: Run VIDiff on changed LabVIEW files
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
       - name: Determine base ref
