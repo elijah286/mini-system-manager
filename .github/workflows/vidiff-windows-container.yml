@@ -11,6 +11,14 @@ on:
       - '**/*.ctl'
       - '.github/labview/**'
       - '.github/workflows/vidiff-windows-container.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - '**/*.vi'
+      - '**/*.ctl'
+      - '.github/labview/**'
+      - '.github/workflows/vidiff-windows-container.yml'
 
 permissions:
   contents: read
@@ -24,16 +32,26 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout PR branch
+      - name: Determine base ref
+        id: refs
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "base_sha=${{ github.event.pull_request.base.sha }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "base_sha=${{ github.event.before }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout current branch
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           path: pr
 
-      - name: Checkout base branch
+      - name: Checkout base ref
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.base.sha }}
+          ref: ${{ steps.refs.outputs.base_sha }}
           path: base
 
       - name: Detect changed LabVIEW files
@@ -41,7 +59,7 @@ jobs:
         shell: bash
         run: |
           cd pr
-          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMR "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}" -- '*.vi' '*.ctl' || true)
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMR "${{ steps.refs.outputs.base_sha }}" "${{ github.sha }}" -- '*.vi' '*.ctl' || true)
 
           if [ -z "$CHANGED_FILES" ]; then
             echo "No changed LabVIEW files detected."
@@ -87,7 +105,11 @@ jobs:
         shell: bash
         run: |
           mkdir -p metadata
-          echo "${{ github.event.pull_request.number }}" > metadata/pr_number
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "${{ github.event.pull_request.number }}" > metadata/pr_number
+          else
+            echo "" > metadata/pr_number
+          fi
           echo "windows" > metadata/platform
 
       - name: Upload metadata
