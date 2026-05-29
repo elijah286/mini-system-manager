@@ -69,6 +69,13 @@ jobs:
           ref: ${{ steps.refs.outputs.base_sha }}
           path: base
 
+      - name: Restore CI scripts from main
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        run: |
+          cd pr
+          git checkout origin/main -- .github/labview .github/workflows
+
       - name: Detect changed LabVIEW files
         id: changed-files
         shell: bash
