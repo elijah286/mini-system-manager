@@ -1,0 +1,57 @@
+name: Run VI Analyzer - Windows Container
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+    paths:
+      - '**/*.vi'
+      - '**/*.ctl'
+      - '**/*.lvproj'
+      - '**/*.lvlib'
+      - '**/*.lvlps'
+      - '.github/labview/**'
+      - '.github/workflows/run-vi-analyzer-windows-container.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - '**/*.vi'
+      - '**/*.ctl'
+      - '**/*.lvproj'
+      - '**/*.lvlib'
+      - '**/*.lvlps'
+      - '.github/labview/**'
+      - '.github/workflows/run-vi-analyzer-windows-container.yml'
+  workflow_dispatch:
+
+env:
+  LABVIEW_CONTAINER_IMAGE: nationalinstruments/labview:latest-windows
+
+jobs:
+  run-vi-analyzer-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Pull LabVIEW container image
+        run: docker pull ${{ env.LABVIEW_CONTAINER_IMAGE }}
+
+      - name: Run VI Analyzer tests
+        run: >
+          docker run --rm
+          -v "${{ github.workspace }}:C:\workspace"
+          ${{ env.LABVIEW_CONTAINER_IMAGE }}
+          powershell -File "C:\workspace\.github\labview\run-vi-analyzer.ps1"
+          -WorkspaceRoot "C:\workspace"
+
+      - name: Upload VI Analyzer report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vi-analyzer-report-windows
+          path: ${{ github.workspace }}\vi-analyzer-results\

@@ -1,0 +1,98 @@
+name: VIDiff Report - Windows Container
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+    paths:
+      - '**/*.vi'
+      - '**/*.ctl'
+      - '.github/labview/**'
+      - '.github/workflows/vidiff-windows-container.yml'
+
+permissions:
+  contents: read
+
+env:
+  LABVIEW_CONTAINER_IMAGE: nationalinstruments/labview:latest-windows
+
+jobs:
+  run-vidiff:
+    name: Run VIDiff on changed LabVIEW files
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          path: pr
+
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+
+      - name: Detect changed LabVIEW files
+        id: changed-files
+        shell: bash
+        run: |
+          cd pr
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMR "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}" -- '*.vi' '*.ctl' || true)
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No changed LabVIEW files detected."
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Changed LabVIEW files:"
+            echo "$CHANGED_FILES"
+            echo "files<<EOF" >> "$GITHUB_OUTPUT"
+            echo "$CHANGED_FILES" >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
+            echo "files_csv=$(echo "$CHANGED_FILES" | tr '\n' ',' | sed 's/,$//')" >> "$GITHUB_OUTPUT"
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Pull LabVIEW container image
+        if: steps.changed-files.outputs.has_changes == 'true'
+        run: docker pull ${{ env.LABVIEW_CONTAINER_IMAGE }}
+
+      - name: Run VIDiff
+        if: steps.changed-files.outputs.has_changes == 'true'
+        shell: pwsh
+        run: |
+          $files = "${{ steps.changed-files.outputs.files_csv }}" -split ',' | Where-Object { $_ -ne '' }
+          foreach ($file in $files) {
+            Write-Host "::group::Running VIDiff for $file"
+            docker run --rm `
+              -v "${{ github.workspace }}\pr:C:\workspace" `
+              -v "${{ github.workspace }}\base:C:\workspace-base" `
+              ${{ env.LABVIEW_CONTAINER_IMAGE }} `
+              powershell -File "C:\workspace\.github\labview\vidiff.ps1" -WorkspaceRoot "C:\workspace" -WorkspaceBaseRoot "C:\workspace-base" -VIFiles "$file"
+            Write-Host "::endgroup::"
+          }
+
+      - name: Upload VIDiff reports
+        if: steps.changed-files.outputs.has_changes == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vidiff-report-windows
+          path: ${{ github.workspace }}\pr\vidiff-reports\
+
+      - name: Save metadata
+        if: steps.changed-files.outputs.has_changes == 'true'
+        shell: bash
+        run: |
+          mkdir -p metadata
+          echo "${{ github.event.pull_request.number }}" > metadata/pr_number
+          echo "windows" > metadata/platform
+
+      - name: Upload metadata
+        if: steps.changed-files.outputs.has_changes == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vidiff-metadata-windows
+          path: metadata/

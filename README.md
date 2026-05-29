@@ -75,3 +75,17 @@ This application uses a classic **Queued Message Handler (QMH)** style:
 2. **Clone the repo**
    ```bash
    git clone https://github.com/elijah286/mini-system-manager.git
+  ```
+
+## CI pipeline
+
+This repository now includes GitHub Actions modeled on the Windows-container workflows in `ni/labview-for-containers`:
+
+- **MassCompile - Windows Container**: mass compiles the repository on pull requests and pushes to `main`
+- **Run VI Analyzer - Windows Container**: runs a starter VI Analyzer ruleset and uploads the text report as an artifact
+- **VIDiff Report - Windows Container**: generates HTML diffs for changed `.vi` and `.ctl` files in pull requests
+- **Deploy VIDiff Reports**: publishes VIDiff HTML reports to GitHub Pages and comments on the pull request with links
+
+The workflows use the NI LabVIEW Windows container image `nationalinstruments/labview:latest-windows`. If you need to pin a different LabVIEW version, update the `LABVIEW_CONTAINER_IMAGE` environment variable in the workflow files under `.github/workflows/` and the LabVIEW executable path in `.github/labview/*.ps1`.
+
+The starter VI Analyzer configuration is in `.github/labview/via-configs/via-config-default.viancfg`. You should expect to tune that ruleset once you see the first CI results for this codebase.

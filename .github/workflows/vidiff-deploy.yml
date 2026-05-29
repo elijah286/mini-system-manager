@@ -1,0 +1,147 @@
+name: Deploy VIDiff Reports
+
+on:
+  workflow_run:
+    workflows:
+      - VIDiff Report - Windows Container
+    types:
+      - completed
+
+permissions:
+  contents: write
+  pull-requests: write
+  pages: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+
+    steps:
+      - name: Download VIDiff report artifacts
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          pattern: vidiff-report-*
+          path: reports
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          merge-multiple: true
+
+      - name: Download VIDiff metadata artifact
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          pattern: vidiff-metadata-*
+          path: metadata
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          merge-multiple: true
+
+      - name: Read metadata
+        id: meta
+        run: |
+          if [ ! -f metadata/pr_number ] || [ ! -f metadata/platform ]; then
+            echo "No VIDiff metadata found. Skipping deployment."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          PR_NUMBER=$(tr -d '[:space:]' < metadata/pr_number)
+          PLATFORM=$(tr -d '[:space:]' < metadata/platform)
+
+          echo "pr_number=${PR_NUMBER}" >> "$GITHUB_OUTPUT"
+          echo "platform=${PLATFORM}" >> "$GITHUB_OUTPUT"
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare GitHub Pages content
+        if: steps.meta.outputs.skip == 'false'
+        run: |
+          PR_NUMBER="${{ steps.meta.outputs.pr_number }}"
+          PLATFORM="${{ steps.meta.outputs.platform }}"
+          DEPLOY_DIR="pages-content/pr-${PR_NUMBER}/${PLATFORM}"
+
+          mkdir -p "$DEPLOY_DIR"
+
+          if [ -d reports ] && find reports -name '*.html' -print -quit | grep -q .; then
+            cp -r reports/* "$DEPLOY_DIR/"
+          else
+            echo "No HTML reports found in artifacts."
+            exit 0
+          fi
+
+          {
+            echo '<!DOCTYPE html>'
+            echo '<html><head><meta charset="utf-8"><title>VIDiff Reports</title></head><body>'
+            echo "<h1>VIDiff Reports - PR #${PR_NUMBER} (${PLATFORM})</h1>"
+            echo '<ul>'
+            for file in "$DEPLOY_DIR"/*.html; do
+              name=$(basename "$file")
+              [ "$name" = 'index.html' ] && continue
+              encoded=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" "$name")
+              display=${name%.html}
+              echo "<li><a href=\"${encoded}\">${display}</a></li>"
+            done
+            echo '</ul></body></html>'
+          } > "$DEPLOY_DIR/index.html"
+
+      - name: Deploy to GitHub Pages
+        if: steps.meta.outputs.skip == 'false'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./pages-content
+          destination_dir: vidiff
+          keep_files: true
+
+      - name: Comment on PR with report links
+        if: steps.meta.outputs.skip == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const prNumber = parseInt('${{ steps.meta.outputs.pr_number }}', 10);
+            const platform = '${{ steps.meta.outputs.platform }}';
+            const repo = context.repo;
+            const baseUrl = `https://${repo.owner}.github.io/${repo.repo}/vidiff/pr-${prNumber}/${platform}`;
+            const deployDir = `pages-content/pr-${prNumber}/${platform}`;
+
+            if (!fs.existsSync(deployDir)) {
+              return;
+            }
+
+            const reports = fs.readdirSync(deployDir)
+              .filter(file => file.endsWith('.html') && file !== 'index.html')
+              .sort();
+
+            if (reports.length === 0) {
+              return;
+            }
+
+            let body = `<!-- vidiff-${platform} -->\n### VIDiff Reports (${platform})\n\n| VI | Report |\n|---|---|\n`;
+            for (const report of reports) {
+              const displayName = report.replace(/\.html$/, '');
+              body += `| ${displayName} | [View Report](${baseUrl}/${encodeURIComponent(report)}) |\n`;
+            }
+            body += `\n[All Reports](${baseUrl}/index.html)`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              ...repo,
+              issue_number: prNumber,
+            });
+
+            const marker = `<!-- vidiff-${platform} -->`;
+            const existing = comments.find(comment => comment.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                ...repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                ...repo,
+                issue_number: prNumber,
+                body,
+              });
+            }
