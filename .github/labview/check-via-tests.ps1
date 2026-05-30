@@ -1,4 +1,4 @@
-Write-Host "=== VI Analyzer Test Installation (v3) ==="
+Write-Host "=== VI Analyzer Test Installation (v4) ==="
 
 $viaTestDir = "C:\Program Files\National Instruments\LabVIEW 2026\project\_VI Analyzer\_tests"
 
@@ -11,7 +11,7 @@ if (Test-Path $viaTestDir) {
 
 Write-Host "VI Analyzer _tests directory not found. Attempting to install..."
 
-# Step 2: Find nipkg (confirmed available from prior run)
+# Step 2: Find nipkg
 $nipkgPath = "C:\Program Files\National Instruments\NI Package Manager\nipkg.exe"
 if (-not (Test-Path $nipkgPath)) {
     $nipkgCmd = Get-Command nipkg -ErrorAction SilentlyContinue
@@ -23,8 +23,33 @@ if (-not (Test-Path $nipkgPath)) {
 }
 Write-Host "Using nipkg: $nipkgPath"
 
-# Step 3: Update feeds first
-Write-Host "`n=== nipkg update (refresh feeds) ==="
+# Step 3: Show current feeds
+Write-Host "`n=== Current feeds ==="
+$feedOutput = & $nipkgPath feed-list 2>&1
+$feedOutput | ForEach-Object { Write-Host "  $_" }
+
+# Step 4: Add NI product feeds to get access to VI Analyzer packages
+Write-Host "`n=== Adding NI product feeds ==="
+$feedUrls = @(
+    @{ Name = "ni-released"; Url = "https://download.ni.com/support/nipkg/products/ni-released" },
+    @{ Name = "ni-labview-2026"; Url = "https://download.ni.com/support/nipkg/products/ni-l/ni-labview-2026/26.1/released" },
+    @{ Name = "ni-labview-2026-community"; Url = "https://download.ni.com/support/nipkg/products/ni-l/ni-labview-2026-community/26.1/released" },
+    @{ Name = "ni-via-toolkit"; Url = "https://download.ni.com/support/nipkg/products/ni-v/ni-viawin-labview-support/26.1/released" },
+    @{ Name = "ni-all-products"; Url = "https://download.ni.com/support/nipkg/products" }
+)
+
+foreach ($feed in $feedUrls) {
+    Write-Host "  Adding feed: $($feed.Name) -> $($feed.Url)"
+    try {
+        $addOutput = & $nipkgPath feed-add $feed.Name $feed.Url 2>&1
+        $addOutput | ForEach-Object { Write-Host "    $_" }
+    } catch {
+        Write-Host "    Error: $_"
+    }
+}
+
+# Step 5: Update feeds after adding new ones
+Write-Host "`n=== nipkg update (refresh all feeds) ==="
 try {
     $updateOutput = & $nipkgPath update 2>&1
     $updateOutput | ForEach-Object { Write-Host "  $_" }
@@ -32,34 +57,13 @@ try {
     Write-Host "  nipkg update failed: $_"
 }
 
-# Step 4: Show what's installed for VIA
-Write-Host "`n=== Installed VIA packages ==="
-try {
-    $installed = & $nipkgPath list-installed 2>&1
-    $installed | Where-Object { $_ -match "via|analyzer" } | ForEach-Object { Write-Host "  $_" }
-} catch {
-    Write-Host "  list-installed failed: $_"
-}
+# Step 6: Show updated feed list
+Write-Host "`n=== Updated feeds ==="
+$feedOutput = & $nipkgPath feed-list 2>&1
+$feedOutput | ForEach-Object { Write-Host "  $_" }
 
-# Step 5: Show files from installed VIA packages
-Write-Host "`n=== Files in ni-viawin-labview-support ==="
-try {
-    $files = & $nipkgPath content ni-viawin-labview-support 2>&1
-    $files | ForEach-Object { Write-Host "  $_" }
-} catch {
-    Write-Host "  content query failed: $_"
-}
-
-Write-Host "`n=== Files in ni-labview-vi-analyzer-toolkit-lic ==="
-try {
-    $files = & $nipkgPath content ni-labview-vi-analyzer-toolkit-lic 2>&1
-    $files | ForEach-Object { Write-Host "  $_" }
-} catch {
-    Write-Host "  content query failed: $_"
-}
-
-# Step 6: Search ALL available packages for anything VIA/analyzer/test related
-Write-Host "`n=== ALL available packages matching via|analyzer|test ==="
+# Step 7: Search for VIA/analyzer packages in the new feeds
+Write-Host "`n=== Available VIA/analyzer packages after feed update ==="
 try {
     $allPkgs = & $nipkgPath list 2>&1
     $matchCount = 0
@@ -67,23 +71,15 @@ try {
         Write-Host "  $_"
         $matchCount++
     }
-    if ($matchCount -eq 0) {
-        Write-Host "  (no matches found)"
-        Write-Host "`n=== Total available packages count ==="
-        Write-Host "  $($allPkgs.Count) packages in feeds"
-        # Show first 10 to verify feeds are working
-        Write-Host "`n=== First 10 available packages (feed health check) ==="
-        $allPkgs | Select-Object -First 10 | ForEach-Object { Write-Host "  $_" }
-    }
+    Write-Host "  Found $matchCount matching packages (total: $($allPkgs.Count))"
 } catch {
     Write-Host "  list failed: $_"
 }
 
-# Step 7: Try installing with various package name patterns
+# Step 8: Try installing VI Analyzer test packages
 $packageNames = @(
+    "ni-viawin-labview-support",
     "ni-viawin-tests",
-    "ni-viawin-labview-tests",
-    "ni-vi-analyzer-tests",
     "ni-vi-analyzer",
     "ni-labview-2026-vi-analyzer",
     "ni-labview-vi-analyzer-toolkit",
@@ -103,40 +99,7 @@ foreach ($pkg in $packageNames) {
     }
 }
 
-# Step 8: Search for test LLBs anywhere in the LabVIEW directory
-Write-Host "`n=== Searching for test LLBs in LabVIEW installation ==="
-$lvDir = "C:\Program Files\National Instruments\LabVIEW 2026"
-try {
-    $testLlbs = Get-ChildItem $lvDir -Recurse -Filter "*.llb" -ErrorAction SilentlyContinue | 
-        Where-Object { $_.FullName -match "test|_tests|analyzer" }
-    if ($testLlbs) {
-        $testLlbs | ForEach-Object { Write-Host "  $($_.FullName) ($($_.Length) bytes)" }
-    } else {
-        Write-Host "  No test LLBs found"
-    }
-} catch {
-    Write-Host "  Search failed: $_"
-}
-
-# Step 9: Check for feed configuration
-Write-Host "`n=== nipkg feed configuration ==="
-try {
-    $feedOutput = & $nipkgPath feed-list 2>&1
-    $feedOutput | ForEach-Object { Write-Host "  $_" }
-} catch {
-    Write-Host "  feed-list failed: $_"
-}
-
-# Also try alternate command
-try {
-    $feedDirs = Get-ChildItem "C:\ProgramData\National Instruments\NI Package Manager\Feeds" -ErrorAction SilentlyContinue
-    if ($feedDirs) {
-        Write-Host "`n=== Feed directories ==="
-        $feedDirs | ForEach-Object { Write-Host "  $($_.FullName)" }
-    }
-} catch {}
-
-# Step 10: Post-install check
+# Step 9: Post-install check
 Write-Host "`n=== Post-install check ==="
 if (Test-Path $viaTestDir) {
     $testCount = (Get-ChildItem $viaTestDir -Recurse -Filter "*.llb" -ErrorAction SilentlyContinue).Count
@@ -147,13 +110,10 @@ if (Test-Path $viaTestDir) {
     # Show _VI Analyzer dir structure
     $viaDir = "C:\Program Files\National Instruments\LabVIEW 2026\project\_VI Analyzer"
     if (Test-Path $viaDir) {
-        Write-Host "`nContents of _VI Analyzer (dirs only):"
-        Get-ChildItem $viaDir -Directory -ErrorAction SilentlyContinue | ForEach-Object {
-            Write-Host "  DIR  $($_.FullName)"
-        }
-        Write-Host "LLB files:"
-        Get-ChildItem $viaDir -Filter "*.llb" -ErrorAction SilentlyContinue | ForEach-Object {
-            Write-Host "  $($_.Name) ($($_.Length) bytes)"
+        Write-Host "`nContents of _VI Analyzer:"
+        Get-ChildItem $viaDir -ErrorAction SilentlyContinue | ForEach-Object {
+            $type = if ($_.PSIsContainer) { "DIR" } else { "FILE ($($_.Length) bytes)" }
+            Write-Host "  $type  $($_.Name)"
         }
     }
 }
