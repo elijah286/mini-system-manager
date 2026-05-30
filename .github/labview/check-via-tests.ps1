@@ -1,4 +1,4 @@
-Write-Host "=== VI Analyzer Test Installation ==="
+Write-Host "=== VI Analyzer Test Installation (v3) ==="
 
 $viaTestDir = "C:\Program Files\National Instruments\LabVIEW 2026\project\_VI Analyzer\_tests"
 
@@ -11,169 +11,149 @@ if (Test-Path $viaTestDir) {
 
 Write-Host "VI Analyzer _tests directory not found. Attempting to install..."
 
-# Step 2: Check if NIPM is available
-Write-Host "`n=== Checking NIPM availability ==="
-$nipmPath = $null
-$nipmCandidates = @(
-    "C:\Program Files\National Instruments\NI Package Manager\nipm.exe",
-    "C:\Program Files (x86)\National Instruments\NI Package Manager\nipm.exe"
+# Step 2: Find nipkg (confirmed available from prior run)
+$nipkgPath = "C:\Program Files\National Instruments\NI Package Manager\nipkg.exe"
+if (-not (Test-Path $nipkgPath)) {
+    $nipkgCmd = Get-Command nipkg -ErrorAction SilentlyContinue
+    if ($nipkgCmd) { $nipkgPath = $nipkgCmd.Source }
+    else {
+        Write-Host "ERROR: nipkg not found"
+        exit 1
+    }
+}
+Write-Host "Using nipkg: $nipkgPath"
+
+# Step 3: Update feeds first
+Write-Host "`n=== nipkg update (refresh feeds) ==="
+try {
+    $updateOutput = & $nipkgPath update 2>&1
+    $updateOutput | ForEach-Object { Write-Host "  $_" }
+} catch {
+    Write-Host "  nipkg update failed: $_"
+}
+
+# Step 4: Show what's installed for VIA
+Write-Host "`n=== Installed VIA packages ==="
+try {
+    $installed = & $nipkgPath list-installed 2>&1
+    $installed | Where-Object { $_ -match "via|analyzer" } | ForEach-Object { Write-Host "  $_" }
+} catch {
+    Write-Host "  list-installed failed: $_"
+}
+
+# Step 5: Show files from installed VIA packages
+Write-Host "`n=== Files in ni-viawin-labview-support ==="
+try {
+    $files = & $nipkgPath content ni-viawin-labview-support 2>&1
+    $files | ForEach-Object { Write-Host "  $_" }
+} catch {
+    Write-Host "  content query failed: $_"
+}
+
+Write-Host "`n=== Files in ni-labview-vi-analyzer-toolkit-lic ==="
+try {
+    $files = & $nipkgPath content ni-labview-vi-analyzer-toolkit-lic 2>&1
+    $files | ForEach-Object { Write-Host "  $_" }
+} catch {
+    Write-Host "  content query failed: $_"
+}
+
+# Step 6: Search ALL available packages for anything VIA/analyzer/test related
+Write-Host "`n=== ALL available packages matching via|analyzer|test ==="
+try {
+    $allPkgs = & $nipkgPath list 2>&1
+    $matchCount = 0
+    $allPkgs | Where-Object { $_ -match "via|analyzer" } | ForEach-Object {
+        Write-Host "  $_"
+        $matchCount++
+    }
+    if ($matchCount -eq 0) {
+        Write-Host "  (no matches found)"
+        Write-Host "`n=== Total available packages count ==="
+        Write-Host "  $($allPkgs.Count) packages in feeds"
+        # Show first 10 to verify feeds are working
+        Write-Host "`n=== First 10 available packages (feed health check) ==="
+        $allPkgs | Select-Object -First 10 | ForEach-Object { Write-Host "  $_" }
+    }
+} catch {
+    Write-Host "  list failed: $_"
+}
+
+# Step 7: Try installing with various package name patterns
+$packageNames = @(
+    "ni-viawin-tests",
+    "ni-viawin-labview-tests",
+    "ni-vi-analyzer-tests",
+    "ni-vi-analyzer",
+    "ni-labview-2026-vi-analyzer",
+    "ni-labview-vi-analyzer-toolkit",
+    "ni-viawin"
 )
-foreach ($p in $nipmCandidates) {
-    if (Test-Path $p) {
-        $nipmPath = $p
-        Write-Host "Found NIPM at: $p"
-        break
-    }
-}
-
-# Also try PATH
-if (-not $nipmPath) {
-    $nipmCmd = Get-Command nipm -ErrorAction SilentlyContinue
-    if ($nipmCmd) {
-        $nipmPath = $nipmCmd.Source
-        Write-Host "Found NIPM in PATH: $nipmPath"
-    }
-}
-
-# Also try nipkg (older name)
-$nipkgPath = $null
-if (-not $nipmPath) {
-    $nipkgCandidates = @(
-        "C:\Program Files\National Instruments\NI Package Manager\nipkg.exe",
-        "C:\Program Files (x86)\National Instruments\NI Package Manager\nipkg.exe"
-    )
-    foreach ($p in $nipkgCandidates) {
-        if (Test-Path $p) {
-            $nipkgPath = $p
-            Write-Host "Found nipkg at: $p"
+foreach ($pkg in $packageNames) {
+    Write-Host "`n=== nipkg: Trying to install $pkg ==="
+    try {
+        $installOutput = & $nipkgPath install $pkg --accept-eulas -y 2>&1
+        $installOutput | ForEach-Object { Write-Host "  $_" }
+        if ($LASTEXITCODE -eq 0 -and (Test-Path $viaTestDir)) {
+            Write-Host "  SUCCESS: $pkg installed and _tests now exists!" -ForegroundColor Green
             break
         }
-    }
-    if (-not $nipkgPath) {
-        $nipkgCmd = Get-Command nipkg -ErrorAction SilentlyContinue
-        if ($nipkgCmd) {
-            $nipkgPath = $nipkgCmd.Source
-            Write-Host "Found nipkg in PATH: $nipkgPath"
-        }
+    } catch {
+        Write-Host "  Failed: $_"
     }
 }
 
-# Step 3: List installed packages to find VI Analyzer
-if ($nipmPath) {
-    Write-Host "`n=== NIPM: Listing installed packages (filtered for analyzer/via) ==="
-    try {
-        $output = & $nipmPath list 2>&1
-        $output | Where-Object { $_ -match "analyzer|via " } | ForEach-Object { Write-Host "  $_" }
-        Write-Host "`n=== NIPM: All installed packages ==="
-        $output | ForEach-Object { Write-Host "  $_" }
-    } catch {
-        Write-Host "NIPM list failed: $_"
+# Step 8: Search for test LLBs anywhere in the LabVIEW directory
+Write-Host "`n=== Searching for test LLBs in LabVIEW installation ==="
+$lvDir = "C:\Program Files\National Instruments\LabVIEW 2026"
+try {
+    $testLlbs = Get-ChildItem $lvDir -Recurse -Filter "*.llb" -ErrorAction SilentlyContinue | 
+        Where-Object { $_.FullName -match "test|_tests|analyzer" }
+    if ($testLlbs) {
+        $testLlbs | ForEach-Object { Write-Host "  $($_.FullName) ($($_.Length) bytes)" }
+    } else {
+        Write-Host "  No test LLBs found"
     }
-
-    # Try to find available VI Analyzer packages
-    Write-Host "`n=== NIPM: Searching for available VI Analyzer packages ==="
-    try {
-        $searchOutput = & $nipmPath search "vi analyzer" 2>&1
-        $searchOutput | ForEach-Object { Write-Host "  $_" }
-    } catch {
-        Write-Host "NIPM search failed: $_"
-    }
-
-    # Try installing common package names for VI Analyzer
-    $packageNames = @(
-        "ni-vi-analyzer",
-        "ni-labview-2026-vi-analyzer",
-        "ni-labview-vi-analyzer",
-        "labview-vi-analyzer"
-    )
-    foreach ($pkg in $packageNames) {
-        Write-Host "`n=== NIPM: Trying to install $pkg ==="
-        try {
-            $installOutput = & $nipmPath install $pkg --accept-eulas -y 2>&1
-            $installOutput | ForEach-Object { Write-Host "  $_" }
-            if ($LASTEXITCODE -eq 0) {
-                Write-Host "  Package $pkg installed successfully!" -ForegroundColor Green
-                break
-            }
-        } catch {
-            Write-Host "  Failed: $_"
-        }
-    }
-} elseif ($nipkgPath) {
-    Write-Host "`n=== nipkg: Listing installed packages ==="
-    try {
-        $output = & $nipkgPath list-installed 2>&1
-        $output | Where-Object { $_ -match "analyzer|via " } | ForEach-Object { Write-Host "  $_" }
-        Write-Host "`nAll installed:"
-        $output | ForEach-Object { Write-Host "  $_" }
-    } catch {
-        Write-Host "nipkg list failed: $_"
-    }
-
-    Write-Host "`n=== nipkg: Searching available packages ==="
-    try {
-        $output = & $nipkgPath list 2>&1
-        $output | Where-Object { $_ -match "analyzer" } | ForEach-Object { Write-Host "  $_" }
-    } catch {
-        Write-Host "nipkg search failed: $_"
-    }
-
-    # Try installing
-    $packageNames = @(
-        "ni-vi-analyzer",
-        "ni-labview-2026-vi-analyzer"
-    )
-    foreach ($pkg in $packageNames) {
-        Write-Host "`n=== nipkg: Trying to install $pkg ==="
-        try {
-            $installOutput = & $nipkgPath install $pkg --accept-eulas -y 2>&1
-            $installOutput | ForEach-Object { Write-Host "  $_" }
-        } catch {
-            Write-Host "  Failed: $_"
-        }
-    }
-} else {
-    Write-Host "Neither NIPM nor nipkg found in the container."
-
-    # Search for any package manager executables
-    Write-Host "`n=== Searching for package manager executables ==="
-    $searchPaths = @(
-        "C:\Program Files\National Instruments",
-        "C:\Program Files (x86)\National Instruments"
-    )
-    foreach ($sp in $searchPaths) {
-        if (Test-Path $sp) {
-            Get-ChildItem $sp -Recurse -ErrorAction SilentlyContinue | Where-Object {
-                $_.Name -match "nipm|nipkg|package.manager"
-            } | ForEach-Object {
-                Write-Host "  $($_.FullName)"
-            }
-        }
-    }
+} catch {
+    Write-Host "  Search failed: $_"
 }
 
-# Step 4: Check if tests exist now (after install attempt)
+# Step 9: Check for feed configuration
+Write-Host "`n=== nipkg feed configuration ==="
+try {
+    $feedOutput = & $nipkgPath feed-list 2>&1
+    $feedOutput | ForEach-Object { Write-Host "  $_" }
+} catch {
+    Write-Host "  feed-list failed: $_"
+}
+
+# Also try alternate command
+try {
+    $feedDirs = Get-ChildItem "C:\ProgramData\National Instruments\NI Package Manager\Feeds" -ErrorAction SilentlyContinue
+    if ($feedDirs) {
+        Write-Host "`n=== Feed directories ==="
+        $feedDirs | ForEach-Object { Write-Host "  $($_.FullName)" }
+    }
+} catch {}
+
+# Step 10: Post-install check
 Write-Host "`n=== Post-install check ==="
 if (Test-Path $viaTestDir) {
     $testCount = (Get-ChildItem $viaTestDir -Recurse -Filter "*.llb" -ErrorAction SilentlyContinue).Count
     Write-Host "SUCCESS: VI Analyzer tests now installed: $testCount LLBs" -ForegroundColor Green
 } else {
     Write-Host "Tests still not found at $viaTestDir" -ForegroundColor Yellow
-
-    # List what IS in the _VI Analyzer directory
+    
+    # Show _VI Analyzer dir structure
     $viaDir = "C:\Program Files\National Instruments\LabVIEW 2026\project\_VI Analyzer"
     if (Test-Path $viaDir) {
-        Write-Host "Contents of _VI Analyzer:"
-        Get-ChildItem $viaDir -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
-            $type = if ($_.PSIsContainer) { "DIR" } else { "FILE ($($_.Length) bytes)" }
-            Write-Host "  $type  $($_.FullName)"
+        Write-Host "`nContents of _VI Analyzer (dirs only):"
+        Get-ChildItem $viaDir -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+            Write-Host "  DIR  $($_.FullName)"
         }
-    }
-
-    # List ALL NI directories for clues
-    Write-Host "`nAll NI program directories:"
-    $niDir = "C:\Program Files\National Instruments"
-    if (Test-Path $niDir) {
-        Get-ChildItem $niDir -Directory | ForEach-Object { Write-Host "  $($_.FullName)" }
+        Write-Host "LLB files:"
+        Get-ChildItem $viaDir -Filter "*.llb" -ErrorAction SilentlyContinue | ForEach-Object {
+            Write-Host "  $($_.Name) ($($_.Length) bytes)"
+        }
     }
 }
