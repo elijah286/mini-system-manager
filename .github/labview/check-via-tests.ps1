@@ -1,10 +1,10 @@
 Write-Host "=== Checking VI Analyzer test availability ==="
 
 Write-Host "All LabVIEW directories:"
-$allLvDirs = Get-ChildItem "C:\Program Files\National Instruments" -Filter "LabVIEW*" -Directory
+$allLvDirs = Get-ChildItem "C:\Program Files\National Instruments" -Filter "LabVIEW*" -Directory -ErrorAction SilentlyContinue
 foreach ($d in $allLvDirs) {
     $hasExe = Test-Path (Join-Path $d.FullName "LabVIEW.exe")
-    Write-Host "  $($d.FullName) — LabVIEW.exe: $hasExe"
+    Write-Host "  $($d.FullName) - LabVIEW.exe: $hasExe"
 }
 
 foreach ($lvDir in $allLvDirs) {
