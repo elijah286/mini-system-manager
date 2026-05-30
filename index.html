@@ -125,7 +125,7 @@
       await Promise.all(fetches);
     }
 
-    function renderVIDiff(tree) {
+    async function renderVIDiff(tree) {
       const container = document.getElementById('vidiff-list');
       const dirFiles = {};
       tree.forEach(n => {
@@ -139,8 +139,8 @@
       const reports = Object.keys(dirFiles).map(label => {
         const sha = label.replace('push-', '').replace('pr-', 'PR #');
         const files = dirFiles[label];
-        const changeCount = files.filter(f => f !== 'index.html').length;
-        return { label, sha, url: `${PAGES_BASE}/vidiff/${label}/windows/`, changeCount };
+        const reportFiles = files.filter(f => f !== 'index.html');
+        return { label, sha, url: `${PAGES_BASE}/vidiff/${label}/windows/`, reportFiles, totalFiles: reportFiles.length };
       }).sort((a, b) => a.label.localeCompare(b.label));
 
       if (reports.length === 0) {
@@ -150,13 +150,39 @@
 
       let html = '<table><thead><tr><th>Ref</th><th>Summary</th><th>Report</th></tr></thead><tbody>';
       for (const r of reports) {
-        const summary = r.changeCount > 0
-          ? `<span class="neutral">${r.changeCount} file${r.changeCount !== 1 ? 's' : ''} changed</span>`
-          : '<span class="neutral">—</span>';
-        html += `<tr><td class="commit-sha">${r.sha}</td><td class="summary">${summary}</td><td><a href="${r.url}">View Report</a></td></tr>`;
+        html += `<tr><td class="commit-sha">${r.sha}</td><td class="summary" id="vd-${r.sha}"><span class="neutral">…</span></td><td><a href="${r.url}">View Report</a></td></tr>`;
       }
       html += '</tbody></table>';
       container.innerHTML = html;
+
+      // Fetch each report to check for material changes
+      const fetches = reports.map(async r => {
+        let materialCount = 0;
+        const checks = r.reportFiles.map(async file => {
+          try {
+            const res = await fetch(`${r.url}${encodeURIComponent(file)}`);
+            if (!res.ok) return false;
+            const html = await res.text();
+            // Material change = has <details> content after "Detailed Information"
+            const idx = html.indexOf('Detailed Information');
+            if (idx === -1) return false;
+            return html.slice(idx).includes('<details');
+          } catch { return false; }
+        });
+        const results = await Promise.all(checks);
+        materialCount = results.filter(Boolean).length;
+
+        const el = document.getElementById(`vd-${r.sha}`);
+        if (!el) return;
+        if (r.totalFiles === 0) {
+          el.innerHTML = '<span class="neutral">—</span>';
+        } else if (materialCount > 0) {
+          el.innerHTML = `<span class="fail">${materialCount} change${materialCount !== 1 ? 's' : ''}</span> · <span class="neutral">${r.totalFiles} file${r.totalFiles !== 1 ? 's' : ''}</span>`;
+        } else {
+          el.innerHTML = `<span class="pass">no material changes</span> · <span class="neutral">${r.totalFiles} file${r.totalFiles !== 1 ? 's' : ''}</span>`;
+        }
+      });
+      await Promise.all(fetches);
     }
 
     fetchTree()
