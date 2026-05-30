@@ -60,6 +60,21 @@ jobs:
         shell: bash
         run: git checkout origin/main -- .github/labview .github/workflows
 
+      - name: Ensure Docker daemon is running
+        run: |
+          $svc = Get-Service docker -ErrorAction SilentlyContinue
+          if ($svc -and $svc.Status -ne 'Running') {
+            Start-Service docker
+            Write-Host "Docker service started"
+          } elseif (-not $svc) {
+            Write-Host "Docker service not found - attempting dockerd start"
+            Start-Process dockerd -WindowStyle Hidden
+            Start-Sleep -Seconds 10
+          } else {
+            Write-Host "Docker already running"
+          }
+          docker info | Select-String "Server Version"
+
       - name: Cache LabVIEW container image
         id: cache-image
         uses: actions/cache@v4

@@ -104,6 +104,22 @@ jobs:
           path: labview-image.tar
           key: labview-container-${{ env.LABVIEW_CONTAINER_IMAGE }}
 
+      - name: Ensure Docker daemon is running
+        if: steps.changed-files.outputs.has_changes == 'true'
+        run: |
+          $svc = Get-Service docker -ErrorAction SilentlyContinue
+          if ($svc -and $svc.Status -ne 'Running') {
+            Start-Service docker
+            Write-Host "Docker service started"
+          } elseif (-not $svc) {
+            Write-Host "Docker service not found - attempting dockerd start"
+            Start-Process dockerd -WindowStyle Hidden
+            Start-Sleep -Seconds 10
+          } else {
+            Write-Host "Docker already running"
+          }
+          docker info | Select-String "Server Version"
+
       - name: Load or pull LabVIEW container image
         if: steps.changed-files.outputs.has_changes == 'true'
         run: |
