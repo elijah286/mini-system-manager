@@ -42,14 +42,9 @@
     <a href="https://github.com/elijah286/mini-system-manager/actions/workflows/vidiff-windows-container.yml"><img src="https://github.com/elijah286/mini-system-manager/actions/workflows/vidiff-windows-container.yml/badge.svg" alt="VIDiff"></a>
   </div>
 
-  <h2>VI Analyzer Reports</h2>
+  <h2>Reports by Commit</h2>
   <div class="section">
-    <div id="vi-analyzer-list" class="loading">Loading reports…</div>
-  </div>
-
-  <h2>VIDiff Reports</h2>
-  <div class="section">
-    <div id="vidiff-list" class="loading">Loading reports…</div>
+    <div id="reports-table" class="loading">Loading reports…</div>
   </div>
 
   <script>
@@ -94,105 +89,91 @@
       return parts.join(' · ');
     }
 
-    async function renderVIAnalyzer(tree) {
-      const container = document.getElementById('vi-analyzer-list');
-      const reports = tree
-        .filter(n => n.path.match(/^vi-analyzer\/vi-analyzer\/[a-f0-9]+\/index\.html$/))
-        .map(n => {
-          const sha = n.path.split('/')[2];
-          return { sha, url: `${PAGES_BASE}/${n.path}` };
-        })
-        .sort((a, b) => a.sha.localeCompare(b.sha));
+    async function renderCombinedTable(tree) {
+      const container = document.getElementById('reports-table');
 
-      if (reports.length === 0) {
-        container.innerHTML = '<p class="empty">No VI Analyzer reports found yet.</p>';
-        return;
-      }
-
-      let html = '<table><thead><tr><th>Commit</th><th>Summary</th><th>Report</th></tr></thead><tbody>';
-      for (const r of reports) {
-        html += `<tr><td class="commit-sha">${r.sha}</td><td class="summary" id="via-${r.sha}"><span class="neutral">…</span></td><td><a href="${r.url}">View Report</a></td></tr>`;
-      }
-      html += '</tbody></table>';
-      container.innerHTML = html;
-
-      // Fetch summaries in parallel
-      const fetches = reports.map(async r => {
-        const s = await fetchReportSummary(r.url);
-        const el = document.getElementById(`via-${r.sha}`);
-        if (el) el.innerHTML = viaSummaryHtml(s);
-      });
-      await Promise.all(fetches);
-    }
-
-    async function renderVIDiff(tree) {
-      const container = document.getElementById('vidiff-list');
-      const dirFiles = {};
+      // Collect VI Analyzer reports by SHA
+      const viaReports = {};
       tree.forEach(n => {
-        const m = n.path.match(/^vidiff\/(push-[a-f0-9]+|pr-\d+)\/windows\/(.+\.html)$/);
+        const m = n.path.match(/^vi-analyzer\/vi-analyzer\/([a-f0-9]+)\/index\.html$/);
+        if (m) viaReports[m[1]] = { url: `${PAGES_BASE}/${n.path}` };
+      });
+
+      // Collect VIDiff reports by SHA
+      const vdReports = {};
+      tree.forEach(n => {
+        const m = n.path.match(/^vidiff\/push-([a-f0-9]+)\/windows\/(.+\.html)$/);
         if (m) {
-          if (!dirFiles[m[1]]) dirFiles[m[1]] = [];
-          dirFiles[m[1]].push(m[2]);
+          if (!vdReports[m[1]]) vdReports[m[1]] = { files: [], url: `${PAGES_BASE}/vidiff/push-${m[1]}/windows/` };
+          if (m[2] !== 'index.html') vdReports[m[1]].files.push(m[2]);
         }
       });
 
-      const reports = Object.keys(dirFiles).map(label => {
-        const sha = label.replace('push-', '').replace('pr-', 'PR #');
-        const files = dirFiles[label];
-        const reportFiles = files.filter(f => f !== 'index.html');
-        return { label, sha, url: `${PAGES_BASE}/vidiff/${label}/windows/`, reportFiles, totalFiles: reportFiles.length };
-      }).sort((a, b) => a.label.localeCompare(b.label));
+      // Merge all SHAs
+      const allShas = [...new Set([...Object.keys(viaReports), ...Object.keys(vdReports)])].sort();
 
-      if (reports.length === 0) {
-        container.innerHTML = '<p class="empty">No VIDiff reports found yet.</p>';
+      if (allShas.length === 0) {
+        container.innerHTML = '<p class="empty">No reports found yet.</p>';
         return;
       }
 
-      let html = '<table><thead><tr><th>Ref</th><th>Summary</th><th>Report</th></tr></thead><tbody>';
-      for (const r of reports) {
-        html += `<tr><td class="commit-sha">${r.sha}</td><td class="summary" id="vd-${r.sha}"><span class="neutral">…</span></td><td><a href="${r.url}">View Report</a></td></tr>`;
+      let html = '<table><thead><tr><th>Commit</th><th>VI Analyzer</th><th>VIDiff</th></tr></thead><tbody>';
+      for (const sha of allShas) {
+        const via = viaReports[sha];
+        const vd = vdReports[sha];
+        const viaCell = via
+          ? `<span class="summary" id="via-${sha}"><span class="neutral">…</span></span> <a href="${via.url}">report</a>`
+          : '<span class="neutral">—</span>';
+        const vdCell = vd
+          ? `<span class="summary" id="vd-${sha}"><span class="neutral">…</span></span> <a href="${vd.url}">report</a>`
+          : '<span class="neutral">—</span>';
+        html += `<tr><td class="commit-sha">${sha}</td><td>${viaCell}</td><td>${vdCell}</td></tr>`;
       }
       html += '</tbody></table>';
       container.innerHTML = html;
 
-      // Fetch each report to check for material changes
-      const fetches = reports.map(async r => {
+      // Fetch VI Analyzer summaries
+      const viaFetches = Object.entries(viaReports).map(async ([sha, r]) => {
+        const s = await fetchReportSummary(r.url);
+        const el = document.getElementById(`via-${sha}`);
+        if (el) el.innerHTML = viaSummaryHtml(s);
+      });
+
+      // Fetch VIDiff material change info
+      const vdFetches = Object.entries(vdReports).map(async ([sha, r]) => {
         let materialCount = 0;
-        const checks = r.reportFiles.map(async file => {
+        const checks = r.files.map(async file => {
           try {
             const res = await fetch(`${r.url}${encodeURIComponent(file)}`);
             if (!res.ok) return false;
-            const html = await res.text();
-            // Material change = has <details> content after "Detailed Information"
-            const idx = html.indexOf('Detailed Information');
+            const text = await res.text();
+            const idx = text.indexOf('Detailed Information');
             if (idx === -1) return false;
-            return html.slice(idx).includes('<details');
+            return text.slice(idx).includes('<details');
           } catch { return false; }
         });
         const results = await Promise.all(checks);
         materialCount = results.filter(Boolean).length;
 
-        const el = document.getElementById(`vd-${r.sha}`);
+        const el = document.getElementById(`vd-${sha}`);
         if (!el) return;
-        if (r.totalFiles === 0) {
-          el.innerHTML = '<span class="neutral">—</span>';
+        const total = r.files.length;
+        if (total === 0) {
+          el.innerHTML = '<span class="neutral">no files</span>';
         } else if (materialCount > 0) {
-          el.innerHTML = `<span class="fail">${materialCount} change${materialCount !== 1 ? 's' : ''}</span> · <span class="neutral">${r.totalFiles} file${r.totalFiles !== 1 ? 's' : ''}</span>`;
+          el.innerHTML = `<span class="fail">${materialCount} change${materialCount !== 1 ? 's' : ''}</span> · <span class="neutral">${total} file${total !== 1 ? 's' : ''}</span>`;
         } else {
-          el.innerHTML = `<span class="pass">no material changes</span> · <span class="neutral">${r.totalFiles} file${r.totalFiles !== 1 ? 's' : ''}</span>`;
+          el.innerHTML = `<span class="pass">no material changes</span> · <span class="neutral">${total} file${total !== 1 ? 's' : ''}</span>`;
         }
       });
-      await Promise.all(fetches);
+
+      await Promise.all([...viaFetches, ...vdFetches]);
     }
 
     fetchTree()
-      .then(tree => {
-        renderVIAnalyzer(tree);
-        renderVIDiff(tree);
-      })
+      .then(tree => renderCombinedTable(tree))
       .catch(err => {
-        document.getElementById('vi-analyzer-list').innerHTML = `<p class="empty">Error loading reports: ${err.message}</p>`;
-        document.getElementById('vidiff-list').innerHTML = '';
+        document.getElementById('reports-table').innerHTML = `<p class="empty">Error loading reports: ${err.message}</p>`;
       });
   </script>
 </body>
