@@ -78,6 +78,26 @@ jobs:
             docker save -o labview-image.tar ${{ env.LABVIEW_CONTAINER_IMAGE }}
           }
 
+      - name: Check VI Analyzer test availability
+        run: >
+          docker run --rm
+          ${{ env.LABVIEW_CONTAINER_IMAGE }}
+          powershell -Command "
+            $lvDir = Get-ChildItem 'C:\Program Files\National Instruments' -Filter 'LabVIEW*' -Directory | Select-Object -First 1;
+            Write-Host 'LabVIEW directory:' $lvDir.FullName;
+            $testsPath = Join-Path $lvDir.FullName 'project\_VI Analyzer\_tests';
+            if (Test-Path $testsPath) {
+              Write-Host 'VI Analyzer tests found at:' $testsPath;
+              Get-ChildItem $testsPath -Recurse -Filter '*.llb' | ForEach-Object { Write-Host '  ' $_.FullName }
+            } else {
+              Write-Host 'WARNING: VI Analyzer tests NOT found at:' $testsPath;
+              Write-Host 'Listing project folder contents:';
+              $projPath = Join-Path $lvDir.FullName 'project';
+              if (Test-Path $projPath) { Get-ChildItem $projPath -Recurse -Depth 2 | ForEach-Object { Write-Host '  ' $_.FullName } }
+              else { Write-Host '  No project folder exists' }
+            }
+          "
+
       - name: Run VI Analyzer tests
         run: >
           docker run --rm
