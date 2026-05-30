@@ -35,6 +35,4 @@ if ($cli) {
     Write-Host "LabVIEWCLI found at: $($cli.Source)"
 } else {
     Write-Host "LabVIEWCLI not found on PATH"
-    $cliPath = Join-Path $lvDir.FullName "LabVIEWCLI.exe"
-    Write-Host "Checking $cliPath : $(Test-Path $cliPath)"
 }
