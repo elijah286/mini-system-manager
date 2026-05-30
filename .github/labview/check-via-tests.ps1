@@ -8,66 +8,50 @@ if (Test-Path $niDir) {
         $hasExe = Test-Path (Join-Path $_.FullName "LabVIEW.exe")
         Write-Host "  $($_.FullName) - LabVIEW.exe: $hasExe"
     }
-} else {
-    Write-Host "  NI directory not found at $niDir"
 }
 
-# Search for VI Analyzer tests in ALL locations
-Write-Host "`n=== Searching for VI Analyzer test LLBs ==="
-$searchPaths = @(
-    "C:\Program Files\National Instruments",
-    "C:\Program Files (x86)\National Instruments"
-)
-foreach ($sp in $searchPaths) {
-    if (Test-Path $sp) {
-        Write-Host "`nSearching $sp for _VI Analyzer..."
-        $found = Get-ChildItem $sp -Recurse -Directory -Filter "_VI Analyzer" -ErrorAction SilentlyContinue
-        if ($found) {
-            foreach ($f in $found) {
-                Write-Host "  FOUND: $($f.FullName)"
-                Get-ChildItem $f.FullName -Recurse -Filter "*.llb" -ErrorAction SilentlyContinue | ForEach-Object {
-                    Write-Host "    LLB: $($_.FullName)"
-                }
-            }
-        } else {
-            Write-Host "  No _VI Analyzer directory found"
-        }
+# List ALL contents of _VI Analyzer directory
+Write-Host "`n=== Full contents of _VI Analyzer directory ==="
+$viaDir = "C:\Program Files\National Instruments\LabVIEW 2026\project\_VI Analyzer"
+if (Test-Path $viaDir) {
+    Get-ChildItem $viaDir -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
+        $type = if ($_.PSIsContainer) { "DIR" } else { "FILE ($($_.Length) bytes)" }
+        Write-Host "  $type  $($_.FullName)"
     }
-}
-
-# List project directories
-Write-Host "`n=== Checking project directories ==="
-Get-ChildItem $niDir -Filter "LabVIEW*" -Directory -ErrorAction SilentlyContinue | ForEach-Object {
-    $projDir = Join-Path $_.FullName "project"
-    if (Test-Path $projDir) {
-        Write-Host "`nProject folder found: $projDir"
-        Get-ChildItem $projDir -Depth 3 -ErrorAction SilentlyContinue | ForEach-Object {
-            Write-Host "  $($_.FullName)"
-        }
-    } else {
-        Write-Host "`n$($_.Name): No project folder"
-        Write-Host "  Top-level contents:"
-        Get-ChildItem $_.FullName -Depth 0 -ErrorAction SilentlyContinue | ForEach-Object {
-            Write-Host "    $($_.Name)"
-        }
-    }
-}
-
-# Check LabVIEWCLI
-Write-Host "`n=== LabVIEWCLI ==="
-$cli = Get-Command LabVIEWCLI -ErrorAction SilentlyContinue
-if ($cli) {
-    Write-Host "Found at: $($cli.Source)"
 } else {
-    Write-Host "Not found on PATH"
-    $cliPath = "C:\Program Files (x86)\National Instruments\Shared\LabVIEW CLI\LabVIEWCLI.exe"
-    if (Test-Path $cliPath) { Write-Host "Found at: $cliPath" }
+    Write-Host "  NOT FOUND: $viaDir"
 }
 
-# Also check RunVIAnalyzer operation
-Write-Host "`n=== RunVIAnalyzer available operations ==="
+# Try LabVIEWCLI RunVIAnalyzer help
+Write-Host "`n=== LabVIEWCLI RunVIAnalyzer Help ==="
 try {
-    & LabVIEWCLI -OperationName RunVIAnalyzer -Help 2>&1 | Select-Object -First 20 | ForEach-Object { Write-Host $_ }
+    $helpOutput = & LabVIEWCLI -OperationName RunVIAnalyzer -Help 2>&1
+    $helpOutput | ForEach-Object { Write-Host $_ }
 } catch {
-    Write-Host "Could not query RunVIAnalyzer help"
+    Write-Host "Help failed: $_"
 }
+
+# Try running without ConfigPath to see behavior
+Write-Host "`n=== Trying RunVIAnalyzer without ConfigPath ==="
+$testReportDir = "C:\workspace\vi-analyzer-test"
+New-Item -ItemType Directory -Path $testReportDir -Force | Out-Null
+$testReport = "$testReportDir\test.txt"
+try {
+    $output = & LabVIEWCLI -LogToConsole TRUE -OperationName RunVIAnalyzer -ReportPath $testReport -LabVIEWPath "C:\Program Files\National Instruments\LabVIEW 2026\LabVIEW.exe" -Headless 2>&1
+    $output | ForEach-Object { Write-Host $_ }
+    if (Test-Path $testReport) {
+        Write-Host "`nTest report content:"
+        Get-Content $testReport | ForEach-Object { Write-Host $_ }
+    }
+} catch {
+    Write-Host "Error: $_"
+}
+
+# Search for ANY test-related LLBs or VIs
+Write-Host "`n=== Searching for test-related files ==="
+$searchDir = "C:\Program Files\National Instruments\LabVIEW 2026"
+Get-ChildItem $searchDir -Recurse -ErrorAction SilentlyContinue | Where-Object {
+    $_.Name -match "Broken VI|Platform Portability|Separate Compiled|Toolkit Usage|Error Cluster|vi.analyzer.*test|test.*analyzer"
+} | ForEach-Object {
+    Write-Host "  $($_.FullName)"
+} | Select-Object -First 30
