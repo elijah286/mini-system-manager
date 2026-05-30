@@ -1,8 +1,8 @@
 # Mini System Manager (Revidyne)
 
-![Mass Compile](https://github.com/elijah286/mini-system-manager/actions/workflows/masscompile-windows-container.yml/badge.svg)
-![VI Analyzer](https://github.com/elijah286/mini-system-manager/actions/workflows/run-vi-analyzer-windows-container.yml/badge.svg)
-![VIDiff](https://github.com/elijah286/mini-system-manager/actions/workflows/vidiff-windows-container.yml/badge.svg)
+[![Mass Compile](https://github.com/elijah286/mini-system-manager/actions/workflows/masscompile-windows-container.yml/badge.svg)](https://elijah286.github.io/mini-system-manager/)
+[![VI Analyzer](https://github.com/elijah286/mini-system-manager/actions/workflows/run-vi-analyzer-windows-container.yml/badge.svg)](https://elijah286.github.io/mini-system-manager/)
+[![VIDiff](https://github.com/elijah286/mini-system-manager/actions/workflows/vidiff-windows-container.yml/badge.svg)](https://elijah286.github.io/mini-system-manager/)
 
 [![Reports Dashboard](https://img.shields.io/badge/Reports-Dashboard-blue?logo=github)](https://elijah286.github.io/mini-system-manager/)
 

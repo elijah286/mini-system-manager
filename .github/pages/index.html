@@ -20,6 +20,10 @@
     td a { color: #58a6ff; text-decoration: none; }
     td a:hover { text-decoration: underline; }
     .commit-sha { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.9em; }
+    .summary { font-size: 0.85em; }
+    .pass { color: #3fb950; }
+    .fail { color: #f85149; }
+    .neutral { color: #8b949e; }
     .loading { color: #8b949e; padding: 1em 0; }
     .empty { color: #8b949e; font-style: italic; padding: 0.8em 0; }
     .section { background: #161b22; border: 1px solid #21262d; border-radius: 6px; padding: 1.2em; margin-bottom: 1.5em; }
@@ -60,7 +64,37 @@
       return (await res.json()).tree || [];
     }
 
-    function renderVIAnalyzer(tree) {
+    async function fetchReportSummary(url) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const html = await res.text();
+        const get = (label) => {
+          const m = html.match(new RegExp(label + '\\s+(\\d+)'));
+          return m ? parseInt(m[1], 10) : null;
+        };
+        return {
+          visAnalyzed: get('VIs Analyzed'),
+          testsRun: get('Total Tests Run'),
+          passed: get('Passed Tests'),
+          failed: get('Failed Tests')
+        };
+      } catch {
+        return null;
+      }
+    }
+
+    function viaSummaryHtml(s) {
+      if (!s) return '<span class="neutral">…</span>';
+      if (s.testsRun === 0) return '<span class="neutral">0 tests run</span>';
+      const parts = [];
+      if (s.failed > 0) parts.push(`<span class="fail">${s.failed} failed</span>`);
+      if (s.passed > 0) parts.push(`<span class="pass">${s.passed} passed</span>`);
+      parts.push(`<span class="neutral">${s.visAnalyzed} VIs</span>`);
+      return parts.join(' · ');
+    }
+
+    async function renderVIAnalyzer(tree) {
       const container = document.getElementById('vi-analyzer-list');
       const reports = tree
         .filter(n => n.path.match(/^vi-analyzer\/vi-analyzer\/[a-f0-9]+\/index\.html$/))
@@ -75,25 +109,38 @@
         return;
       }
 
-      let html = '<table><thead><tr><th>Commit</th><th>Report</th></tr></thead><tbody>';
+      let html = '<table><thead><tr><th>Commit</th><th>Summary</th><th>Report</th></tr></thead><tbody>';
       for (const r of reports) {
-        html += `<tr><td class="commit-sha">${r.sha}</td><td><a href="${r.url}">View Report</a></td></tr>`;
+        html += `<tr><td class="commit-sha">${r.sha}</td><td class="summary" id="via-${r.sha}"><span class="neutral">…</span></td><td><a href="${r.url}">View Report</a></td></tr>`;
       }
       html += '</tbody></table>';
       container.innerHTML = html;
+
+      // Fetch summaries in parallel
+      const fetches = reports.map(async r => {
+        const s = await fetchReportSummary(r.url);
+        const el = document.getElementById(`via-${r.sha}`);
+        if (el) el.innerHTML = viaSummaryHtml(s);
+      });
+      await Promise.all(fetches);
     }
 
     function renderVIDiff(tree) {
       const container = document.getElementById('vidiff-list');
-      const dirs = new Set();
+      const dirFiles = {};
       tree.forEach(n => {
-        const m = n.path.match(/^vidiff\/(push-[a-f0-9]+|pr-\d+)\/windows\/index\.html$/);
-        if (m) dirs.add(m[1]);
+        const m = n.path.match(/^vidiff\/(push-[a-f0-9]+|pr-\d+)\/windows\/(.+\.html)$/);
+        if (m) {
+          if (!dirFiles[m[1]]) dirFiles[m[1]] = [];
+          dirFiles[m[1]].push(m[2]);
+        }
       });
 
-      const reports = Array.from(dirs).map(label => {
+      const reports = Object.keys(dirFiles).map(label => {
         const sha = label.replace('push-', '').replace('pr-', 'PR #');
-        return { label, sha, url: `${PAGES_BASE}/vidiff/${label}/windows/` };
+        const files = dirFiles[label];
+        const changeCount = files.filter(f => f !== 'index.html').length;
+        return { label, sha, url: `${PAGES_BASE}/vidiff/${label}/windows/`, changeCount };
       }).sort((a, b) => a.label.localeCompare(b.label));
 
       if (reports.length === 0) {
@@ -101,9 +148,12 @@
         return;
       }
 
-      let html = '<table><thead><tr><th>Ref</th><th>Report</th></tr></thead><tbody>';
+      let html = '<table><thead><tr><th>Ref</th><th>Summary</th><th>Report</th></tr></thead><tbody>';
       for (const r of reports) {
-        html += `<tr><td class="commit-sha">${r.sha}</td><td><a href="${r.url}">View Report</a></td></tr>`;
+        const summary = r.changeCount > 0
+          ? `<span class="neutral">${r.changeCount} file${r.changeCount !== 1 ? 's' : ''} changed</span>`
+          : '<span class="neutral">—</span>';
+        html += `<tr><td class="commit-sha">${r.sha}</td><td class="summary">${summary}</td><td><a href="${r.url}">View Report</a></td></tr>`;
       }
       html += '</tbody></table>';
       container.innerHTML = html;
