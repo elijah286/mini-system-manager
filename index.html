@@ -109,25 +109,56 @@
         }
       });
 
-      // Merge all SHAs
-      const allShas = [...new Set([...Object.keys(viaReports), ...Object.keys(vdReports)])].sort();
+      // Merge all SHAs and fetch commit dates
+      const allShas = [...new Set([...Object.keys(viaReports), ...Object.keys(vdReports)])];
 
       if (allShas.length === 0) {
         container.innerHTML = '<p class="empty">No reports found yet.</p>';
         return;
       }
 
-      let html = '<table><thead><tr><th>Commit</th><th>VI Analyzer</th><th>VIDiff</th></tr></thead><tbody>';
+      // Fetch commit info for dates (batch via commits API)
+      const commitDates = {};
+      await Promise.all(allShas.map(async sha => {
+        try {
+          const res = await fetch(`${API_BASE}/commits/${sha}`);
+          if (res.ok) {
+            const data = await res.json();
+            commitDates[sha] = {
+              date: data.commit.committer.date,
+              message: data.commit.message.split('\n')[0]
+            };
+          }
+        } catch {}
+      }));
+
+      // Sort by date (newest first), fall back to SHA
+      allShas.sort((a, b) => {
+        const da = commitDates[a]?.date || '';
+        const db = commitDates[b]?.date || '';
+        return db.localeCompare(da);
+      });
+
+      function formatDate(iso) {
+        if (!iso) return '<span class="neutral">—</span>';
+        const d = new Date(iso);
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      }
+
+      let html = '<table><thead><tr><th>Commit</th><th>Date</th><th>VI Analyzer</th><th>VIDiff</th></tr></thead><tbody>';
       for (const sha of allShas) {
         const via = viaReports[sha];
         const vd = vdReports[sha];
+        const info = commitDates[sha];
+        const dateCell = formatDate(info?.date);
+        const titleAttr = info?.message ? ` title="${info.message.replace(/"/g, '&quot;')}"` : '';
         const viaCell = via
           ? `<span class="summary" id="via-${sha}"><span class="neutral">…</span></span> <a href="${via.url}">report</a>`
           : '<span class="neutral">—</span>';
         const vdCell = vd
           ? `<span class="summary" id="vd-${sha}"><span class="neutral">…</span></span> <a href="${vd.url}">report</a>`
           : '<span class="neutral">—</span>';
-        html += `<tr><td class="commit-sha">${sha}</td><td>${viaCell}</td><td>${vdCell}</td></tr>`;
+        html += `<tr><td class="commit-sha"${titleAttr}>${sha}</td><td>${dateCell}</td><td>${viaCell}</td><td>${vdCell}</td></tr>`;
       }
       html += '</tbody></table>';
       container.innerHTML = html;
