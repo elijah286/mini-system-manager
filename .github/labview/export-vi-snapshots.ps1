@@ -10,76 +10,16 @@ if (-not (Test-Path -Path $OutputDir)) {
     New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
 }
 
-# ── Diagnostic: find available CLI operations ──
+# ── Diagnostic: verify PrintToSingleFileHtml operation is available ──
 Write-Host "=== CLI Operations Diagnostic ===" -ForegroundColor Cyan
-$searchDirs = @(
-    "C:\Program Files\National Instruments\Shared\LabVIEWCLI",
-    "C:\Program Files\National Instruments\LabVIEW 2026\resource\cli",
-    "C:\Program Files\National Instruments\LabVIEW 2026\vi.lib\LabVIEWCLI",
-    $PSScriptRoot
-)
-foreach ($sd in $searchDirs) {
-    Write-Host "`nDirectory: $sd"
-    if (Test-Path $sd) {
-        Get-ChildItem -Path $sd -Directory -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  OP: $($_.Name)" }
-    } else {
-        Write-Host "  (not found)"
-    }
-}
-
-# Search for PrintToSingleFileHtml anywhere under Program Files\National Instruments
-Write-Host "`n=== Searching for PrintToSingleFileHtml ===" -ForegroundColor Cyan
-$ptsfDirs = Get-ChildItem -Path "C:\Program Files\National Instruments" -Recurse -Directory -Filter "PrintToSingleFileHtml" -ErrorAction SilentlyContinue
-if ($ptsfDirs) {
-    foreach ($d in $ptsfDirs) { Write-Host "  FOUND: $($d.FullName)" }
-    # Use the first found directory's parent as AdditionalOperationDirectory
-    $AdditionalOpDir = $ptsfDirs[0].Parent.FullName
-    Write-Host "  Using AdditionalOperationDirectory: $AdditionalOpDir" -ForegroundColor Green
+$ptsfDir = Join-Path $PSScriptRoot "PrintToSingleFileHtml"
+if (Test-Path $ptsfDir) {
+    Write-Host "PrintToSingleFileHtml operation directory found at: $ptsfDir" -ForegroundColor Green
+    Get-ChildItem -Path $ptsfDir | ForEach-Object { Write-Host "  $($_.Name)" }
 } else {
-    Write-Host "  Not found in NI directories."
-    # Also try nipkg list to see what's installed
-    Write-Host "`n=== Installed NI Packages ===" -ForegroundColor Cyan
-    $nipkg = "C:\Program Files\National Instruments\NI Package Manager\nipkg.exe"
-    if (Test-Path $nipkg) {
-        & $nipkg list 2>&1 | Select-String -Pattern "diff|vidiff|cli" -CaseSensitive:$false | ForEach-Object { Write-Host "  $_" }
-        Write-Host "`n=== Searching for VIDiff package ===" -ForegroundColor Cyan
-        # Add NI feed and update
-        & $nipkg feed-add NI "https://download.ni.com/support/nipkg/products/ni-package-manager/26.0/released" 2>&1 | ForEach-Object { Write-Host "  feed-add: $_" }
-        & $nipkg update 2>&1 | Out-Null
-        # Search for available VIDiff packages
-        & $nipkg list --available 2>&1 | Select-String -Pattern "vidiff|vi-diff|VIDiff" -CaseSensitive:$false | ForEach-Object { Write-Host "  available: $_" }
-        # Also search for labviewcli operations packages
-        & $nipkg list --available 2>&1 | Select-String -Pattern "labviewcli|cli-operation|PrintToSingle" -CaseSensitive:$false | ForEach-Object { Write-Host "  available: $_" }
-        # Try various possible package names
-        $packageNames = @(
-            "ni-vidiff",
-            "ni-labview-vidiff-toolkit",
-            "ni-labview-2026-vidiff-toolkit",
-            "ni-labview-2026-vidiff",
-            "ni-labview-vi-diff"
-        )
-        foreach ($pkg in $packageNames) {
-            Write-Host "  Trying: $pkg" -ForegroundColor Yellow
-            $result = & $nipkg install $pkg -y 2>&1
-            if ($LASTEXITCODE -eq 0) {
-                Write-Host "  Installed $pkg successfully!" -ForegroundColor Green
-                break
-            }
-        }
-        # Re-check after install attempt
-        $ptsfDirs = Get-ChildItem -Path "C:\Program Files\National Instruments" -Recurse -Directory -Filter "PrintToSingleFileHtml" -ErrorAction SilentlyContinue
-        if ($ptsfDirs) {
-            $AdditionalOpDir = $ptsfDirs[0].Parent.FullName
-            Write-Host "  Post-install found: $($ptsfDirs[0].FullName)" -ForegroundColor Green
-        }
-    } else {
-        Write-Host "  nipkg not found at expected path."
-        # Try to find nipkg elsewhere
-        $nipkgAlt = Get-Command nipkg -ErrorAction SilentlyContinue
-        if ($nipkgAlt) {
-            Write-Host "  Found nipkg at: $($nipkgAlt.Source)"
-        }
-    }
+    Write-Host "ERROR: PrintToSingleFileHtml operation directory NOT found at: $ptsfDir" -ForegroundColor Red
+    Write-Host "The PrintToSingleFileHtml VIs must be placed alongside this script."
+    exit 1
 }
 
 Write-Host "`nUsing AdditionalOperationDirectory: $AdditionalOpDir" -ForegroundColor Cyan
