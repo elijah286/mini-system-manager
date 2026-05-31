@@ -5,99 +5,175 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>VI Browser — Mini System Manager</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0d1117; color: #c9d1d9; padding: 2em; max-width: 960px; margin: 0 auto; }
-    h1 { color: #58a6ff; margin-bottom: 0.3em; font-size: 1.6em; }
-    .subtitle { color: #8b949e; margin-bottom: 2em; font-size: 0.95em; }
-    .subtitle a { color: #58a6ff; text-decoration: none; }
-    .subtitle a:hover { text-decoration: underline; }
-    h2 { color: #f0f6fc; margin: 1.5em 0 0.5em; font-size: 1.1em; border-bottom: 1px solid #21262d; padding-bottom: 0.3em; }
-    .file-list { list-style: none; }
-    .file-list li { padding: 0.4em 0.6em; border-bottom: 1px solid #21262d; }
-    .file-list li:hover { background: #161b22; }
-    .file-list a { color: #58a6ff; text-decoration: none; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.9em; }
-    .file-list a:hover { text-decoration: underline; }
-    .file-list .dir { color: #8b949e; font-size: 0.8em; margin-right: 0.5em; }
-    .badge { display: inline-block; background: #21262d; color: #8b949e; font-size: 0.75em; padding: 0.15em 0.5em; border-radius: 3px; margin-left: 0.5em; }
-    .section { background: #161b22; border: 1px solid #21262d; border-radius: 6px; padding: 1.2em; margin-bottom: 1.5em; }
-    .back-link { color: #58a6ff; text-decoration: none; font-size: 0.9em; }
-    .back-link:hover { text-decoration: underline; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0d1117;color:#c9d1d9}
+    .header{padding:1.5em 2em;border-bottom:1px solid #21262d}
+    h1{color:#58a6ff;margin-bottom:.3em;font-size:1.6em}
+    .subtitle{color:#8b949e;font-size:.95em}
+    .subtitle a{color:#58a6ff;text-decoration:none}
+    .subtitle a:hover{text-decoration:underline}
+    .toolbar{padding:1em 2em;background:#161b22;border-bottom:1px solid #21262d;display:flex;align-items:center;gap:1em;flex-wrap:wrap}
+    .commit-select{background:#21262d;color:#c9d1d9;border:1px solid #30363d;border-radius:6px;padding:.5em 1em;font-size:.9em;min-width:300px;max-width:100%}
+    .toolbar-btn{color:#58a6ff;text-decoration:none;font-size:.85em;padding:.5em 1em;border:1px solid #30363d;border-radius:6px;background:#21262d;white-space:nowrap}
+    .toolbar-btn:hover{background:#30363d}
+    .commit-meta{color:#8b949e;font-size:.8em;margin-left:auto}
+    .content{padding:2em;max-width:960px;margin:0 auto}
+    .tree{list-style:none}
+    .tree ul{list-style:none;padding-left:1.5em}
+    .tree li{padding:.15em 0}
+    .folder-row{cursor:pointer;user-select:none;color:#f0f6fc;font-weight:500;font-size:.95em;display:inline-flex;align-items:center;gap:.3em}
+    .folder-row:hover{color:#58a6ff}
+    .caret{display:inline-block;width:.8em;text-align:center;font-size:.7em;color:#484f58;transition:transform .15s}
+    .caret.open{transform:rotate(90deg)}
+    .file-link{color:#58a6ff;text-decoration:none;font-family:'SFMono-Regular',Consolas,monospace;font-size:.88em}
+    .file-link:hover{text-decoration:underline}
+    .file-row{display:inline-flex;align-items:center;gap:.4em}
+    .badge{display:inline-block;background:#21262d;color:#8b949e;font-size:.7em;padding:.1em .45em;border-radius:3px}
+    .icon{font-size:.9em}
+    .section-label{color:#8b949e;font-size:.8em;margin-top:2em;margin-bottom:.5em;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid #21262d;padding-bottom:.3em}
+    .loading{color:#8b949e;font-style:italic;padding:2em}
+    .error{color:#f85149;padding:2em}
+    .stats{color:#484f58;font-size:.8em;margin-top:.5em}
   </style>
 </head>
 <body>
-  <h1>VI Browser</h1>
-  <p class="subtitle">
-    <a class="back-link" href="../">← Back to Dashboard</a> ·
-    <a href="https://github.com/elijah286/mini-system-manager">elijah286/mini-system-manager</a>
-    — Front Panel &amp; Block Diagram snapshots for every VI
-  </p>
-<div class="section"><h2>Root</h2><ul class="file-list">
-<li><a href="Controller%20Commands.ctl.html">Controller Commands.ctl</a><span class="badge">CTL</span></li>
-<li><a href="Curriculum%20Launcher.vi.html">Curriculum Launcher.vi</a><span class="badge">VI</span></li>
-<li><a href="Find%20Curriculum.vi.html">Find Curriculum.vi</a><span class="badge">VI</span></li>
-<li><a href="Graph%20Popup.vi.html">Graph Popup.vi</a><span class="badge">VI</span></li>
-<li><a href="Simple%20Solar%20Tracker%20v4.vi.html">Simple Solar Tracker v4.vi</a><span class="badge">VI</span></li>
-<li><a href="Status%20String%20Update.vi.html">Status String Update.vi</a><span class="badge">VI</span></li>
-<li><a href="main.vi.html">main.vi</a><span class="badge">VI</span></li>
-</ul></div>
-<div class="section"><h2>Curriculum\Generator API</h2><ul class="file-list">
-<li><a href="Curriculum%5CGenerator%20API%5CGenerator%20Driver%20Template%201.vi.html">Generator Driver Template 1.vi</a><span class="badge">VI</span></li>
-<li><a href="Curriculum%5CGenerator%20API%5CGenerator%20Driver%20Template%202.vi.html">Generator Driver Template 2.vi</a><span class="badge">VI</span></li>
-<li><a href="Curriculum%5CGenerator%20API%5CGenerator%20Driver%20Template%203.vi.html">Generator Driver Template 3.vi</a><span class="badge">VI</span></li>
-<li><a href="Curriculum%5CGenerator%20API%5CGenerator%20Driver%20Template%204.vi.html">Generator Driver Template 4.vi</a><span class="badge">VI</span></li>
-<li><a href="Curriculum%5CGenerator%20API%5CGenerator%20Driver%20Template%205.vi.html">Generator Driver Template 5.vi</a><span class="badge">VI</span></li>
-</ul></div>
-<div class="section"><h2>Curriculum\Generator API\subVIs\Demo</h2><ul class="file-list">
-<li><a href="Curriculum%5CGenerator%20API%5CsubVIs%5CDemo%5CDemo%20PID%20Control.vi.html">Demo PID Control.vi</a><span class="badge">VI</span></li>
-</ul></div>
-<div class="section"><h2>Curriculum\Generator API\subVIs\Private</h2><ul class="file-list">
-<li><a href="Curriculum%5CGenerator%20API%5CsubVIs%5CPrivate%5CDefault%20Instrument%20Setup.vi.html">Default Instrument Setup.vi</a><span class="badge">VI</span></li>
-</ul></div>
-<div class="section"><h2>Curriculum\Generator API\subVIs\Public</h2><ul class="file-list">
-<li><a href="Curriculum%5CGenerator%20API%5CsubVIs%5CPublic%5CClose.vi.html">Close.vi</a><span class="badge">VI</span></li>
-<li><a href="Curriculum%5CGenerator%20API%5CsubVIs%5CPublic%5CInitialize.vi.html">Initialize.vi</a><span class="badge">VI</span></li>
-<li><a href="Curriculum%5CGenerator%20API%5CsubVIs%5CPublic%5CVI%20Tree.vi.html">VI Tree.vi</a><span class="badge">VI</span></li>
-</ul></div>
-<div class="section"><h2>Curriculum\Generator API\subVIs\Public\Action-Status</h2><ul class="file-list">
-<li><a href="Curriculum%5CGenerator%20API%5CsubVIs%5CPublic%5CAction-Status%5CInit.vi.html">Init.vi</a><span class="badge">VI</span></li>
-<li><a href="Curriculum%5CGenerator%20API%5CsubVIs%5CPublic%5CAction-Status%5CMotor%20Off.vi.html">Motor Off.vi</a><span class="badge">VI</span></li>
-<li><a href="Curriculum%5CGenerator%20API%5CsubVIs%5CPublic%5CAction-Status%5CMotor%20On.vi.html">Motor On.vi</a><span class="badge">VI</span></li>
-</ul></div>
-<div class="section"><h2>Curriculum\Generator API\subVIs\Public\Configure</h2><ul class="file-list">
-<li><a href="Curriculum%5CGenerator%20API%5CsubVIs%5CPublic%5CConfigure%5CSet%20Load.vi.html">Set Load.vi</a><span class="badge">VI</span></li>
-<li><a href="Curriculum%5CGenerator%20API%5CsubVIs%5CPublic%5CConfigure%5CSet%20Speed.vi.html">Set Speed.vi</a><span class="badge">VI</span></li>
-</ul></div>
-<div class="section"><h2>Curriculum\Generator API\subVIs\Public\Data</h2><ul class="file-list">
-<li><a href="Curriculum%5CGenerator%20API%5CsubVIs%5CPublic%5CData%5CGet%20KW.vi.html">Get KW.vi</a><span class="badge">VI</span></li>
-<li><a href="Curriculum%5CGenerator%20API%5CsubVIs%5CPublic%5CData%5CGet%20Value.vi.html">Get Value.vi</a><span class="badge">VI</span></li>
-</ul></div>
-<div class="section"><h2>Curriculum\Generator API\subVIs\Public\Utility</h2><ul class="file-list">
-<li><a href="Curriculum%5CGenerator%20API%5CsubVIs%5CPublic%5CUtility%5CError%20Query.vi.html">Error Query.vi</a><span class="badge">VI</span></li>
-<li><a href="Curriculum%5CGenerator%20API%5CsubVIs%5CPublic%5CUtility%5CReset.vi.html">Reset.vi</a><span class="badge">VI</span></li>
-<li><a href="Curriculum%5CGenerator%20API%5CsubVIs%5CPublic%5CUtility%5CRevision%20Query.vi.html">Revision Query.vi</a><span class="badge">VI</span></li>
-<li><a href="Curriculum%5CGenerator%20API%5CsubVIs%5CPublic%5CUtility%5CSelf-Test.vi.html">Self-Test.vi</a><span class="badge">VI</span></li>
-</ul></div>
-<div class="section"><h2>Curriculum\Generator Lessons</h2><ul class="file-list">
-<li><a href="Curriculum%5CGenerator%20Lessons%5CGenerator%20Lesson%201.vi.html">Generator Lesson 1.vi</a><span class="badge">VI</span></li>
-<li><a href="Curriculum%5CGenerator%20Lessons%5CGenerator%20Lesson%202.vi.html">Generator Lesson 2.vi</a><span class="badge">VI</span></li>
-<li><a href="Curriculum%5CGenerator%20Lessons%5CGenerator%20Lesson%203.vi.html">Generator Lesson 3.vi</a><span class="badge">VI</span></li>
-<li><a href="Curriculum%5CGenerator%20Lessons%5CGenerator%20Lesson%204.vi.html">Generator Lesson 4.vi</a><span class="badge">VI</span></li>
-<li><a href="Curriculum%5CGenerator%20Lessons%5CGenerator%20Lesson%205.vi.html">Generator Lesson 5.vi</a><span class="badge">VI</span></li>
-<li><a href="Curriculum%5CGenerator%20Lessons%5CGenerator%20Lesson%206.vi.html">Generator Lesson 6.vi</a><span class="badge">VI</span></li>
-<li><a href="Curriculum%5CGenerator%20Lessons%5CGenerator%20Lesson%207.vi.html">Generator Lesson 7.vi</a><span class="badge">VI</span></li>
-</ul></div>
-<div class="section"><h2>Curriculum\Generator Lessons\subVIs</h2><ul class="file-list">
-<li><a href="Curriculum%5CGenerator%20Lessons%5CsubVIs%5CCommand%20with%20Return%20Value.vi.html">Command with Return Value.vi</a><span class="badge">VI</span></li>
-<li><a href="Curriculum%5CGenerator%20Lessons%5CsubVIs%5CConfirm%20USB%20Devices%20and%20IO.vi.html">Confirm USB Devices and IO.vi</a><span class="badge">VI</span></li>
-<li><a href="Curriculum%5CGenerator%20Lessons%5CsubVIs%5CGet%20All%20Values.vi.html">Get All Values.vi</a><span class="badge">VI</span></li>
-<li><a href="Curriculum%5CGenerator%20Lessons%5CsubVIs%5CUSB%20Device%20Filter.vi.html">USB Device Filter.vi</a><span class="badge">VI</span></li>
-<li><a href="Curriculum%5CGenerator%20Lessons%5CsubVIs%5Cbalance%20grid.vi.html">balance grid.vi</a><span class="badge">VI</span></li>
-</ul></div>
-<div class="section"><h2>Curriculum\Main Power Grid</h2><ul class="file-list">
-<li><a href="Curriculum%5CMain%20Power%20Grid%5CMain%20Power%20Grid.vi.html">Main Power Grid.vi</a><span class="badge">VI</span></li>
-</ul></div>
-<div class="section"><h2>Curriculum\Solar Lessons</h2><ul class="file-list">
-<li><a href="Curriculum%5CSolar%20Lessons%5CSolar%20Example.vi.html">Solar Example.vi</a><span class="badge">VI</span></li>
-</ul></div>
+  <div class="header">
+    <h1>VI Browser</h1>
+    <p class="subtitle">
+      <a href="../">← Back to Dashboard</a> ·
+      <a href="https://github.com/elijah286/mini-system-manager">elijah286/mini-system-manager</a>
+      — Front Panel &amp; Block Diagram snapshots for every VI
+    </p>
+  </div>
+  <div class="toolbar">
+    <label for="commit-sel" style="color:#8b949e;font-size:.85em">Commit:</label>
+    <select id="commit-sel" class="commit-select"><option>Loading…</option></select>
+    <a id="diff-link" class="toolbar-btn" href="#" style="display:none">View VIDiff Report →</a>
+    <span id="commit-meta" class="commit-meta"></span>
+  </div>
+  <div class="content" id="content"><p class="loading">Loading…</p></div>
+
+  <script>
+    let commits=[], cur=null;
+    const BASE=location.pathname.replace(/\/index\.html$/,'/').replace(/\/$/,'/');
+
+    async function init(){
+      try{
+        const r=await fetch(BASE+'commits.json');
+        if(!r.ok) throw new Error('No commits.json');
+        commits=await r.json();
+      }catch(e){
+        document.getElementById('content').innerHTML='<p class="error">'+esc(e.message)+'</p>';
+        return;
+      }
+      if(!commits.length){
+        document.getElementById('content').innerHTML='<p class="loading">No snapshots available yet.</p>';
+        return;
+      }
+      const sel=document.getElementById('commit-sel');
+      sel.innerHTML='';
+      commits.forEach((c,i)=>{
+        const o=document.createElement('option');
+        o.value=c.sha;
+        const d=new Date(c.date).toLocaleDateString();
+        o.textContent=c.short_sha+' — '+c.message+' ('+d+')'+(i===0?' ★':'');
+        sel.appendChild(o);
+      });
+      sel.addEventListener('change',()=>load(sel.value));
+      const h=location.hash.slice(1);
+      const hc=commits.find(c=>c.sha===h||c.short_sha===h);
+      load(hc?hc.sha:commits[0].sha);
+    }
+
+    async function load(sha){
+      cur=sha;
+      const short=sha.slice(0,7);
+      location.hash=short;
+      const ci=commits.find(c=>c.sha===sha);
+      document.getElementById('commit-sel').value=sha;
+
+      // diff link
+      const dl=document.getElementById('diff-link');
+      dl.href='../vidiff/push-'+short+'/';
+      dl.style.display='inline-block';
+
+      // commit meta
+      const cm=document.getElementById('commit-meta');
+      if(ci) cm.textContent=new Date(ci.date).toLocaleString()+(ci.stats?' · '+ci.stats.succeeded+'/'+ci.stats.total+' VIs':'');
+
+      const el=document.getElementById('content');
+      el.innerHTML='<p class="loading">Loading snapshots…</p>';
+      try{
+        const r=await fetch(BASE+'commits/'+sha+'/manifest.json');
+        if(!r.ok) throw new Error('Manifest not found for '+short);
+        render(await r.json(),sha);
+      }catch(e){el.innerHTML='<p class="error">'+esc(e.message)+'</p>';}
+    }
+
+    function render(m,sha){
+      const el=document.getElementById('content');
+      el.innerHTML='';
+      const dir='commits/'+sha+'/';
+      if(m.tree&&m.tree.length){
+        const ul=document.createElement('ul');
+        ul.className='tree';
+        m.tree.forEach(n=>ul.appendChild(mkNode(n,dir)));
+        el.appendChild(ul);
+      }
+      if(m.nonProjectFiles&&m.nonProjectFiles.length){
+        const lbl=document.createElement('p');
+        lbl.className='section-label';
+        lbl.textContent='Files not in project';
+        el.appendChild(lbl);
+        const ul=document.createElement('ul');
+        ul.className='tree';
+        m.nonProjectFiles.forEach(f=>{
+          const li=document.createElement('li');
+          li.innerHTML=mkFile(f,dir);
+          ul.appendChild(li);
+        });
+        el.appendChild(ul);
+      }
+    }
+
+    function mkNode(n,dir){
+      const li=document.createElement('li');
+      if(n.type==='folder'||n.type==='target'){
+        const row=document.createElement('span');
+        row.className='folder-row';
+        const caret=document.createElement('span');
+        caret.className='caret open';
+        caret.textContent='▶';
+        row.appendChild(caret);
+        row.appendChild(document.createTextNode(' 📁 '+n.name));
+        const sub=document.createElement('ul');
+        if(n.children) n.children.forEach(c=>sub.appendChild(mkNode(c,dir)));
+        row.addEventListener('click',e=>{
+          e.stopPropagation();
+          caret.classList.toggle('open');
+          sub.style.display=sub.style.display==='none'?'':'none';
+        });
+        li.appendChild(row);
+        li.appendChild(sub);
+      }else{
+        li.innerHTML=mkFile(n,dir);
+      }
+      return li;
+    }
+
+    function mkFile(n,dir){
+      const ext=(n.name||'').split('.').pop().toLowerCase();
+      const badge=ext==='ctl'?'CTL':'VI';
+      if(n.html){
+        const href=dir+n.html.replace(/\\/g,'/').split('/').map(encodeURIComponent).join('/');
+        return '<span class="file-row"><span class="icon">📄</span><a class="file-link" href="'+href+'">'+esc(n.name)+'</a><span class="badge">'+badge+'</span></span>';
+      }
+      return '<span class="file-row"><span class="icon">📄</span><span style="color:#484f58">'+esc(n.name)+'</span><span class="badge" style="color:#484f58">'+badge+'</span></span>';
+    }
+
+    function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+    init();
+  </script>
 </body>
 </html>
