@@ -42,9 +42,30 @@ if ($ptsfDirs) {
     $nipkg = "C:\Program Files\National Instruments\NI Package Manager\nipkg.exe"
     if (Test-Path $nipkg) {
         & $nipkg list 2>&1 | Select-String -Pattern "diff|vidiff|cli" -CaseSensitive:$false | ForEach-Object { Write-Host "  $_" }
-        Write-Host "`n=== Trying to install VIDiff ===" -ForegroundColor Cyan
+        Write-Host "`n=== Searching for VIDiff package ===" -ForegroundColor Cyan
+        # Add NI feed and update
+        & $nipkg feed-add NI "https://download.ni.com/support/nipkg/products/ni-package-manager/26.0/released" 2>&1 | ForEach-Object { Write-Host "  feed-add: $_" }
         & $nipkg update 2>&1 | Out-Null
-        & $nipkg install ni-labview-2026-vidiff-toolkit 2>&1 | ForEach-Object { Write-Host "  $_" }
+        # Search for available VIDiff packages
+        & $nipkg list --available 2>&1 | Select-String -Pattern "vidiff|vi-diff|VIDiff" -CaseSensitive:$false | ForEach-Object { Write-Host "  available: $_" }
+        # Also search for labviewcli operations packages
+        & $nipkg list --available 2>&1 | Select-String -Pattern "labviewcli|cli-operation|PrintToSingle" -CaseSensitive:$false | ForEach-Object { Write-Host "  available: $_" }
+        # Try various possible package names
+        $packageNames = @(
+            "ni-vidiff",
+            "ni-labview-vidiff-toolkit",
+            "ni-labview-2026-vidiff-toolkit",
+            "ni-labview-2026-vidiff",
+            "ni-labview-vi-diff"
+        )
+        foreach ($pkg in $packageNames) {
+            Write-Host "  Trying: $pkg" -ForegroundColor Yellow
+            $result = & $nipkg install $pkg -y 2>&1
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "  Installed $pkg successfully!" -ForegroundColor Green
+                break
+            }
+        }
         # Re-check after install attempt
         $ptsfDirs = Get-ChildItem -Path "C:\Program Files\National Instruments" -Recurse -Directory -Filter "PrintToSingleFileHtml" -ErrorAction SilentlyContinue
         if ($ptsfDirs) {
