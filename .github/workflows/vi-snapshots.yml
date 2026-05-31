@@ -23,8 +23,8 @@ jobs:
     name: Export VI front panel & diagram images
     runs-on: windows-2022
     concurrency:
-      group: pages-deploy
-      cancel-in-progress: false
+      group: vi-snapshots-deploy
+      cancel-in-progress: true
 
     steps:
       - name: Checkout repository
