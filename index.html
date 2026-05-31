@@ -90,6 +90,37 @@
       return parts.join(' · ');
     }
 
+    async function fetchMCSummary(url) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const html = await res.text();
+        const get = (label) => {
+          const m = html.match(new RegExp(label + '(?:\\s+|</td>\\s*<td>)(\\d+)'));
+          return m ? parseInt(m[1], 10) : null;
+        };
+        return {
+          total: get('Total VIs'),
+          compiled: get('Compiled Successfully'),
+          failed: get('Failed to Compile'),
+          missingDeps: get('Missing Dependencies')
+        };
+      } catch {
+        return null;
+      }
+    }
+
+    function mcSummaryHtml(s) {
+      if (!s) return '<span class="neutral">…</span>';
+      if (s.total === null) return '<span class="neutral">no data</span>';
+      const parts = [];
+      if (s.failed > 0) parts.push(`<span class="fail">${s.failed} failed</span>`);
+      if (s.compiled > 0) parts.push(`<span class="pass">${s.compiled} compiled</span>`);
+      parts.push(`<span class="neutral">${s.total} VIs</span>`);
+      if (s.missingDeps > 0) parts.push(`<span class="fail">${s.missingDeps} missing deps</span>`);
+      return parts.join(' · ');
+    }
+
     async function renderCombinedTable(tree) {
       const container = document.getElementById('reports-table');
 
@@ -98,6 +129,13 @@
       tree.forEach(n => {
         const m = n.path.match(/^vi-analyzer\/vi-analyzer\/([a-f0-9]+)\/index\.html$/);
         if (m) viaReports[m[1]] = { url: `${PAGES_BASE}/${n.path}` };
+      });
+
+      // Collect Mass Compile reports by SHA
+      const mcReports = {};
+      tree.forEach(n => {
+        const m = n.path.match(/^masscompile\/masscompile\/([a-f0-9]+)\/index\.html$/);
+        if (m) mcReports[m[1]] = { url: `${PAGES_BASE}/${n.path}` };
       });
 
       // Collect VIDiff reports by SHA
@@ -111,7 +149,7 @@
       });
 
       // Merge all SHAs and fetch commit dates
-      const allShas = [...new Set([...Object.keys(viaReports), ...Object.keys(vdReports)])];
+      const allShas = [...new Set([...Object.keys(viaReports), ...Object.keys(mcReports), ...Object.keys(vdReports)])];
 
       if (allShas.length === 0) {
         container.innerHTML = '<p class="empty">No reports found yet.</p>';
@@ -146,23 +184,34 @@
         return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
       }
 
-      let html = '<table><thead><tr><th>Commit</th><th>Date</th><th>VI Analyzer</th><th>VIDiff</th></tr></thead><tbody>';
+      let html = '<table><thead><tr><th>Commit</th><th>Date</th><th>Mass Compile</th><th>VI Analyzer</th><th>VIDiff</th></tr></thead><tbody>';
       for (const sha of allShas) {
         const via = viaReports[sha];
+        const mc = mcReports[sha];
         const vd = vdReports[sha];
         const info = commitDates[sha];
         const dateCell = formatDate(info?.date);
         const titleAttr = info?.message ? ` title="${info.message.replace(/"/g, '&quot;')}"` : '';
+        const mcCell = mc
+          ? `<span class="summary" id="mc-${sha}"><span class="neutral">…</span></span> <a href="${mc.url}">report</a>`
+          : '<span class="neutral">—</span>';
         const viaCell = via
           ? `<span class="summary" id="via-${sha}"><span class="neutral">…</span></span> <a href="${via.url}">report</a>`
           : '<span class="neutral">—</span>';
         const vdCell = vd
           ? `<span class="summary" id="vd-${sha}"><span class="neutral">…</span></span> <a href="${vd.url}">report</a>`
           : '<span class="neutral">—</span>';
-        html += `<tr><td class="commit-sha"${titleAttr}>${sha}</td><td>${dateCell}</td><td>${viaCell}</td><td>${vdCell}</td></tr>`;
+        html += `<tr><td class="commit-sha"${titleAttr}>${sha}</td><td>${dateCell}</td><td>${mcCell}</td><td>${viaCell}</td><td>${vdCell}</td></tr>`;
       }
       html += '</tbody></table>';
       container.innerHTML = html;
+
+      // Fetch Mass Compile summaries
+      const mcFetches = Object.entries(mcReports).map(async ([sha, r]) => {
+        const s = await fetchMCSummary(r.url);
+        const el = document.getElementById(`mc-${sha}`);
+        if (el) el.innerHTML = mcSummaryHtml(s);
+      });
 
       // Fetch VI Analyzer summaries
       const viaFetches = Object.entries(viaReports).map(async ([sha, r]) => {
@@ -199,7 +248,7 @@
         }
       });
 
-      await Promise.all([...viaFetches, ...vdFetches]);
+      await Promise.all([...mcFetches, ...viaFetches, ...vdFetches]);
     }
 
     fetchTree()
