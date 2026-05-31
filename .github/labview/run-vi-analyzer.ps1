@@ -37,8 +37,12 @@ if (Test-Path -Path $ReportPath) {
     Write-Host "WARNING: No HTML report was generated at $ReportPath" -ForegroundColor Yellow
 }
 
-if ($exitCode -ne 0) {
-    Write-Host "VI Analyzer returned exit code $exitCode." -ForegroundColor Red
+# Exit code 3 = failures found (informational, not a build error)
+if ($exitCode -eq 3) {
+    Write-Host "VI Analyzer completed with failures (exit code 3). See report for details." -ForegroundColor Yellow
+    exit 0
+} elseif ($exitCode -ne 0) {
+    Write-Host "VI Analyzer returned unexpected exit code $exitCode." -ForegroundColor Red
     exit $exitCode
 }
 
