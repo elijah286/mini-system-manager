@@ -65,7 +65,8 @@
         if (!res.ok) return null;
         const html = await res.text();
         const get = (label) => {
-          const m = html.match(new RegExp(label + '\\s+(\\d+)'));
+          // Match both "Label 123" and "<td>Label</td><td>123</td>"
+          const m = html.match(new RegExp(label + '(?:\\s+|</td>\\s*<td>)(\\d+)'));
           return m ? parseInt(m[1], 10) : null;
         };
         return {
