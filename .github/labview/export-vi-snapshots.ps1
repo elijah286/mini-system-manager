@@ -61,8 +61,13 @@ foreach ($vi in $viFiles) {
     }
 }
 
-# Write manifest JSON for the gallery page generator
-$manifest | ConvertTo-Json -Depth 3 | Out-File -FilePath (Join-Path $OutputDir "manifest.json") -Encoding UTF8
+# Write manifest JSON for the gallery page generator (UTF-8 without BOM)
+if ($manifest.Count -eq 0) {
+    $jsonText = "[]"
+} else {
+    $jsonText = $manifest | ConvertTo-Json -Depth 3
+}
+[System.IO.File]::WriteAllText((Join-Path $OutputDir "manifest.json"), $jsonText, [System.Text.UTF8Encoding]::new($false))
 
 Write-Host ""
 Write-Host "Snapshot summary: $($viFiles.Count) total, $succeeded succeeded, $failed failed." -ForegroundColor Cyan

@@ -63,6 +63,35 @@ jobs:
             docker save -o labview-image.tar ${{ env.LABVIEW_CONTAINER_IMAGE }}
           }
 
+      - name: List available CLI operations
+        run: >
+          docker run --rm
+          -v "${{ github.workspace }}:C:\workspace"
+          ${{ env.LABVIEW_CONTAINER_IMAGE }}
+          powershell -Command "
+            Write-Host '=== LabVIEW CLI operations directories ===';
+            $lvDir = 'C:\Program Files\National Instruments\LabVIEW 2026';
+            $cliDirs = @(
+              (Join-Path $lvDir 'resource\cli'),
+              (Join-Path $lvDir 'vi.lib\LabVIEWCLI'),
+              'C:\workspace\.github\labview'
+            );
+            foreach ($d in $cliDirs) {
+              Write-Host \"`nSearching: $d\";
+              if (Test-Path $d) {
+                Get-ChildItem -Path $d -Directory -ErrorAction SilentlyContinue | ForEach-Object { Write-Host \"  OP: $($_.Name)\" }
+              } else { Write-Host '  (not found)' }
+            };
+            Write-Host \"`n=== Searching entire LabVIEW for PrintToSingleFileHtml ===\";
+            Get-ChildItem -Path $lvDir -Recurse -Directory -Filter 'PrintToSingleFileHtml' -ErrorAction SilentlyContinue |
+              ForEach-Object { Write-Host \"  FOUND: $($_.FullName)\" };
+            Write-Host \"`n=== Searching for VIDiff ===\";
+            Get-ChildItem -Path $lvDir -Recurse -Directory -Filter '*VIDiff*' -ErrorAction SilentlyContinue |
+              ForEach-Object { Write-Host \"  FOUND: $($_.FullName)\" };
+            Get-ChildItem -Path $lvDir -Recurse -Directory -Filter '*Diff*' -ErrorAction SilentlyContinue |
+              ForEach-Object { Write-Host \"  FOUND: $($_.FullName)\" }
+          "
+
       - name: Export VI snapshots
         run: >
           docker run --rm
@@ -128,13 +157,19 @@ jobs:
             </p>
           HEADER
 
-          if [ -f "$MANIFEST" ]; then
+          if [ -f "$MANIFEST" ] && [ -s "$MANIFEST" ]; then
             # Group files by directory using Python for JSON parsing
             python3 -c "
           import json, os, sys, urllib.parse
 
-          with open(sys.argv[1]) as f:
-              items = json.load(f)
+          with open(sys.argv[1], encoding='utf-8-sig') as f:
+              data = json.load(f)
+
+          # Handle single-item (dict) vs list
+          items = data if isinstance(data, list) else [data]
+          if not items:
+              print('<div class=\"section\"><p style=\"color: #8b949e; font-style: italic;\">No snapshots were generated.</p></div>')
+              sys.exit(0)
 
           # Group by directory
           groups = {}
