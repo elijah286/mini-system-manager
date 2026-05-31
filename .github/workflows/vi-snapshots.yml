@@ -63,42 +63,19 @@ jobs:
             docker save -o labview-image.tar ${{ env.LABVIEW_CONTAINER_IMAGE }}
           }
 
-      - name: List available CLI operations
-        run: >
-          docker run --rm
-          -v "${{ github.workspace }}:C:\workspace"
-          ${{ env.LABVIEW_CONTAINER_IMAGE }}
-          powershell -Command "
-            Write-Host '=== LabVIEW CLI operations directories ===';
-            $lvDir = 'C:\Program Files\National Instruments\LabVIEW 2026';
-            $cliDirs = @(
-              (Join-Path $lvDir 'resource\cli'),
-              (Join-Path $lvDir 'vi.lib\LabVIEWCLI'),
-              'C:\workspace\.github\labview'
-            );
-            foreach ($d in $cliDirs) {
-              Write-Host \"`nSearching: $d\";
-              if (Test-Path $d) {
-                Get-ChildItem -Path $d -Directory -ErrorAction SilentlyContinue | ForEach-Object { Write-Host \"  OP: $($_.Name)\" }
-              } else { Write-Host '  (not found)' }
-            };
-            Write-Host \"`n=== Searching entire LabVIEW for PrintToSingleFileHtml ===\";
-            Get-ChildItem -Path $lvDir -Recurse -Directory -Filter 'PrintToSingleFileHtml' -ErrorAction SilentlyContinue |
-              ForEach-Object { Write-Host \"  FOUND: $($_.FullName)\" };
-            Write-Host \"`n=== Searching for VIDiff ===\";
-            Get-ChildItem -Path $lvDir -Recurse -Directory -Filter '*VIDiff*' -ErrorAction SilentlyContinue |
-              ForEach-Object { Write-Host \"  FOUND: $($_.FullName)\" };
-            Get-ChildItem -Path $lvDir -Recurse -Directory -Filter '*Diff*' -ErrorAction SilentlyContinue |
-              ForEach-Object { Write-Host \"  FOUND: $($_.FullName)\" }
-          "
-
       - name: Export VI snapshots
+        continue-on-error: true
         run: >
           docker run --rm
           -v "${{ github.workspace }}:C:\workspace"
           ${{ env.LABVIEW_CONTAINER_IMAGE }}
           powershell -File "C:\workspace\.github\labview\export-vi-snapshots.ps1"
           -WorkspaceRoot "C:\workspace"
+
+      - name: Ensure vi-snapshots directory exists
+        if: always()
+        shell: bash
+        run: mkdir -p "${{ github.workspace }}/vi-snapshots"
 
       - name: Upload snapshots artifact
         if: always()
