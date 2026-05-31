@@ -7,7 +7,10 @@ on:
     paths:
       - '**/*.vi'
       - '**/*.ctl'
+      - '**/*.lvproj'
       - '.github/labview/export-vi-snapshots.ps1'
+      - '.github/labview/build-gallery.py'
+      - '.github/pages/vi-browser.html'
       - '.github/workflows/vi-snapshots.yml'
   workflow_dispatch:
 
@@ -77,110 +80,43 @@ jobs:
         shell: bash
         run: mkdir -p "${{ github.workspace }}/vi-snapshots"
 
+      - name: Build gallery data
+        if: always()
+        shell: bash
+        run: |
+          WORKSPACE="${{ github.workspace }}"
+          SNAPSHOT_DIR="$WORKSPACE/vi-snapshots"
+          DEPLOY_DIR="$WORKSPACE/vi-snapshots-deploy"
+          COMMIT_SHA="${{ github.sha }}"
+          PAGES_URL="https://elijah286.github.io/mini-system-manager"
+          GALLERY_HTML="$WORKSPACE/.github/pages/vi-browser.html"
+
+          mkdir -p "$DEPLOY_DIR"
+
+          # Pass commit message via env var to avoid shell escaping issues
+          export COMMIT_MSG=$(git log -1 --format=%s 2>/dev/null || echo "unknown")
+          export COMMIT_DATE=$(git log -1 --format=%cI 2>/dev/null || date -Iseconds)
+
+          python3 "$WORKSPACE/.github/labview/build-gallery.py" \
+            "$WORKSPACE" \
+            "$SNAPSHOT_DIR" \
+            "$DEPLOY_DIR" \
+            "$COMMIT_SHA" \
+            "$PAGES_URL" \
+            "$GALLERY_HTML"
+
       - name: Upload snapshots artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: vi-snapshots
-          path: ${{ github.workspace }}/vi-snapshots/
-
-      - name: Generate gallery index
-        if: always()
-        shell: bash
-        run: |
-          SNAPSHOT_DIR="${{ github.workspace }}/vi-snapshots"
-          if [ ! -d "$SNAPSHOT_DIR" ]; then
-            echo "No snapshots directory found."
-            exit 0
-          fi
-
-          # Build gallery index from manifest.json
-          MANIFEST="$SNAPSHOT_DIR/manifest.json"
-          GALLERY="$SNAPSHOT_DIR/index.html"
-
-          cat > "$GALLERY" <<'HEADER'
-          <!DOCTYPE html>
-          <html lang="en">
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <title>VI Browser — Mini System Manager</title>
-            <style>
-              * { box-sizing: border-box; margin: 0; padding: 0; }
-              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0d1117; color: #c9d1d9; padding: 2em; max-width: 960px; margin: 0 auto; }
-              h1 { color: #58a6ff; margin-bottom: 0.3em; font-size: 1.6em; }
-              .subtitle { color: #8b949e; margin-bottom: 2em; font-size: 0.95em; }
-              .subtitle a { color: #58a6ff; text-decoration: none; }
-              .subtitle a:hover { text-decoration: underline; }
-              h2 { color: #f0f6fc; margin: 1.5em 0 0.5em; font-size: 1.1em; border-bottom: 1px solid #21262d; padding-bottom: 0.3em; }
-              .file-list { list-style: none; }
-              .file-list li { padding: 0.4em 0.6em; border-bottom: 1px solid #21262d; }
-              .file-list li:hover { background: #161b22; }
-              .file-list a { color: #58a6ff; text-decoration: none; font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.9em; }
-              .file-list a:hover { text-decoration: underline; }
-              .file-list .dir { color: #8b949e; font-size: 0.8em; margin-right: 0.5em; }
-              .badge { display: inline-block; background: #21262d; color: #8b949e; font-size: 0.75em; padding: 0.15em 0.5em; border-radius: 3px; margin-left: 0.5em; }
-              .section { background: #161b22; border: 1px solid #21262d; border-radius: 6px; padding: 1.2em; margin-bottom: 1.5em; }
-              .back-link { color: #58a6ff; text-decoration: none; font-size: 0.9em; }
-              .back-link:hover { text-decoration: underline; }
-            </style>
-          </head>
-          <body>
-            <h1>VI Browser</h1>
-            <p class="subtitle">
-              <a class="back-link" href="../">← Back to Dashboard</a> ·
-              <a href="https://github.com/elijah286/mini-system-manager">elijah286/mini-system-manager</a>
-              — Front Panel &amp; Block Diagram snapshots for every VI
-            </p>
-          HEADER
-
-          if [ -f "$MANIFEST" ] && [ -s "$MANIFEST" ]; then
-            # Group files by directory using Python for JSON parsing
-            python3 -c "
-          import json, os, sys, urllib.parse
-
-          with open(sys.argv[1], encoding='utf-8-sig') as f:
-              data = json.load(f)
-
-          # Handle single-item (dict) vs list
-          items = data if isinstance(data, list) else [data]
-          if not items:
-              print('<div class=\"section\"><p style=\"color: #8b949e; font-style: italic;\">No snapshots were generated.</p></div>')
-              sys.exit(0)
-
-          # Group by directory
-          groups = {}
-          for item in items:
-              d = os.path.dirname(item['path']) or '(root)'
-              groups.setdefault(d, []).append(item)
-
-          # Sort groups
-          for key in sorted(groups.keys()):
-              files = sorted(groups[key], key=lambda x: x['path'])
-              label = key if key != '(root)' else 'Root'
-              print(f'<div class=\"section\"><h2>{label}</h2><ul class=\"file-list\">')
-              for f in files:
-                  name = os.path.basename(f['path'])
-                  ext = os.path.splitext(name)[1]
-                  badge = 'CTL' if ext == '.ctl' else 'VI'
-                  href = urllib.parse.quote(f['html'])
-                  print(f'<li><a href=\"{href}\">{name}</a><span class=\"badge\">{badge}</span></li>')
-              print('</ul></div>')
-          " "$MANIFEST" >> "$GALLERY"
-          else
-            echo '<div class="section"><p style="color: #8b949e; font-style: italic;">No snapshots were generated.</p></div>' >> "$GALLERY"
-          fi
-
-          cat >> "$GALLERY" <<'FOOTER'
-          </body>
-          </html>
-          FOOTER
+          path: ${{ github.workspace }}/vi-snapshots-deploy/
 
       - name: Deploy snapshots to GitHub Pages
         if: always()
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{ github.workspace }}/vi-snapshots
+          publish_dir: ${{ github.workspace }}/vi-snapshots-deploy
           destination_dir: vi-snapshots
-          keep_files: false
+          keep_files: true
