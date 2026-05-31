@@ -131,9 +131,9 @@ jobs:
           if [ -f "$MANIFEST" ]; then
             # Group files by directory using Python for JSON parsing
             python3 -c "
-          import json, os, urllib.parse
+          import json, os, sys, urllib.parse
 
-          with open('$MANIFEST') as f:
+          with open(sys.argv[1]) as f:
               items = json.load(f)
 
           # Group by directory
@@ -154,7 +154,7 @@ jobs:
                   href = urllib.parse.quote(f['html'])
                   print(f'<li><a href=\"{href}\">{name}</a><span class=\"badge\">{badge}</span></li>')
               print('</ul></div>')
-          " >> "$GALLERY"
+          " "$MANIFEST" >> "$GALLERY"
           else
             echo '<div class="section"><p style="color: #8b949e; font-style: italic;">No snapshots were generated.</p></div>' >> "$GALLERY"
           fi
