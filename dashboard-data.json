@@ -1,11 +1,13 @@
 {
-  "generatedAt": "26746614408",
+  "generatedAt": "26750864134",
   "tree": [
     ".nojekyll",
     "dashboard-data.json",
     "index.html",
     "masscompile",
     "masscompile/masscompile",
+    "masscompile/masscompile/2d213d9",
+    "masscompile/masscompile/2d213d9/index.html",
     "masscompile/masscompile/2e371b5",
     "masscompile/masscompile/2e371b5/index.html",
     "masscompile/masscompile/505eedf",
@@ -20,6 +22,8 @@
     "vi-analyzer/vi-analyzer/112e147/index.html",
     "vi-analyzer/vi-analyzer/17ac573",
     "vi-analyzer/vi-analyzer/17ac573/index.html",
+    "vi-analyzer/vi-analyzer/2d213d9",
+    "vi-analyzer/vi-analyzer/2d213d9/index.html",
     "vi-analyzer/vi-analyzer/518f8bb",
     "vi-analyzer/vi-analyzer/518f8bb/index.html",
     "vi-analyzer/vi-analyzer/62113d7",
@@ -1509,17 +1513,17 @@
   ],
   "runsBySha": {
     "2d213d98abc9dce82e0ede185e2f03f083c68907": {
-      "mc": {
-        "status": "pending",
-        "conclusion": null,
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26746614365",
+      "via": {
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26746614352",
         "createdAt": "2026-06-01T09:27:56Z",
         "title": "Label CI-only commits in dashboard rows"
       },
-      "via": {
-        "status": "in_progress",
-        "conclusion": null,
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26746614352",
+      "mc": {
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26746614365",
         "createdAt": "2026-06-01T09:27:56Z",
         "title": "Label CI-only commits in dashboard rows"
       }
@@ -1541,49 +1545,49 @@
       }
     },
     "84631942a5ece3321b56c216b6a7c907f21217a1": {
-      "via": {
-        "status": "completed",
-        "conclusion": "cancelled",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26746061616",
-        "createdAt": "2026-06-01T09:16:05Z",
-        "title": "Use readable revision labels instead of full commit hashes on dashboard"
-      },
       "mc": {
         "status": "completed",
         "conclusion": "cancelled",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26746061588",
         "createdAt": "2026-06-01T09:16:05Z",
         "title": "Use readable revision labels instead of full commit hashes on dashboard"
-      }
-    },
-    "737e317dd4588a38e4b7bb43e957e658bc8949ac": {
+      },
       "via": {
         "status": "completed",
         "conclusion": "cancelled",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26745589848",
-        "createdAt": "2026-06-01T09:05:55Z",
-        "title": "Clarify dashboard status when workflow succeeds without report artifact"
-      },
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26746061616",
+        "createdAt": "2026-06-01T09:16:05Z",
+        "title": "Use readable revision labels instead of full commit hashes on dashboard"
+      }
+    },
+    "737e317dd4588a38e4b7bb43e957e658bc8949ac": {
       "mc": {
         "status": "completed",
         "conclusion": "cancelled",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26745589844",
         "createdAt": "2026-06-01T09:05:55Z",
         "title": "Clarify dashboard status when workflow succeeds without report artifact"
-      }
-    },
-    "cefa707d19b67dd5e0e6b1330705a5026497f18a": {
+      },
       "via": {
         "status": "completed",
         "conclusion": "cancelled",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26745499762",
-        "createdAt": "2026-06-01T09:04:00Z",
-        "title": "Serve dashboard data from workflow to avoid browser API rate limits"
-      },
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26745589848",
+        "createdAt": "2026-06-01T09:05:55Z",
+        "title": "Clarify dashboard status when workflow succeeds without report artifact"
+      }
+    },
+    "cefa707d19b67dd5e0e6b1330705a5026497f18a": {
       "mc": {
         "status": "completed",
         "conclusion": "success",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26745499751",
+        "createdAt": "2026-06-01T09:04:00Z",
+        "title": "Serve dashboard data from workflow to avoid browser API rate limits"
+      },
+      "via": {
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26745499762",
         "createdAt": "2026-06-01T09:04:00Z",
         "title": "Serve dashboard data from workflow to avoid browser API rate limits"
       }
@@ -1669,13 +1673,6 @@
       }
     },
     "634f1536c66280b4bb6d1cd4b80f255151e32637": {
-      "mc": {
-        "status": "completed",
-        "conclusion": "cancelled",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26743488996",
-        "createdAt": "2026-06-01T08:20:34Z",
-        "title": "Merge branch 'main' of https://github.com/elijah286/mini-system-manager"
-      },
       "via": {
         "status": "completed",
         "conclusion": "success",
@@ -1687,6 +1684,13 @@
         "status": "completed",
         "conclusion": "success",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26743488912",
+        "createdAt": "2026-06-01T08:20:34Z",
+        "title": "Merge branch 'main' of https://github.com/elijah286/mini-system-manager"
+      },
+      "mc": {
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26743488996",
         "createdAt": "2026-06-01T08:20:34Z",
         "title": "Merge branch 'main' of https://github.com/elijah286/mini-system-manager"
       }
