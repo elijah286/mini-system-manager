@@ -1,5 +1,5 @@
 {
-  "generatedAt": "26770757877",
+  "generatedAt": "26776644809",
   "tree": [
     ".nojekyll",
     "dashboard-data.json",
@@ -20,6 +20,8 @@
     "masscompile/masscompile/711230b/index.html",
     "masscompile/masscompile/7711b99",
     "masscompile/masscompile/7711b99/index.html",
+    "masscompile/masscompile/a8c3034",
+    "masscompile/masscompile/a8c3034/index.html",
     "masscompile/masscompile/cefa707",
     "masscompile/masscompile/cefa707/index.html",
     "vi-analyzer",
@@ -1520,6 +1522,29 @@
     "vidiff/push-f0e2b16/windows/main (Modified)_files/support/unchecked-image.png"
   ],
   "runsBySha": {
+    "b33292157dbaff8cceb65efd57a6dd684356461c": {
+      "mc": {
+        "status": "in_progress",
+        "conclusion": null,
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26776141547",
+        "createdAt": "2026-06-01T19:11:27Z",
+        "title": "Add interactive VI viewer with case structure navigation"
+      },
+      "via": {
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26776141608",
+        "createdAt": "2026-06-01T19:11:27Z",
+        "title": "Add interactive VI viewer with case structure navigation"
+      },
+      "vd": {
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26776141656",
+        "createdAt": "2026-06-01T19:11:27Z",
+        "title": "Add interactive VI viewer with case structure navigation"
+      }
+    },
     "a8c303445778052ffea52fcb30a7685dc7b6f02e": {
       "via": {
         "status": "completed",
@@ -1529,8 +1554,8 @@
         "title": "Dashboard: add Show CI-only revisions checkbox, unchecked by default"
       },
       "mc": {
-        "status": "in_progress",
-        "conclusion": null,
+        "status": "completed",
+        "conclusion": "success",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26769728828",
         "createdAt": "2026-06-01T17:05:47Z",
         "title": "Dashboard: add Show CI-only revisions checkbox, unchecked by default"
@@ -2091,40 +2116,16 @@
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26686007805",
         "createdAt": "2026-05-30T14:15:04Z",
         "title": "VIA: probe NIPM and attempt to install VI Analyzer tests in container"
-      },
-      "vd": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26686007818",
-        "createdAt": "2026-05-30T14:15:04Z",
-        "title": "VIA: probe NIPM and attempt to install VI Analyzer tests in container"
-      },
-      "via": {
-        "status": "completed",
-        "conclusion": "cancelled",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26686007830",
-        "createdAt": "2026-05-30T14:15:04Z",
-        "title": "VIA: probe NIPM and attempt to install VI Analyzer tests in container"
-      }
-    },
-    "3d3a69aaee24c065736d02d7dc339bb9ca8d20d9": {
-      "mc": {
-        "status": "completed",
-        "conclusion": "failure",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26685420612",
-        "createdAt": "2026-05-30T13:47:23Z",
-        "title": "VI Analyzer: full 90-test config from NI labview-for-containers refer\u2026"
-      },
-      "vd": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26685420620",
-        "createdAt": "2026-05-30T13:47:23Z",
-        "title": "VI Analyzer: full 90-test config from NI labview-for-containers refer\u2026"
       }
     }
   },
   "recentCommits": [
+    {
+      "sha": "b33292157dbaff8cceb65efd57a6dd684356461c",
+      "date": "2026-06-01T19:11:22Z",
+      "message": "Add interactive VI viewer with case structure navigation",
+      "ciOnly": true
+    },
     {
       "sha": "a8c303445778052ffea52fcb30a7685dc7b6f02e",
       "date": "2026-06-01T17:05:40Z",
@@ -2477,12 +2478,6 @@
       "sha": "d3abc9d4563b3f0a8c793b7fa7b0241439973f80",
       "date": "2026-05-29T11:57:37Z",
       "message": "Add LabVIEW CI pipeline (mass compile, VI Analyzer, VIDiff)\n\nModeled on ni/labview-for-containers Windows-container workflows.\n- MassCompile on PRs and pushes to main\n- VI Analyzer with starter ruleset\n- VIDiff HTML reports for changed VIs with GitHub Pages deploy",
-      "ciOnly": false
-    },
-    {
-      "sha": "e2a3f966890183a17f333b2316c0074f7e24fb68",
-      "date": "2026-02-09T23:19:40Z",
-      "message": "Add installation and setup section to README\n\nAdded installation and setup instructions to the README.",
       "ciOnly": false
     }
   ]
