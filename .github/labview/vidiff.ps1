@@ -2,8 +2,10 @@ param(
     [string]$WorkspaceRoot = "C:\workspace",
     [string]$WorkspaceBaseRoot = "C:\workspace-base",
     [Parameter(Mandatory = $true)]
-    [string[]]$VIFiles
+    [string]$VIFilesCsv
 )
+
+$VIFiles = $VIFilesCsv -split ',' | Where-Object { $_ -ne '' }
 
 $LabVIEWPath = "C:\Program Files\National Instruments\LabVIEW 2026\LabVIEW.exe"
 $AdditionalOpDir = $PSScriptRoot

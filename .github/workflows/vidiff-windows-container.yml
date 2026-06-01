@@ -141,7 +141,7 @@ jobs:
             -v "${{ github.workspace }}\pr:C:\workspace" `
             -v "${{ github.workspace }}\base:C:\workspace-base" `
             ${{ env.LABVIEW_CONTAINER_IMAGE }} `
-            powershell -File "C:\workspace\.github\labview\vidiff.ps1" -WorkspaceRoot "C:\workspace" -WorkspaceBaseRoot "C:\workspace-base" -VIFiles $($files -split ',' | ForEach-Object { '"' + $_ + '"' })
+            powershell -File "C:\workspace\.github\labview\vidiff.ps1" -WorkspaceRoot "C:\workspace" -WorkspaceBaseRoot "C:\workspace-base" -VIFilesCsv "$files"
 
       - name: Upload VIDiff reports
         if: steps.changed-files.outputs.has_changes == 'true'
