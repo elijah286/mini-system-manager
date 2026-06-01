@@ -70,6 +70,20 @@ jobs:
           except Exception:
             runs = []
 
+          try:
+            commits_data = api_get("commits?sha=main&per_page=60")
+            recent_commits = [
+              {
+                "sha": c.get("sha"),
+                "date": (c.get("commit", {}).get("author") or {}).get("date") or (c.get("commit", {}).get("committer") or {}).get("date"),
+                "message": (c.get("commit", {}) or {}).get("message", ""),
+              }
+              for c in commits_data
+              if isinstance(c, dict) and c.get("sha") and isinstance(c.get("commit"), dict)
+            ]
+          except Exception:
+            recent_commits = []
+
           workflow_to_key = {
             "MassCompile - Windows Container": "mc",
             "Run VI Analyzer - Windows Container": "via",
@@ -99,6 +113,7 @@ jobs:
             "generatedAt": os.environ.get("GITHUB_RUN_ID"),
             "tree": tree_paths,
             "runsBySha": by_sha,
+            "recentCommits": recent_commits,
           }
 
           with open("pages-content/dashboard-data.json", "w", encoding="utf-8") as f:
