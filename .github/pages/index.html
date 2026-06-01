@@ -166,9 +166,13 @@
 
     async function fetchWorkflowRunsBySha() {
       try {
-        const res = await fetch(`${API_BASE}/actions/runs?per_page=100&branch=main&event=push`);
-        if (!res.ok) return {};
-        const runs = (await res.json()).workflow_runs || [];
+        const [pushRes, dispatchRes] = await Promise.all([
+          fetch(`${API_BASE}/actions/runs?per_page=100&branch=main&event=push`),
+          fetch(`${API_BASE}/actions/runs?per_page=100&branch=main&event=workflow_dispatch`)
+        ]);
+        const pushRuns = pushRes.ok ? ((await pushRes.json()).workflow_runs || []) : [];
+        const dispatchRuns = dispatchRes.ok ? ((await dispatchRes.json()).workflow_runs || []) : [];
+        const runs = [...pushRuns, ...dispatchRuns];
         const bySha = {};
 
         runs.forEach((run) => {
@@ -309,15 +313,13 @@
       return parts.join(" · ");
     }
 
-    function runStateHtml(run, successText, reportUrl) {
+    function runStateHtml(run, successText) {
       if (!run) return '<span class="neutral">-</span>';
       if (run.status !== "completed") {
         return `<span class="neutral">running...</span> <a href="${run.url}">actions</a>`;
       }
       if (run.conclusion === "success") {
-        const href = reportUrl || run.url;
-        const text = reportUrl ? 'report' : 'actions';
-        return `<span class="pass">${successText}</span> <a href="${href}">${text}</a>`;
+        return `<span class="pass">${successText}</span> <a href="${run.url}">actions</a>`;
       }
       if (run.conclusion === "cancelled") {
         return `<span class="neutral">cancelled</span> <a href="${run.url}">actions</a>`;
@@ -472,13 +474,13 @@
 
         let mcCell = mc
           ? `<span class="summary" id="mc-${sha}"><span class="neutral">...</span></span> <a href="${mc.url}">report</a>`
-          : runStateHtml(run.mc, "completed", `${PAGES_BASE}/masscompile/masscompile/${sha}/index.html`);
+          : runStateHtml(run.mc, "completed");
         let viaCell = via
           ? `<span class="summary" id="via-${sha}"><span class="neutral">...</span></span> <a href="${via.url}">report</a>`
-          : runStateHtml(run.via, "completed", `${PAGES_BASE}/vi-analyzer/vi-analyzer/${sha}/index.html`);
+          : runStateHtml(run.via, "completed");
         let vdCell = vd
           ? `<span class="summary" id="vd-${sha}"><span class="neutral">...</span></span> <a href="${vd.url}">report</a>`
-          : runStateHtml(run.vd, "completed", `${PAGES_BASE}/vidiff/push-${sha}/windows/`);
+          : runStateHtml(run.vd, "completed");
 
         if (isCiOnly && !mc && !run.mc) mcCell = '<span class="neutral">CI only</span>';
         if (isCiOnly && !via && !run.via) viaCell = '<span class="neutral">CI only</span>';
