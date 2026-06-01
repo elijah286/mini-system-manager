@@ -144,6 +144,17 @@
       }
     }
 
+    async function fetchGhPagesTree() {
+      try {
+        const res = await fetch(`${API_BASE}/git/trees/gh-pages?recursive=1`);
+        if (!res.ok) return [];
+        const data = await res.json();
+        return Array.isArray(data.tree) ? data.tree : [];
+      } catch {
+        return [];
+      }
+    }
+
     async function urlExists(url) {
       try {
         const head = await fetch(url, { method: "HEAD" });
@@ -249,42 +260,40 @@
       return `<span class="fail">${run.conclusion || "failed"}</span> <a href="${run.url}">actions</a>`;
     }
 
-    async function buildReportMaps(commits) {
+    async function buildReportMapsFromTree(tree) {
       const viaReports = {};
       const mcReports = {};
       const vdReports = {};
 
-      await Promise.all(commits.map(async (c) => {
-        const sha = c.sha;
-        const short = c.short_sha || sha.slice(0, 7);
-
-        const mcUrl = `${PAGES_BASE}/masscompile/masscompile/${short}/index.html`;
-        const viaUrl = `${PAGES_BASE}/vi-analyzer/vi-analyzer/${short}/index.html`;
-        const vdIndex = `${PAGES_BASE}/vidiff/push-${short}/windows/index.html`;
-
-        const [mcOk, viaOk, vdOk] = await Promise.all([
-          urlExists(mcUrl),
-          urlExists(viaUrl),
-          urlExists(vdIndex)
-        ]);
-
-        if (mcOk) mcReports[sha] = { url: mcUrl };
-        if (viaOk) viaReports[sha] = { url: viaUrl };
-        if (vdOk) {
-          const files = await fetchVidiffFiles(vdIndex);
-          vdReports[sha] = {
-            files,
-            url: `${PAGES_BASE}/vidiff/push-${short}/windows/`
-          };
+      tree.forEach((n) => {
+        const mc = n.path.match(/^masscompile\/masscompile\/([a-f0-9]+)\/index\.html$/);
+        if (mc) {
+          mcReports[mc[1]] = { url: `${PAGES_BASE}/${n.path}` };
         }
-      }));
+
+        const va = n.path.match(/^vi-analyzer\/vi-analyzer\/([a-f0-9]+)\/index\.html$/);
+        if (va) {
+          viaReports[va[1]] = { url: `${PAGES_BASE}/${n.path}` };
+        }
+
+        const vd = n.path.match(/^vidiff\/push-([a-f0-9]+)\/windows\/(.+\.html)$/);
+        if (vd) {
+          if (!vdReports[vd[1]]) {
+            vdReports[vd[1]] = {
+              files: [],
+              url: `${PAGES_BASE}/vidiff/push-${vd[1]}/windows/`
+            };
+          }
+          if (vd[2] !== "index.html") vdReports[vd[1]].files.push(vd[2]);
+        }
+      });
 
       return { viaReports, mcReports, vdReports };
     }
 
-    async function renderCombinedTable(commits, runsBySha) {
+    async function renderCombinedTable(commits, runsBySha, tree) {
       const container = document.getElementById("reports-table");
-      const { viaReports, mcReports, vdReports } = await buildReportMaps(commits);
+      const { viaReports, mcReports, vdReports } = await buildReportMapsFromTree(tree || []);
 
       const commitMeta = {};
       commits.forEach((c) => {
@@ -398,22 +407,26 @@
     }
 
     let runsByShaCache = null;
+    let treeCache = null;
 
-    async function refreshDashboard(refreshRuns) {
+    async function refreshDashboard(refreshRuns, refreshTree) {
       try {
         if (refreshRuns || !runsByShaCache) {
           runsByShaCache = await fetchWorkflowRunsBySha();
         }
+        if (refreshTree || !treeCache) {
+          treeCache = await fetchGhPagesTree();
+        }
         const commits = await fetchSnapshotCommits();
-        await renderCombinedTable(commits, runsByShaCache || {});
+        await renderCombinedTable(commits, runsByShaCache || {}, treeCache || []);
       } catch (err) {
         document.getElementById("reports-table").innerHTML = `<p class="empty">Error loading reports: ${err.message}</p>`;
       }
     }
 
-    refreshDashboard(true);
-    setInterval(() => refreshDashboard(false), 30000);
-    setInterval(() => refreshDashboard(true), 300000);
+    refreshDashboard(true, true);
+    setInterval(() => refreshDashboard(false, false), 30000);
+    setInterval(() => refreshDashboard(true, true), 300000);
   </script>
 </body>
 </html>
