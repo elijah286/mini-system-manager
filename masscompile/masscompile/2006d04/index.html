@@ -1,0 +1,43 @@
+﻿<html>
+<head><title>Mass Compile Results</title></head>
+<body>
+<h1>Mass Compile Results</h1>
+Monday, June 01, 2026 4:50:55 PM
+<br><br>
+<h2>Results</h2>
+<table border=1>
+<tr><td>Total VIs</td><td>42</td></tr>
+<tr><td>Compiled Successfully</td><td>41</td></tr>
+<tr><td>Failed to Compile</td><td>1</td></tr>
+<tr><td>Missing Dependencies</td><td>1</td></tr>
+</table>
+<br>
+<h2 style="color: red">Status: FAILED</h2><h2>Failed VIs</h2>
+<table border=1>
+<tr><th>VI Name</th><th>Path</th></tr>
+<tr><td>Revidyne Generator.lvlib:VI Tree.vi</td><td>C:\workspace\Curriculum\Generator API\subVIs\Public\VI Tree.vi</td></tr>
+</table>
+<br><h2>Missing Dependencies</h2>
+<table border=1>
+<tr><th>Missing File</th><th>Caller</th></tr>
+<tr><td>Trim Whitespace (string).vi</td><td>main.vi</td></tr>
+</table>
+<br><h2>Full Log</h2>
+<pre>LabVIEWCLI started logging in file:  C:\Users\ContainerAdministrator\AppData\Local\Temp\lvtemporary_443376.log
+Using LabVIEW: "C:\Program Files\National Instruments\LabVIEW 2026\LabVIEW.exe"
+LabVIEW launched successfully.
+Connection established with LabVIEW at port number 3363.
+
+Operation output: 
+#### Starting Mass Compile: Mon, Jun 1, 2026 4:50:41 PM
+  Directory: "C:\workspace"
+  ### Bad VI:    "Revidyne Generator.lvlib:VI Tree.vi"	Path="C:\workspace\Curriculum\Generator API\subVIs\Public\VI Tree.vi" 
+Search failed to find "Trim Whitespace (string).vi" previously from "&lt;vilib&gt;:\Utility\error.llb\Trim Whitespace (string).vi"  +=+   Caller: "main.vi"
+C:\workspace\.github\labview\PrintToSingleFileHtml\PrintToSingleFileHtml.lvclass (PrintToSingleFileHtml.lvclass)
+    - The class expected to be at "C:\workspace\.github\labview\CoreOperation\CoreOperation.lvclass" was loaded from "C:\Program Files (x86)\National Instruments\Shared\LabVIEW CLI\Operations\CoreOperation\CoreOperation.lvclass".
+#### Finished Mass Compile: Mon, Jun 1, 2026 4:50:55 PM
+System.Management.Automation.RemoteException
+MassCompile operation failed.
+System.Management.Automation.RemoteException</pre>
+</body>
+</html>
