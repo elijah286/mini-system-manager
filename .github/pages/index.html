@@ -73,6 +73,14 @@
       color: #8b949e;
       font-size: 0.8em;
     }
+    .ci-only-tag {
+      color: #8b949e;
+      margin-left: 0.5em;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      font-size: 0.75em;
+    }
     .summary { font-size: 0.85em; }
     .pass { color: #3fb950; }
     .fail { color: #f85149; }
@@ -362,7 +370,7 @@
 
       const commitMeta = {};
       commits.forEach((c) => {
-        commitMeta[c.sha] = { date: c.date, message: c.message };
+        commitMeta[c.sha] = { date: c.date, message: c.message, ciOnly: c.ciOnly === true };
       });
 
       const allShas = [...new Set([
@@ -386,7 +394,8 @@
         if (!first) return;
         commitMeta[sha] = {
           date: first.createdAt,
-          message: first.title || "Pending CI reports"
+          message: first.title || "Pending CI reports",
+          ciOnly: false
         };
       });
 
@@ -411,23 +420,29 @@
         const info = commitMeta[sha] || {};
         const dateCell = formatDate(info.date);
         const titleAttr = info.message ? ` title="${info.message.replace(/"/g, "&quot;")}"` : "";
+        const isCiOnly = info.ciOnly === true;
         const shortSha = sha.slice(0, 7);
         const revisionLabel = compactRevisionLabel(info.message, shortSha);
         const revisionLabelEscaped = escapeHtml(revisionLabel);
         const shortShaEscaped = escapeHtml(shortSha);
         const commitUrl = `https://github.com/${OWNER}/${REPO}/commit/${sha}`;
+        const ciOnlyTag = isCiOnly ? '<span class="ci-only-tag">CI only</span>' : "";
 
-        const mcCell = mc
+        let mcCell = mc
           ? `<span class="summary" id="mc-${sha}"><span class="neutral">...</span></span> <a href="${mc.url}">report</a>`
           : runStateHtml(run.mc, "completed");
-        const viaCell = via
+        let viaCell = via
           ? `<span class="summary" id="via-${sha}"><span class="neutral">...</span></span> <a href="${via.url}">report</a>`
           : runStateHtml(run.via, "completed");
-        const vdCell = vd
+        let vdCell = vd
           ? `<span class="summary" id="vd-${sha}"><span class="neutral">...</span></span> <a href="${vd.url}">report</a>`
           : runStateHtml(run.vd, "completed");
 
-        html += `<tr><td${titleAttr}><a class="revision-title" href="${commitUrl}">${revisionLabelEscaped}</a><div class="revision-meta"><span class="commit-sha">${shortShaEscaped}</span></div></td><td>${dateCell}</td><td>${mcCell}</td><td>${viaCell}</td><td>${vdCell}</td></tr>`;
+        if (isCiOnly && !mc && !run.mc) mcCell = '<span class="neutral">CI only</span>';
+        if (isCiOnly && !via && !run.via) viaCell = '<span class="neutral">CI only</span>';
+        if (isCiOnly && !vd && !run.vd) vdCell = '<span class="neutral">CI only</span>';
+
+        html += `<tr><td${titleAttr}><a class="revision-title" href="${commitUrl}">${revisionLabelEscaped}</a><div class="revision-meta"><span class="commit-sha">${shortShaEscaped}</span>${ciOnlyTag}</div></td><td>${dateCell}</td><td>${mcCell}</td><td>${viaCell}</td><td>${vdCell}</td></tr>`;
       }
       html += "</tbody></table>";
       container.innerHTML = html;
