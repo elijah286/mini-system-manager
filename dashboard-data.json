@@ -1,5 +1,5 @@
 {
-  "generatedAt": "26746061606",
+  "generatedAt": "26746302346",
   "tree": [
     ".nojekyll",
     "dashboard-data.json",
@@ -1504,18 +1504,34 @@
     "vidiff/push-f0e2b16/windows/main (Modified)_files/support/unchecked-image.png"
   ],
   "runsBySha": {
-    "84631942a5ece3321b56c216b6a7c907f21217a1": {
-      "mc": {
+    "a659f347451ed764b3c4197a5a68d842256dd36b": {
+      "via": {
         "status": "pending",
         "conclusion": null,
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26746061588",
-        "createdAt": "2026-06-01T09:16:05Z",
-        "title": "Use readable revision labels instead of full commit hashes on dashboard"
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26746302320",
+        "createdAt": "2026-06-01T09:21:16Z",
+        "title": "Wrap revision labels and include recent commits in dashboard rows"
       },
+      "mc": {
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26746302229",
+        "createdAt": "2026-06-01T09:21:15Z",
+        "title": "Wrap revision labels and include recent commits in dashboard rows"
+      }
+    },
+    "84631942a5ece3321b56c216b6a7c907f21217a1": {
       "via": {
         "status": "completed",
         "conclusion": "cancelled",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26746061616",
+        "createdAt": "2026-06-01T09:16:05Z",
+        "title": "Use readable revision labels instead of full commit hashes on dashboard"
+      },
+      "mc": {
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26746061588",
         "createdAt": "2026-06-01T09:16:05Z",
         "title": "Use readable revision labels instead of full commit hashes on dashboard"
       }
@@ -2130,30 +2146,309 @@
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26673673139",
         "createdAt": "2026-05-30T03:47:48Z",
         "title": "Fix VI Analyzer: use default tests instead of explicit LLB paths"
-      },
-      "via": {
-        "status": "completed",
-        "conclusion": "failure",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26673673131",
-        "createdAt": "2026-05-30T03:47:48Z",
-        "title": "Fix VI Analyzer: use default tests instead of explicit LLB paths"
-      },
-      "mc": {
-        "status": "completed",
-        "conclusion": "failure",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26673673150",
-        "createdAt": "2026-05-30T03:47:48Z",
-        "title": "Fix VI Analyzer: use default tests instead of explicit LLB paths"
-      }
-    },
-    "aa170e5c52754656cd979212bce91851bd8d8eae": {
-      "vd": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26673232021",
-        "createdAt": "2026-05-30T03:26:41Z",
-        "title": "Fix diagnostic script syntax error"
       }
     }
-  }
+  },
+  "recentCommits": [
+    {
+      "sha": "a659f347451ed764b3c4197a5a68d842256dd36b",
+      "date": "2026-06-01T09:21:11Z",
+      "message": "Wrap revision labels and include recent commits in dashboard rows"
+    },
+    {
+      "sha": "84631942a5ece3321b56c216b6a7c907f21217a1",
+      "date": "2026-06-01T09:16:00Z",
+      "message": "Use readable revision labels instead of full commit hashes on dashboard"
+    },
+    {
+      "sha": "737e317dd4588a38e4b7bb43e957e658bc8949ac",
+      "date": "2026-06-01T09:05:50Z",
+      "message": "Clarify dashboard status when workflow succeeds without report artifact"
+    },
+    {
+      "sha": "cefa707d19b67dd5e0e6b1330705a5026497f18a",
+      "date": "2026-06-01T09:03:55Z",
+      "message": "Serve dashboard data from workflow to avoid browser API rate limits"
+    },
+    {
+      "sha": "23131a79baf9908c4bb25da9eac3164ae7cd03b8",
+      "date": "2026-06-01T09:01:49Z",
+      "message": "Restore historical dashboard rows and isolate dashboard deploy concurrency"
+    },
+    {
+      "sha": "d823cb5a8c252c88f875910721da17abc333e3be",
+      "date": "2026-06-01T08:49:34Z",
+      "message": "Restore historical dashboard rows from gh-pages report tree"
+    },
+    {
+      "sha": "62113d775865bbe5345cb792f0f6636d15684e7e",
+      "date": "2026-06-01T08:44:27Z",
+      "message": "Fix dashboard blank page caused by malformed HTML structure"
+    },
+    {
+      "sha": "10934f83431d6781a4cef8db4cb0e4fc8dacb3ae",
+      "date": "2026-06-01T08:39:43Z",
+      "message": "Reduce dashboard GitHub API usage to prevent 403 rate limits"
+    },
+    {
+      "sha": "801654a5fc3b86c18e4ae5b9f94192bae04a6dc5",
+      "date": "2026-06-01T08:24:35Z",
+      "message": "Show running workflow states on dashboard and auto-deploy dashboard page"
+    },
+    {
+      "sha": "634f1536c66280b4bb6d1cd4b80f255151e32637",
+      "date": "2026-06-01T08:20:24Z",
+      "message": "Merge branch 'main' of https://github.com/elijah286/mini-system-manager"
+    },
+    {
+      "sha": "711230b48660cb638b0eb44fe3f1a9ccef12b8bb",
+      "date": "2026-06-01T08:20:17Z",
+      "message": "resized the graph\n\nmade it smaller by default"
+    },
+    {
+      "sha": "738dd3ec98c44e3d48b3051866309c50686549d1",
+      "date": "2026-05-31T19:50:15Z",
+      "message": "Add per-commit VI Browser with lvproj tree, commit selector, and VIDiff links"
+    },
+    {
+      "sha": "bb77e9cffb74be6639bfcd448f7a8de2dd3737b1",
+      "date": "2026-05-31T19:04:29Z",
+      "message": "Add PrintToSingleFileHtml operation VIs from NI labview-for-containers repo\n\nThe PrintToSingleFileHtml LabVIEWCLI operation is not installed in the container\nby default. It must be provided as a set of VI files alongside the export script.\nSource: github.com/ni/labview-for-containers/examples/cicd-examples/helper-scripts/vidiff/"
+    },
+    {
+      "sha": "6a7ed013f5d2c86b50d1c7633709e810ed69628b",
+      "date": "2026-05-31T19:01:30Z",
+      "message": "Search for correct VIDiff nipkg package name, add NI feed"
+    },
+    {
+      "sha": "17ac5733174b67023c1d3007e504ecafaae40a07",
+      "date": "2026-05-31T18:42:01Z",
+      "message": "Move CLI diagnostic into export script, auto-detect PrintToSingleFileHtml location, try nipkg install"
+    },
+    {
+      "sha": "5276fae3c39d91e8ff83ed3ed7596a4064595d7d",
+      "date": "2026-05-31T16:51:16Z",
+      "message": "Add VI file table to README, fix snapshot manifest BOM/empty handling, add CLI ops diagnostic"
+    },
+    {
+      "sha": "2e371b57d0b75f15784c8b7ad8483c0c30f251ac",
+      "date": "2026-05-31T13:32:07Z",
+      "message": "Fix VI snapshots: use separate concurrency group to avoid cancellation"
+    },
+    {
+      "sha": "505eedff706457a7f629303df213aff74cc99a43",
+      "date": "2026-05-31T13:30:33Z",
+      "message": "Fix VI snapshots gallery: pass manifest path via sys.argv to avoid Windows backslash escaping"
+    },
+    {
+      "sha": "07a28bb403649dcb125d795bb07d1863551b5b58",
+      "date": "2026-05-31T13:00:11Z",
+      "message": "Add VI Browser: export front panel & diagram snapshots for all VIs\n\n- export-vi-snapshots.ps1: runs PrintToSingleFileHtml (same op as VIDiff) on every VI/CTL\n- vi-snapshots.yml: workflow to export and deploy gallery to gh-pages\n- Dashboard: add VI Browser link above reports table"
+    },
+    {
+      "sha": "c58710ce3ded35a20e1edd91bd2d43656b12713d",
+      "date": "2026-05-31T12:50:49Z",
+      "message": "Add Mass Compile column to dashboard with pass/fail counts\n\n- masscompile.ps1: capture output, parse bad VIs, generate HTML report\n- Workflow: add Pages deploy, artifact upload, commit status, concurrency\n- Dashboard: add Mass Compile column showing compiled/failed/missing deps"
+    },
+    {
+      "sha": "112e147930deed2eaf06bfa6a4a341d6076c0790",
+      "date": "2026-05-31T12:12:40Z",
+      "message": "Dashboard: fix parser to handle LabVIEW native HTML report format"
+    },
+    {
+      "sha": "90167c8addc17353f684c9cea858f691b6c586e3",
+      "date": "2026-05-31T12:02:26Z",
+      "message": "VIA: treat exit code 3 (failures found) as success, fix heredoc indentation"
+    },
+    {
+      "sha": "518f8bb0e81e001c0ec421f4a741714a22651047",
+      "date": "2026-05-31T10:13:11Z",
+      "message": "VIA: use default tests by pointing ConfigPath at workspace folder, generate HTML report\n\n- Remove .viancfg config file dependency\n- ConfigPath now targets C:\\workspace directly (runs all default VIA tests)\n- Add -ReportSaveType HTML for native HTML report output\n- Remove check-via-tests.ps1 step (no longer needed)\n- Deploy HTML report directly to Pages instead of wrapping Results.txt"
+    },
+    {
+      "sha": "09f06281631fe65ed017036d115cf355fa5cb605",
+      "date": "2026-05-30T15:58:33Z",
+      "message": "VIA: fix nipkg feed-add syntax, try multiple variations"
+    },
+    {
+      "sha": "350eeac1dd1e423066e5040d8b43ccc18fb14687",
+      "date": "2026-05-30T15:40:32Z",
+      "message": "VIA: add NI product feeds to nipkg before installing VI Analyzer tests"
+    },
+    {
+      "sha": "c1843c7adb09bd265ff331295f6b9a7fa92e8520",
+      "date": "2026-05-30T15:20:29Z",
+      "message": "VIA: deeper probe - nipkg update, feed config, package content, broader search"
+    },
+    {
+      "sha": "8a37023ca9b4a337d0174d13535dbef3e3f7b775",
+      "date": "2026-05-30T14:15:00Z",
+      "message": "VIA: probe NIPM and attempt to install VI Analyzer tests in container"
+    },
+    {
+      "sha": "3d3a69aaee24c065736d02d7dc339bb9ca8d20d9",
+      "date": "2026-05-30T13:47:19Z",
+      "message": "VI Analyzer: full 90-test config from NI labview-for-containers reference"
+    },
+    {
+      "sha": "bd5b6220006697812f8c1a9ae925814170ff600d",
+      "date": "2026-05-30T13:38:01Z",
+      "message": "Enhanced VIA diagnostic: list all files, try without ConfigPath, search for test VIs"
+    },
+    {
+      "sha": "16372e4995b27713599e4e6f755ac0cd1afcc3c1",
+      "date": "2026-05-30T13:16:55Z",
+      "message": "Dashboard: add commit date column, sort newest first"
+    },
+    {
+      "sha": "506ad63459947865bd0d18d954bac3b931917cdc",
+      "date": "2026-05-30T13:07:10Z",
+      "message": "Diagnostic: comprehensive search for VI Analyzer test LLBs in container"
+    },
+    {
+      "sha": "1c44635abbd5d0c2363ec9300ceeba225b2726e7",
+      "date": "2026-05-30T12:59:07Z",
+      "message": "Dashboard: combine VIA and VIDiff into single table by commit"
+    },
+    {
+      "sha": "cc1b29a09e5247d4e976935f18dda51d472210b6",
+      "date": "2026-05-30T12:56:18Z",
+      "message": "Dashboard: distinguish material VIDiff changes from binary-only diffs"
+    },
+    {
+      "sha": "584b344159829faeb804021f30bdede829f69014",
+      "date": "2026-05-30T12:49:31Z",
+      "message": "Link badges to dashboard, add summary columns to dashboard"
+    },
+    {
+      "sha": "22699198fcda3d3282c07d96c98747e9c45852a3",
+      "date": "2026-05-30T12:42:09Z",
+      "message": "Add Docker daemon startup step to all workflows (windows-2022 runner fix)"
+    },
+    {
+      "sha": "09db3a18ef3ca02495b9657bd985124ec8228bd6",
+      "date": "2026-05-30T03:47:44Z",
+      "message": "Fix VI Analyzer: use default tests instead of explicit LLB paths"
+    },
+    {
+      "sha": "aa170e5c52754656cd979212bce91851bd8d8eae",
+      "date": "2026-05-30T03:26:38Z",
+      "message": "Fix diagnostic script syntax error"
+    },
+    {
+      "sha": "5c33eb173014e06e92b50f20326d8a9306366360",
+      "date": "2026-05-30T03:06:28Z",
+      "message": "Diagnostic: check ALL LabVIEW dirs for VI Analyzer tests"
+    },
+    {
+      "sha": "2f2d63967517326bb2481947d47434791b7a82ae",
+      "date": "2026-05-30T02:46:36Z",
+      "message": "Fix VI Analyzer diagnostic: use script file to avoid YAML escaping"
+    },
+    {
+      "sha": "8a23e0a82b3ef79857fbd767f62b00367f0f45e1",
+      "date": "2026-05-30T02:21:23Z",
+      "message": "Diagnose VI Analyzer: check if test LLBs exist in container"
+    },
+    {
+      "sha": "db4e75da2d9c87d5c4f6ef7f004ddf57b8330ee0",
+      "date": "2026-05-29T15:26:06Z",
+      "message": "Add CI dashboard, status badges, and deploy concurrency controls\n\n- Dashboard: self-updating HTML page at Pages root (uses GitHub API)\n- Badges: Mass Compile, VI Analyzer, VIDiff status in README\n- Concurrency: pages-deploy group prevents gh-pages push races"
+    },
+    {
+      "sha": "a905f3eaec83626e91aad9a5202307cbfa198dee",
+      "date": "2026-05-29T15:21:06Z",
+      "message": "Cache Docker image and run VIDiff in single container\n\n- Cache LabVIEW container image with actions/cache (avoids ~5min pull)\n- VIDiff: pass all files to single docker run instead of one per file\n- First run saves image to cache; subsequent runs load from cache"
+    },
+    {
+      "sha": "0c1930f8a2e90bd61fae69d6a182baa68b581154",
+      "date": "2026-05-29T14:50:52Z",
+      "message": "Fix VI Analyzer config: use absolute container path for workspace"
+    },
+    {
+      "sha": "aef2727a5f67677eafb3e8ced47cb0e011dd0977",
+      "date": "2026-05-29T14:43:51Z",
+      "message": "Fix retroactive runs: restore CI scripts from main for historical commits"
+    },
+    {
+      "sha": "4a56353b849935aee51f56eaf64a599fde028c59",
+      "date": "2026-05-29T14:41:54Z",
+      "message": "VIDiff status link goes directly to report when only one"
+    },
+    {
+      "sha": "74dec76e84b3fee622ad38c733dc1aa8d39dda49",
+      "date": "2026-05-29T14:23:51Z",
+      "message": "Support per-commit checkout and status links for retroactive runs\n\n- VI Analyzer: add commit_sha input for workflow_dispatch\n- VIDiff: save head_sha in metadata for correct status targeting\n- Deploy: read head_sha from metadata instead of workflow_run event"
+    },
+    {
+      "sha": "bae22f4b3d8a5cf1cd3d893323e413609400bcdb",
+      "date": "2026-05-29T14:10:04Z",
+      "message": "Fix Docker failures (pin windows-2022) and link reports to commits\n\n- Pin all workflows to windows-2022 for reliable Docker daemon\n- Add commit status links so VI Analyzer and VIDiff reports\n  appear as clickable Details links on each commit in the\n  GitHub history view"
+    },
+    {
+      "sha": "ff3d8f6f1d773451db1fd8711ced3077a7d4344d",
+      "date": "2026-05-29T12:44:17Z",
+      "message": "VI Analyzer: run on every push to main, deploy HTML report to Pages"
+    },
+    {
+      "sha": "3c15223e4428cbf35979e873fd9d6ba07a599575",
+      "date": "2026-05-29T12:42:03Z",
+      "message": "Add workflow_dispatch to VIDiff for retroactive runs"
+    },
+    {
+      "sha": "e79a32f54939ad389f937054972907717d0f40e1",
+      "date": "2026-05-29T12:39:35Z",
+      "message": "Merge branch 'main' of https://github.com/elijah286/mini-system-manager"
+    },
+    {
+      "sha": "18f9d59a3f2763a5f651ac35fbf87eb72106238c",
+      "date": "2026-05-29T12:38:27Z",
+      "message": "moved a constant"
+    },
+    {
+      "sha": "970ae2364ee44b912fd144d7f1a6ce4ec9ff4b19",
+      "date": "2026-05-29T12:37:27Z",
+      "message": "Trigger VIDiff on push to main (not just PRs)\n\nCompare against previous commit on push events. Deploy reports\nunder push-<sha> path. PR commenting only runs for PR-triggered builds."
+    },
+    {
+      "sha": "f0e2b160d4e16d1caab904dfabf42ca85df7c772",
+      "date": "2026-05-29T12:27:27Z",
+      "message": "moved the send command button"
+    },
+    {
+      "sha": "d3abc9d4563b3f0a8c793b7fa7b0241439973f80",
+      "date": "2026-05-29T11:57:37Z",
+      "message": "Add LabVIEW CI pipeline (mass compile, VI Analyzer, VIDiff)\n\nModeled on ni/labview-for-containers Windows-container workflows.\n- MassCompile on PRs and pushes to main\n- VI Analyzer with starter ruleset\n- VIDiff HTML reports for changed VIs with GitHub Pages deploy"
+    },
+    {
+      "sha": "e2a3f966890183a17f333b2316c0074f7e24fb68",
+      "date": "2026-02-09T23:19:40Z",
+      "message": "Add installation and setup section to README\n\nAdded installation and setup instructions to the README."
+    },
+    {
+      "sha": "545a0685870fc292e7a37ec3cc9e6ac4a6b28556",
+      "date": "2026-02-09T23:14:32Z",
+      "message": "Update image source in README\n\nReplaced local image link with an external image link in the README."
+    },
+    {
+      "sha": "250f6e937df5659ae34051d901c91a9f0212e1ae",
+      "date": "2026-02-09T23:11:29Z",
+      "message": "Delete screenshot instructions from README\n\nRemove instructions for adding a screenshot of the main block diagram."
+    },
+    {
+      "sha": "287a21aa37fd0e84d3abeac560147405162c0c66",
+      "date": "2026-02-09T23:10:46Z",
+      "message": "Enhance README with detailed project information\n\nExpanded the README to provide detailed information about the Mini System Manager, including its purpose, functionality, supported systems, architecture, and getting started instructions."
+    },
+    {
+      "sha": "8932135f5d7cf931fd409ac03f191e62ef1ccb61",
+      "date": "2025-01-29T00:45:35Z",
+      "message": "Create README.md"
+    },
+    {
+      "sha": "6a28235e326d3b7e6b6c62935610dd83594615b9",
+      "date": "2024-11-21T22:32:29Z",
+      "message": "fixed errors in motor VIs"
+    }
+  ]
 }
