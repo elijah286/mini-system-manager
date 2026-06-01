@@ -1,7 +1,8 @@
 {
-  "generatedAt": "26745499817",
+  "generatedAt": "26745589746",
   "tree": [
     ".nojekyll",
+    "dashboard-data.json",
     "index.html",
     "masscompile",
     "masscompile/masscompile",
@@ -1503,18 +1504,34 @@
     "vidiff/push-f0e2b16/windows/main (Modified)_files/support/unchecked-image.png"
   ],
   "runsBySha": {
-    "cefa707d19b67dd5e0e6b1330705a5026497f18a": {
-      "via": {
+    "737e317dd4588a38e4b7bb43e957e658bc8949ac": {
+      "mc": {
         "status": "pending",
         "conclusion": null,
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26745499762",
-        "createdAt": "2026-06-01T09:04:00Z",
-        "title": "Serve dashboard data from workflow to avoid browser API rate limits"
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26745589844",
+        "createdAt": "2026-06-01T09:05:55Z",
+        "title": "Clarify dashboard status when workflow succeeds without report artifact"
       },
+      "via": {
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26745589848",
+        "createdAt": "2026-06-01T09:05:55Z",
+        "title": "Clarify dashboard status when workflow succeeds without report artifact"
+      }
+    },
+    "cefa707d19b67dd5e0e6b1330705a5026497f18a": {
       "mc": {
         "status": "in_progress",
         "conclusion": null,
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26745499751",
+        "createdAt": "2026-06-01T09:04:00Z",
+        "title": "Serve dashboard data from workflow to avoid browser API rate limits"
+      },
+      "via": {
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26745499762",
         "createdAt": "2026-06-01T09:04:00Z",
         "title": "Serve dashboard data from workflow to avoid browser API rate limits"
       }
@@ -2143,29 +2160,6 @@
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26672797455",
         "createdAt": "2026-05-30T03:06:32Z",
         "title": "Diagnostic: check ALL LabVIEW dirs for VI Analyzer tests"
-      },
-      "mc": {
-        "status": "completed",
-        "conclusion": "failure",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26672797460",
-        "createdAt": "2026-05-30T03:06:32Z",
-        "title": "Diagnostic: check ALL LabVIEW dirs for VI Analyzer tests"
-      },
-      "vd": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26672797481",
-        "createdAt": "2026-05-30T03:06:32Z",
-        "title": "Diagnostic: check ALL LabVIEW dirs for VI Analyzer tests"
-      }
-    },
-    "2f2d63967517326bb2481947d47434791b7a82ae": {
-      "mc": {
-        "status": "completed",
-        "conclusion": "failure",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26672379607",
-        "createdAt": "2026-05-30T02:46:39Z",
-        "title": "Fix VI Analyzer diagnostic: use script file to avoid YAML escaping"
       }
     }
   }

@@ -364,13 +364,13 @@
 
         const mcCell = mc
           ? `<span class="summary" id="mc-${sha}"><span class="neutral">...</span></span> <a href="${mc.url}">report</a>`
-          : runStateHtml(run.mc, "publishing...");
+          : runStateHtml(run.mc, "completed");
         const viaCell = via
           ? `<span class="summary" id="via-${sha}"><span class="neutral">...</span></span> <a href="${via.url}">report</a>`
-          : runStateHtml(run.via, "publishing...");
+          : runStateHtml(run.via, "completed");
         const vdCell = vd
           ? `<span class="summary" id="vd-${sha}"><span class="neutral">...</span></span> <a href="${vd.url}">report</a>`
-          : runStateHtml(run.vd, "publishing...");
+          : runStateHtml(run.vd, "completed");
 
         html += `<tr><td class="commit-sha"${titleAttr}>${sha}</td><td>${dateCell}</td><td>${mcCell}</td><td>${viaCell}</td><td>${vdCell}</td></tr>`;
       }
