@@ -1,5 +1,5 @@
 {
-  "generatedAt": "26768332285",
+  "generatedAt": "26768711568",
   "tree": [
     ".nojekyll",
     "dashboard-data.json",
@@ -1516,18 +1516,34 @@
     "vidiff/push-f0e2b16/windows/main (Modified)_files/support/unchecked-image.png"
   ],
   "runsBySha": {
-    "0faf3879605cde0b5d3f84e9a18c48619b7105b2": {
+    "7711b99c683d121d16887b7275de6c0b98ab6b0b": {
       "mc": {
         "status": "pending",
         "conclusion": null,
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768332472",
-        "createdAt": "2026-06-01T16:38:22Z",
-        "title": "Fix dashboard report links: normalize SHAs to 7 chars to match report\u2026"
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768712133",
+        "createdAt": "2026-06-01T16:45:50Z",
+        "title": "Dashboard: only show report links for confirmed reports; also fetch w\u2026"
       },
       "via": {
         "status": "completed",
         "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768710120",
+        "createdAt": "2026-06-01T16:45:47Z",
+        "title": "Dashboard: only show report links for confirmed reports; also fetch w\u2026"
+      }
+    },
+    "0faf3879605cde0b5d3f84e9a18c48619b7105b2": {
+      "via": {
+        "status": "completed",
+        "conclusion": "cancelled",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768332250",
+        "createdAt": "2026-06-01T16:38:22Z",
+        "title": "Fix dashboard report links: normalize SHAs to 7 chars to match report\u2026"
+      },
+      "mc": {
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768332472",
         "createdAt": "2026-06-01T16:38:22Z",
         "title": "Fix dashboard report links: normalize SHAs to 7 chars to match report\u2026"
       }
@@ -2108,35 +2124,16 @@
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26685224543",
         "createdAt": "2026-05-30T13:38:05Z",
         "title": "Enhanced VIA diagnostic: list all files, try without ConfigPath, sear\u2026"
-      },
-      "via": {
-        "status": "completed",
-        "conclusion": "cancelled",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26685224579",
-        "createdAt": "2026-05-30T13:38:05Z",
-        "title": "Enhanced VIA diagnostic: list all files, try without ConfigPath, sear\u2026"
-      }
-    },
-    "16372e4995b27713599e4e6f755ac0cd1afcc3c1": {
-      "via": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26684784343",
-        "createdAt": "2026-05-30T13:16:59Z",
-        "title": "Dashboard: add commit date column, sort newest first"
-      }
-    },
-    "506ad63459947865bd0d18d954bac3b931917cdc": {
-      "mc": {
-        "status": "completed",
-        "conclusion": "failure",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26684595903",
-        "createdAt": "2026-05-30T13:07:13Z",
-        "title": "Diagnostic: comprehensive search for VI Analyzer test LLBs in container"
       }
     }
   },
   "recentCommits": [
+    {
+      "sha": "7711b99c683d121d16887b7275de6c0b98ab6b0b",
+      "date": "2026-06-01T16:45:40Z",
+      "message": "Dashboard: only show report links for confirmed reports; also fetch workflow_dispatch runs",
+      "ciOnly": true
+    },
     {
       "sha": "0faf3879605cde0b5d3f84e9a18c48619b7105b2",
       "date": "2026-06-01T16:38:16Z",
@@ -2489,12 +2486,6 @@
       "sha": "545a0685870fc292e7a37ec3cc9e6ac4a6b28556",
       "date": "2026-02-09T23:14:32Z",
       "message": "Update image source in README\n\nReplaced local image link with an external image link in the README.",
-      "ciOnly": false
-    },
-    {
-      "sha": "250f6e937df5659ae34051d901c91a9f0212e1ae",
-      "date": "2026-02-09T23:11:29Z",
-      "message": "Delete screenshot instructions from README\n\nRemove instructions for adding a screenshot of the main block diagram.",
       "ciOnly": false
     }
   ]
