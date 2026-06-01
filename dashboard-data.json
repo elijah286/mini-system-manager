@@ -1,11 +1,13 @@
 {
-  "generatedAt": "26768711568",
+  "generatedAt": "26769730474",
   "tree": [
     ".nojekyll",
     "dashboard-data.json",
     "index.html",
     "masscompile",
     "masscompile/masscompile",
+    "masscompile/masscompile/2006d04",
+    "masscompile/masscompile/2006d04/index.html",
     "masscompile/masscompile/2d213d9",
     "masscompile/masscompile/2d213d9/index.html",
     "masscompile/masscompile/2e371b5",
@@ -1516,9 +1518,25 @@
     "vidiff/push-f0e2b16/windows/main (Modified)_files/support/unchecked-image.png"
   ],
   "runsBySha": {
-    "7711b99c683d121d16887b7275de6c0b98ab6b0b": {
+    "a8c303445778052ffea52fcb30a7685dc7b6f02e": {
       "mc": {
         "status": "pending",
+        "conclusion": null,
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26769728828",
+        "createdAt": "2026-06-01T17:05:47Z",
+        "title": "Dashboard: add Show CI-only revisions checkbox, unchecked by default"
+      },
+      "via": {
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26769728771",
+        "createdAt": "2026-06-01T17:05:47Z",
+        "title": "Dashboard: add Show CI-only revisions checkbox, unchecked by default"
+      }
+    },
+    "7711b99c683d121d16887b7275de6c0b98ab6b0b": {
+      "mc": {
+        "status": "in_progress",
         "conclusion": null,
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768712133",
         "createdAt": "2026-06-01T16:45:50Z",
@@ -1549,17 +1567,17 @@
       }
     },
     "2006d0449b590e7878214b0e3e01180fdfe68e38": {
-      "mc": {
-        "status": "in_progress",
-        "conclusion": null,
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768081116",
-        "createdAt": "2026-06-01T16:33:22Z",
-        "title": "Dashboard: system theme, filter CI-only rows, fix links to reports"
-      },
       "via": {
         "status": "completed",
         "conclusion": "cancelled",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768080857",
+        "createdAt": "2026-06-01T16:33:22Z",
+        "title": "Dashboard: system theme, filter CI-only rows, fix links to reports"
+      },
+      "mc": {
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768081116",
         "createdAt": "2026-06-01T16:33:22Z",
         "title": "Dashboard: system theme, filter CI-only rows, fix links to reports"
       }
@@ -2101,33 +2119,16 @@
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26685420620",
         "createdAt": "2026-05-30T13:47:23Z",
         "title": "VI Analyzer: full 90-test config from NI labview-for-containers refer\u2026"
-      },
-      "via": {
-        "status": "completed",
-        "conclusion": "cancelled",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26685420606",
-        "createdAt": "2026-05-30T13:47:23Z",
-        "title": "VI Analyzer: full 90-test config from NI labview-for-containers refer\u2026"
-      }
-    },
-    "bd5b6220006697812f8c1a9ae925814170ff600d": {
-      "mc": {
-        "status": "completed",
-        "conclusion": "failure",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26685224561",
-        "createdAt": "2026-05-30T13:38:05Z",
-        "title": "Enhanced VIA diagnostic: list all files, try without ConfigPath, sear\u2026"
-      },
-      "vd": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26685224543",
-        "createdAt": "2026-05-30T13:38:05Z",
-        "title": "Enhanced VIA diagnostic: list all files, try without ConfigPath, sear\u2026"
       }
     }
   },
   "recentCommits": [
+    {
+      "sha": "a8c303445778052ffea52fcb30a7685dc7b6f02e",
+      "date": "2026-06-01T17:05:40Z",
+      "message": "Dashboard: add Show CI-only revisions checkbox, unchecked by default",
+      "ciOnly": true
+    },
     {
       "sha": "7711b99c683d121d16887b7275de6c0b98ab6b0b",
       "date": "2026-06-01T16:45:40Z",
@@ -2480,12 +2481,6 @@
       "sha": "e2a3f966890183a17f333b2316c0074f7e24fb68",
       "date": "2026-02-09T23:19:40Z",
       "message": "Add installation and setup section to README\n\nAdded installation and setup instructions to the README.",
-      "ciOnly": false
-    },
-    {
-      "sha": "545a0685870fc292e7a37ec3cc9e6ac4a6b28556",
-      "date": "2026-02-09T23:14:32Z",
-      "message": "Update image source in README\n\nReplaced local image link with an external image link in the README.",
       "ciOnly": false
     }
   ]

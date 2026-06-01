@@ -112,7 +112,11 @@
     .fail { color: var(--fail); }
     .neutral { color: var(--muted); }
     .empty { color: var(--muted); font-style: italic; padding: 0.8em 0; }
-    .info-line { color: var(--muted); font-size: 0.82em; margin-bottom: 0.7em; }
+    .info-line { color: var(--muted); font-size: 0.82em; }
+    .table-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5em; margin-bottom: 0.7em; }
+    .ci-filter-label { display: flex; align-items: center; gap: 0.35em; font-size: 0.82em; color: var(--muted); cursor: pointer; white-space: nowrap; user-select: none; }
+    .ci-filter-label input[type="checkbox"] { cursor: pointer; }
+    #reports-table.hide-ci-only tr[data-ci-only="true"] { display: none; }
   </style>
 </head>
 <body>
@@ -138,8 +142,11 @@
 
   <h2>Reports by Commit</h2>
   <div class="section">
-    <p class="info-line">Live status from GitHub Actions. Report rows refresh every 30s; workflow states refresh every 5m.</p>
-    <div id="reports-table" class="empty">Loading reports...</div>
+    <div class="table-toolbar">
+      <p class="info-line">Live status from GitHub Actions. Report rows refresh every 30s; workflow states refresh every 5m.</p>
+      <label class="ci-filter-label"><input type="checkbox" id="show-ci-only"> Show CI-only revisions</label>
+    </div>
+    <div id="reports-table" class="empty hide-ci-only">Loading reports...</div>
   </div>
 
   <script>
@@ -460,9 +467,6 @@
         const info = commitMeta[sha] || {};
         const isCiOnly = info.ciOnly === true;
 
-        // Skip CI-only commits that have no reports and no active workflows
-        if (isCiOnly && !mc && !via && !vd && !run.mc && !run.via && !run.vd) continue;
-
         const dateCell = formatDate(info.date);
         const titleAttr = info.message ? ` title="${info.message.replace(/"/g, "&quot;")}"` : "";
         const shortSha = sha.slice(0, 7);
@@ -471,6 +475,7 @@
         const shortShaEscaped = escapeHtml(shortSha);
         const commitUrl = `https://github.com/${OWNER}/${REPO}/commit/${sha}`;
         const ciOnlyTag = isCiOnly ? '<span class="ci-only-tag">CI only</span>' : "";
+        const trCiAttr = isCiOnly ? ' data-ci-only="true"' : '';
 
         let mcCell = mc
           ? `<span class="summary" id="mc-${sha}"><span class="neutral">...</span></span> <a href="${mc.url}">report</a>`
@@ -486,7 +491,7 @@
         if (isCiOnly && !via && !run.via) viaCell = '<span class="neutral">CI only</span>';
         if (isCiOnly && !vd && !run.vd) vdCell = '<span class="neutral">CI only</span>';
 
-        html += `<tr><td${titleAttr}><a class="revision-title" href="${commitUrl}">${revisionLabelEscaped}</a><div class="revision-meta"><span class="commit-sha">${shortShaEscaped}</span>${ciOnlyTag}</div></td><td>${dateCell}</td><td>${mcCell}</td><td>${viaCell}</td><td>${vdCell}</td></tr>`;
+        html += `<tr${trCiAttr}><td${titleAttr}><a class="revision-title" href="${commitUrl}">${revisionLabelEscaped}</a><div class="revision-meta"><span class="commit-sha">${shortShaEscaped}</span>${ciOnlyTag}</div></td><td>${dateCell}</td><td>${mcCell}</td><td>${viaCell}</td><td>${vdCell}</td></tr>`;
       }
       html += "</tbody></table>";
       container.innerHTML = html;
@@ -579,6 +584,10 @@
     refreshDashboard(true, true);
     setInterval(() => refreshDashboard(false, false), 30000);
     setInterval(() => refreshDashboard(true, true), 300000);
+
+    document.getElementById('show-ci-only').addEventListener('change', function () {
+      document.getElementById('reports-table').classList.toggle('hide-ci-only', !this.checked);
+    });
   </script>
 </body>
 </html>
