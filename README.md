@@ -1,5 +1,11 @@
 # Mini System Manager (Revidyne)
 
+[![Mass Compile](https://github.com/elijah286/mini-system-manager/actions/workflows/masscompile-windows-container.yml/badge.svg)](https://elijah286.github.io/mini-system-manager/)
+[![VI Analyzer](https://github.com/elijah286/mini-system-manager/actions/workflows/run-vi-analyzer-windows-container.yml/badge.svg)](https://elijah286.github.io/mini-system-manager/)
+[![VIDiff](https://github.com/elijah286/mini-system-manager/actions/workflows/vidiff-windows-container.yml/badge.svg)](https://elijah286.github.io/mini-system-manager/)
+
+[![Reports Dashboard](https://img.shields.io/badge/Reports-Dashboard-blue?logo=github)](https://elijah286.github.io/mini-system-manager/)
+
 **Repository:** `github.com/elijah286/mini-system-manager`  
 **Purpose:** A simple, readable LabVIEW-based “mini system manager” for connecting to **Revidyne** educational hardware systems (available via **revidyne.com**).
 
@@ -68,6 +74,90 @@ This application uses a classic **Queued Message Handler (QMH)** style:
 
 <img width="1489" height="777" alt="Screenshot 2026-02-09 at 5 09 49 PM" src="https://github.com/user-attachments/assets/5bf8a3d0-2be4-4805-aef1-b7e424dd08a4" />
 
+
+## VI File Browser
+
+Browse front panel and block diagram snapshots for every VI in this project:
+**[Open VI Browser →](https://elijah286.github.io/mini-system-manager/vi-snapshots/)**
+
+<details>
+<summary><strong>All VIs & Controls (42 files)</strong></summary>
+
+#### Root
+
+| File | Type |
+|------|------|
+| [Controller Commands.ctl](https://elijah286.github.io/mini-system-manager/vi-snapshots/Controller%20Commands.ctl.html) | CTL |
+| [Curriculum Launcher.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum%20Launcher.vi.html) | VI |
+| [Find Curriculum.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Find%20Curriculum.vi.html) | VI |
+| [Graph Popup.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Graph%20Popup.vi.html) | VI |
+| [main.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/main.vi.html) | VI |
+| [Simple Solar Tracker v4.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Simple%20Solar%20Tracker%20v4.vi.html) | VI |
+| [Status String Update.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Status%20String%20Update.vi.html) | VI |
+
+#### Curriculum / Generator API
+
+| File | Type |
+|------|------|
+| [Generator Driver Template 1.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20API/Generator%20Driver%20Template%201.vi.html) | VI |
+| [Generator Driver Template 2.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20API/Generator%20Driver%20Template%202.vi.html) | VI |
+| [Generator Driver Template 3.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20API/Generator%20Driver%20Template%203.vi.html) | VI |
+| [Generator Driver Template 4.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20API/Generator%20Driver%20Template%204.vi.html) | VI |
+| [Generator Driver Template 5.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20API/Generator%20Driver%20Template%205.vi.html) | VI |
+
+#### Curriculum / Generator API / subVIs
+
+| File | Type |
+|------|------|
+| [Demo PID Control.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20API/subVIs/Demo/Demo%20PID%20Control.vi.html) | VI |
+| [Default Instrument Setup.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20API/subVIs/Private/Default%20Instrument%20Setup.vi.html) | VI |
+| [Close.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20API/subVIs/Public/Close.vi.html) | VI |
+| [Initialize.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20API/subVIs/Public/Initialize.vi.html) | VI |
+| [VI Tree.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20API/subVIs/Public/VI%20Tree.vi.html) | VI |
+| [Init.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20API/subVIs/Public/Action-Status/Init.vi.html) | VI |
+| [Motor Off.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20API/subVIs/Public/Action-Status/Motor%20Off.vi.html) | VI |
+| [Motor On.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20API/subVIs/Public/Action-Status/Motor%20On.vi.html) | VI |
+| [Set Load.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20API/subVIs/Public/Configure/Set%20Load.vi.html) | VI |
+| [Set Speed.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20API/subVIs/Public/Configure/Set%20Speed.vi.html) | VI |
+| [Get KW.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20API/subVIs/Public/Data/Get%20KW.vi.html) | VI |
+| [Get Value.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20API/subVIs/Public/Data/Get%20Value.vi.html) | VI |
+| [Error Query.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20API/subVIs/Public/Utility/Error%20Query.vi.html) | VI |
+| [Reset.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20API/subVIs/Public/Utility/Reset.vi.html) | VI |
+| [Revision Query.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20API/subVIs/Public/Utility/Revision%20Query.vi.html) | VI |
+| [Self-Test.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20API/subVIs/Public/Utility/Self-Test.vi.html) | VI |
+
+#### Curriculum / Generator Lessons
+
+| File | Type |
+|------|------|
+| [Generator Lesson 1.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20Lessons/Generator%20Lesson%201.vi.html) | VI |
+| [Generator Lesson 2.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20Lessons/Generator%20Lesson%202.vi.html) | VI |
+| [Generator Lesson 3.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20Lessons/Generator%20Lesson%203.vi.html) | VI |
+| [Generator Lesson 4.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20Lessons/Generator%20Lesson%204.vi.html) | VI |
+| [Generator Lesson 5.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20Lessons/Generator%20Lesson%205.vi.html) | VI |
+| [Generator Lesson 6.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20Lessons/Generator%20Lesson%206.vi.html) | VI |
+| [Generator Lesson 7.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20Lessons/Generator%20Lesson%207.vi.html) | VI |
+| [balance grid.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20Lessons/subVIs/balance%20grid.vi.html) | VI |
+| [Command with Return Value.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20Lessons/subVIs/Command%20with%20Return%20Value.vi.html) | VI |
+| [Confirm USB Devices and IO.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20Lessons/subVIs/Confirm%20USB%20Devices%20and%20IO.vi.html) | VI |
+| [Get All Values.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20Lessons/subVIs/Get%20All%20Values.vi.html) | VI |
+| [USB Device Filter.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Generator%20Lessons/subVIs/USB%20Device%20Filter.vi.html) | VI |
+
+#### Curriculum / Main Power Grid
+
+| File | Type |
+|------|------|
+| [Main Power Grid.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Main%20Power%20Grid/Main%20Power%20Grid.vi.html) | VI |
+
+#### Curriculum / Solar Lessons
+
+| File | Type |
+|------|------|
+| [Solar Example.vi](https://elijah286.github.io/mini-system-manager/vi-snapshots/Curriculum/Solar%20Lessons/Solar%20Example.vi.html) | VI |
+
+</details>
+
+---
 
 ## Getting started
 

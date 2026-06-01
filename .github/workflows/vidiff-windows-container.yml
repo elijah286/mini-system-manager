@@ -19,9 +19,18 @@ on:
       - '**/*.ctl'
       - '.github/labview/**'
       - '.github/workflows/vidiff-windows-container.yml'
+  workflow_dispatch:
+    inputs:
+      base_sha:
+        description: 'Base commit SHA to diff from'
+        required: true
+      head_sha:
+        description: 'Head commit SHA to diff to'
+        required: true
 
 permissions:
   contents: read
+  statuses: write
 
 env:
   LABVIEW_CONTAINER_IMAGE: nationalinstruments/labview:latest-windows
@@ -29,7 +38,7 @@ env:
 jobs:
   run-vidiff:
     name: Run VIDiff on changed LabVIEW files
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
       - name: Determine base ref
@@ -38,14 +47,20 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             echo "base_sha=${{ github.event.pull_request.base.sha }}" >> "$GITHUB_OUTPUT"
+            echo "head_sha=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "base_sha=${{ github.event.inputs.base_sha }}" >> "$GITHUB_OUTPUT"
+            echo "head_sha=${{ github.event.inputs.head_sha }}" >> "$GITHUB_OUTPUT"
           else
             echo "base_sha=${{ github.event.before }}" >> "$GITHUB_OUTPUT"
+            echo "head_sha=${{ github.sha }}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Checkout current branch
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ steps.refs.outputs.head_sha }}
           path: pr
 
       - name: Checkout base ref
@@ -54,12 +69,19 @@ jobs:
           ref: ${{ steps.refs.outputs.base_sha }}
           path: base
 
+      - name: Restore CI scripts from main
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        run: |
+          cd pr
+          git checkout origin/main -- .github/labview .github/workflows
+
       - name: Detect changed LabVIEW files
         id: changed-files
         shell: bash
         run: |
           cd pr
-          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMR "${{ steps.refs.outputs.base_sha }}" "${{ github.sha }}" -- '*.vi' '*.ctl' || true)
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMR "${{ steps.refs.outputs.base_sha }}" "${{ steps.refs.outputs.head_sha }}" -- '*.vi' '*.ctl' || true)
 
           if [ -z "$CHANGED_FILES" ]; then
             echo "No changed LabVIEW files detected."
@@ -74,24 +96,52 @@ jobs:
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Pull LabVIEW container image
+      - name: Cache LabVIEW container image
         if: steps.changed-files.outputs.has_changes == 'true'
-        run: docker pull ${{ env.LABVIEW_CONTAINER_IMAGE }}
+        id: cache-image
+        uses: actions/cache@v4
+        with:
+          path: labview-image.tar
+          key: labview-container-${{ env.LABVIEW_CONTAINER_IMAGE }}
+
+      - name: Ensure Docker daemon is running
+        if: steps.changed-files.outputs.has_changes == 'true'
+        run: |
+          $svc = Get-Service docker -ErrorAction SilentlyContinue
+          if ($svc -and $svc.Status -ne 'Running') {
+            Start-Service docker
+            Write-Host "Docker service started"
+          } elseif (-not $svc) {
+            Write-Host "Docker service not found - attempting dockerd start"
+            Start-Process dockerd -WindowStyle Hidden
+            Start-Sleep -Seconds 10
+          } else {
+            Write-Host "Docker already running"
+          }
+          docker info | Select-String "Server Version"
+
+      - name: Load or pull LabVIEW container image
+        if: steps.changed-files.outputs.has_changes == 'true'
+        run: |
+          if (Test-Path "labview-image.tar") {
+            Write-Host "Loading cached image..."
+            docker load -i labview-image.tar
+          } else {
+            Write-Host "Pulling image..."
+            docker pull ${{ env.LABVIEW_CONTAINER_IMAGE }}
+            docker save -o labview-image.tar ${{ env.LABVIEW_CONTAINER_IMAGE }}
+          }
 
       - name: Run VIDiff
         if: steps.changed-files.outputs.has_changes == 'true'
         shell: pwsh
         run: |
-          $files = "${{ steps.changed-files.outputs.files_csv }}" -split ',' | Where-Object { $_ -ne '' }
-          foreach ($file in $files) {
-            Write-Host "::group::Running VIDiff for $file"
-            docker run --rm `
-              -v "${{ github.workspace }}\pr:C:\workspace" `
-              -v "${{ github.workspace }}\base:C:\workspace-base" `
-              ${{ env.LABVIEW_CONTAINER_IMAGE }} `
-              powershell -File "C:\workspace\.github\labview\vidiff.ps1" -WorkspaceRoot "C:\workspace" -WorkspaceBaseRoot "C:\workspace-base" -VIFiles "$file"
-            Write-Host "::endgroup::"
-          }
+          $files = "${{ steps.changed-files.outputs.files_csv }}"
+          docker run --rm `
+            -v "${{ github.workspace }}\pr:C:\workspace" `
+            -v "${{ github.workspace }}\base:C:\workspace-base" `
+            ${{ env.LABVIEW_CONTAINER_IMAGE }} `
+            powershell -File "C:\workspace\.github\labview\vidiff.ps1" -WorkspaceRoot "C:\workspace" -WorkspaceBaseRoot "C:\workspace-base" -VIFiles $($files -split ',' | ForEach-Object { '"' + $_ + '"' })
 
       - name: Upload VIDiff reports
         if: steps.changed-files.outputs.has_changes == 'true'
@@ -110,6 +160,7 @@ jobs:
           else
             echo "" > metadata/pr_number
           fi
+          echo "${{ steps.refs.outputs.head_sha }}" > metadata/head_sha
           echo "windows" > metadata/platform
 
       - name: Upload metadata

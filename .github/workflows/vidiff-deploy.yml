@@ -11,11 +11,15 @@ permissions:
   contents: write
   pull-requests: write
   pages: write
+  statuses: write
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     if: github.event.workflow_run.conclusion == 'success'
+    concurrency:
+      group: pages-deploy
+      cancel-in-progress: false
 
     steps:
       - name: Download VIDiff report artifacts
@@ -48,17 +52,25 @@ jobs:
           PR_NUMBER=$(tr -d '[:space:]' < metadata/pr_number)
           PLATFORM=$(tr -d '[:space:]' < metadata/platform)
 
+          if [ -f metadata/head_sha ]; then
+            HEAD_SHA=$(tr -d '[:space:]' < metadata/head_sha)
+          else
+            HEAD_SHA="${{ github.event.workflow_run.head_sha }}"
+          fi
+
+          SHORT_SHA=$(echo "${HEAD_SHA}" | cut -c1-7)
+
           if [ -n "$PR_NUMBER" ]; then
             echo "pr_number=${PR_NUMBER}" >> "$GITHUB_OUTPUT"
             echo "label=pr-${PR_NUMBER}" >> "$GITHUB_OUTPUT"
             echo "is_pr=true" >> "$GITHUB_OUTPUT"
           else
-            SHORT_SHA=$(echo "${{ github.event.workflow_run.head_sha }}" | cut -c1-7)
             echo "pr_number=" >> "$GITHUB_OUTPUT"
             echo "label=push-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
             echo "is_pr=false" >> "$GITHUB_OUTPUT"
           fi
 
+          echo "head_sha=${HEAD_SHA}" >> "$GITHUB_OUTPUT"
           echo "platform=${PLATFORM}" >> "$GITHUB_OUTPUT"
           echo "skip=false" >> "$GITHUB_OUTPUT"
 
@@ -156,3 +168,28 @@ jobs:
                 body,
               });
             }
+
+      - name: Add commit status with report link
+        if: steps.meta.outputs.skip == 'false'
+        run: |
+          LABEL="${{ steps.meta.outputs.label }}"
+          PLATFORM="${{ steps.meta.outputs.platform }}"
+          HEAD_SHA="${{ steps.meta.outputs.head_sha }}"
+          BASE_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/vidiff/${LABEL}/${PLATFORM}"
+          DEPLOY_DIR="pages-content/${LABEL}/${PLATFORM}"
+
+          # If there's exactly one report, link directly to it instead of the index
+          REPORTS=($(find "$DEPLOY_DIR" -maxdepth 1 -name '*.html' ! -name 'index.html' 2>/dev/null))
+          if [ ${#REPORTS[@]} -eq 1 ]; then
+            FILENAME=$(basename "${REPORTS[0]}")
+            ENCODED=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" "$FILENAME")
+            REPORT_URL="${BASE_URL}/${ENCODED}"
+          else
+            REPORT_URL="${BASE_URL}/"
+          fi
+
+          curl -s -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/statuses/${HEAD_SHA}" \
+            -d "{\"state\":\"success\",\"target_url\":\"${REPORT_URL}\",\"description\":\"View VIDiff report\",\"context\":\"VIDiff Report\"}"
