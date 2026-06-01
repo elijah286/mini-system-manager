@@ -1,5 +1,5 @@
 {
-  "generatedAt": "26745589746",
+  "generatedAt": "26746061606",
   "tree": [
     ".nojekyll",
     "dashboard-data.json",
@@ -1504,18 +1504,34 @@
     "vidiff/push-f0e2b16/windows/main (Modified)_files/support/unchecked-image.png"
   ],
   "runsBySha": {
-    "737e317dd4588a38e4b7bb43e957e658bc8949ac": {
+    "84631942a5ece3321b56c216b6a7c907f21217a1": {
       "mc": {
         "status": "pending",
         "conclusion": null,
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26745589844",
-        "createdAt": "2026-06-01T09:05:55Z",
-        "title": "Clarify dashboard status when workflow succeeds without report artifact"
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26746061588",
+        "createdAt": "2026-06-01T09:16:05Z",
+        "title": "Use readable revision labels instead of full commit hashes on dashboard"
       },
       "via": {
         "status": "completed",
         "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26746061616",
+        "createdAt": "2026-06-01T09:16:05Z",
+        "title": "Use readable revision labels instead of full commit hashes on dashboard"
+      }
+    },
+    "737e317dd4588a38e4b7bb43e957e658bc8949ac": {
+      "via": {
+        "status": "completed",
+        "conclusion": "cancelled",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26745589848",
+        "createdAt": "2026-06-01T09:05:55Z",
+        "title": "Clarify dashboard status when workflow succeeds without report artifact"
+      },
+      "mc": {
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26745589844",
         "createdAt": "2026-06-01T09:05:55Z",
         "title": "Clarify dashboard status when workflow succeeds without report artifact"
       }
@@ -2137,29 +2153,6 @@
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26673232021",
         "createdAt": "2026-05-30T03:26:41Z",
         "title": "Fix diagnostic script syntax error"
-      },
-      "mc": {
-        "status": "completed",
-        "conclusion": "failure",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26673232026",
-        "createdAt": "2026-05-30T03:26:41Z",
-        "title": "Fix diagnostic script syntax error"
-      },
-      "via": {
-        "status": "completed",
-        "conclusion": "failure",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26673232029",
-        "createdAt": "2026-05-30T03:26:41Z",
-        "title": "Fix diagnostic script syntax error"
-      }
-    },
-    "5c33eb173014e06e92b50f20326d8a9306366360": {
-      "via": {
-        "status": "completed",
-        "conclusion": "failure",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26672797455",
-        "createdAt": "2026-05-30T03:06:32Z",
-        "title": "Diagnostic: check ALL LabVIEW dirs for VI Analyzer tests"
       }
     }
   }
