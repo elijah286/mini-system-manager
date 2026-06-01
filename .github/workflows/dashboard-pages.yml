@@ -1,0 +1,37 @@
+name: Deploy Dashboard Page
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/pages/index.html'
+      - '.github/workflows/dashboard-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+jobs:
+  deploy-dashboard:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pages-deploy
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare dashboard content
+        run: |
+          mkdir -p pages-content
+          cp .github/pages/index.html pages-content/index.html
+
+      - name: Deploy dashboard to GitHub Pages root
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./pages-content
+          keep_files: true

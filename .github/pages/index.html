@@ -52,6 +52,7 @@
 
   <h2>Reports by Commit</h2>
   <div class="section">
+    <p style="color:#8b949e;font-size:0.82em;margin-bottom:0.7em;">Live status from GitHub Actions. Auto-refreshes every 30s.</p>
     <div id="reports-table" class="loading">Loading reports…</div>
   </div>
 
@@ -60,11 +61,45 @@
     const REPO = 'mini-system-manager';
     const PAGES_BASE = `https://${OWNER}.github.io/${REPO}`;
     const API_BASE = `https://api.github.com/repos/${OWNER}/${REPO}`;
+    const WORKFLOW_TO_KEY = {
+      'MassCompile - Windows Container': 'mc',
+      'Run VI Analyzer - Windows Container': 'via',
+      'VIDiff Report - Windows Container': 'vd'
+    };
 
     async function fetchTree() {
       const res = await fetch(`${API_BASE}/git/trees/gh-pages?recursive=1`);
       if (!res.ok) throw new Error(`API error: ${res.status}`);
       return (await res.json()).tree || [];
+    }
+
+    async function fetchWorkflowRunsBySha() {
+      try {
+        const res = await fetch(`${API_BASE}/actions/runs?per_page=100&branch=main&event=push`);
+        if (!res.ok) return {};
+        const runs = (await res.json()).workflow_runs || [];
+        const bySha = {};
+
+        runs.forEach(run => {
+          const key = WORKFLOW_TO_KEY[run.name];
+          if (!key || !run.head_sha) return;
+
+          if (!bySha[run.head_sha]) bySha[run.head_sha] = {};
+          const prev = bySha[run.head_sha][key];
+          if (!prev || (new Date(run.created_at) > new Date(prev.createdAt))) {
+            bySha[run.head_sha][key] = {
+              status: run.status,
+              conclusion: run.conclusion,
+              url: run.html_url,
+              createdAt: run.created_at
+            };
+          }
+        });
+
+        return bySha;
+      } catch {
+        return {};
+      }
     }
 
     async function fetchReportSummary(url) {
@@ -129,7 +164,21 @@
       return parts.join(' · ');
     }
 
-    async function renderCombinedTable(tree) {
+    function runStateHtml(run, successText) {
+      if (!run) return '<span class="neutral">—</span>';
+      if (run.status !== 'completed') {
+        return `<span class="neutral">running…</span> <a href="${run.url}">actions</a>`;
+      }
+      if (run.conclusion === 'success') {
+        return `<span class="pass">${successText}</span> <a href="${run.url}">actions</a>`;
+      }
+      if (run.conclusion === 'cancelled') {
+        return `<span class="neutral">cancelled</span> <a href="${run.url}">actions</a>`;
+      }
+      return `<span class="fail">${run.conclusion || 'failed'}</span> <a href="${run.url}">actions</a>`;
+    }
+
+    async function renderCombinedTable(tree, runsBySha) {
       const container = document.getElementById('reports-table');
 
       // Collect VI Analyzer reports by SHA
@@ -156,8 +205,13 @@
         }
       });
 
-      // Merge all SHAs and fetch commit dates
-      const allShas = [...new Set([...Object.keys(viaReports), ...Object.keys(mcReports), ...Object.keys(vdReports)])];
+      // Merge report SHAs with workflow-run SHAs so new commits appear immediately.
+      const allShas = [...new Set([
+        ...Object.keys(viaReports),
+        ...Object.keys(mcReports),
+        ...Object.keys(vdReports),
+        ...Object.keys(runsBySha || {})
+      ])];
 
       if (allShas.length === 0) {
         container.innerHTML = '<p class="empty">No reports found yet.</p>';
@@ -197,18 +251,19 @@
         const via = viaReports[sha];
         const mc = mcReports[sha];
         const vd = vdReports[sha];
+        const run = (runsBySha && runsBySha[sha]) || {};
         const info = commitDates[sha];
         const dateCell = formatDate(info?.date);
         const titleAttr = info?.message ? ` title="${info.message.replace(/"/g, '&quot;')}"` : '';
         const mcCell = mc
           ? `<span class="summary" id="mc-${sha}"><span class="neutral">…</span></span> <a href="${mc.url}">report</a>`
-          : '<span class="neutral">—</span>';
+          : runStateHtml(run.mc, 'publishing…');
         const viaCell = via
           ? `<span class="summary" id="via-${sha}"><span class="neutral">…</span></span> <a href="${via.url}">report</a>`
-          : '<span class="neutral">—</span>';
+          : runStateHtml(run.via, 'publishing…');
         const vdCell = vd
           ? `<span class="summary" id="vd-${sha}"><span class="neutral">…</span></span> <a href="${vd.url}">report</a>`
-          : '<span class="neutral">—</span>';
+          : runStateHtml(run.vd, 'publishing…');
         html += `<tr><td class="commit-sha"${titleAttr}>${sha}</td><td>${dateCell}</td><td>${mcCell}</td><td>${viaCell}</td><td>${vdCell}</td></tr>`;
       }
       html += '</tbody></table>';
@@ -259,11 +314,17 @@
       await Promise.all([...mcFetches, ...viaFetches, ...vdFetches]);
     }
 
-    fetchTree()
-      .then(tree => renderCombinedTable(tree))
-      .catch(err => {
+    async function refreshDashboard() {
+      try {
+        const [tree, runsBySha] = await Promise.all([fetchTree(), fetchWorkflowRunsBySha()]);
+        await renderCombinedTable(tree, runsBySha);
+      } catch (err) {
         document.getElementById('reports-table').innerHTML = `<p class="empty">Error loading reports: ${err.message}</p>`;
-      });
+      }
+    }
+
+    refreshDashboard();
+    setInterval(refreshDashboard, 30000);
   </script>
 </body>
 </html>
