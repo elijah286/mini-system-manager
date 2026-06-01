@@ -3,177 +3,591 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>VI Browser — Mini System Manager</title>
+  <title>CI Reports Dashboard - Mini System Manager</title>
   <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0d1117;color:#c9d1d9}
-    .header{padding:1.5em 2em;border-bottom:1px solid #21262d}
-    h1{color:#58a6ff;margin-bottom:.3em;font-size:1.6em}
-    .subtitle{color:#8b949e;font-size:.95em}
-    .subtitle a{color:#58a6ff;text-decoration:none}
-    .subtitle a:hover{text-decoration:underline}
-    .toolbar{padding:1em 2em;background:#161b22;border-bottom:1px solid #21262d;display:flex;align-items:center;gap:1em;flex-wrap:wrap}
-    .commit-select{background:#21262d;color:#c9d1d9;border:1px solid #30363d;border-radius:6px;padding:.5em 1em;font-size:.9em;min-width:300px;max-width:100%}
-    .toolbar-btn{color:#58a6ff;text-decoration:none;font-size:.85em;padding:.5em 1em;border:1px solid #30363d;border-radius:6px;background:#21262d;white-space:nowrap}
-    .toolbar-btn:hover{background:#30363d}
-    .commit-meta{color:#8b949e;font-size:.8em;margin-left:auto}
-    .content{padding:2em;max-width:960px;margin:0 auto}
-    .tree{list-style:none}
-    .tree ul{list-style:none;padding-left:1.5em}
-    .tree li{padding:.15em 0}
-    .folder-row{cursor:pointer;user-select:none;color:#f0f6fc;font-weight:500;font-size:.95em;display:inline-flex;align-items:center;gap:.3em}
-    .folder-row:hover{color:#58a6ff}
-    .caret{display:inline-block;width:.8em;text-align:center;font-size:.7em;color:#484f58;transition:transform .15s}
-    .caret.open{transform:rotate(90deg)}
-    .file-link{color:#58a6ff;text-decoration:none;font-family:'SFMono-Regular',Consolas,monospace;font-size:.88em}
-    .file-link:hover{text-decoration:underline}
-    .file-row{display:inline-flex;align-items:center;gap:.4em}
-    .badge{display:inline-block;background:#21262d;color:#8b949e;font-size:.7em;padding:.1em .45em;border-radius:3px}
-    .icon{font-size:.9em}
-    .section-label{color:#8b949e;font-size:.8em;margin-top:2em;margin-bottom:.5em;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid #21262d;padding-bottom:.3em}
-    .loading{color:#8b949e;font-style:italic;padding:2em}
-    .error{color:#f85149;padding:2em}
-    .stats{color:#484f58;font-size:.8em;margin-top:.5em}
+    :root {
+      --bg: #ffffff;
+      --section-bg: #f6f8fa;
+      --border: #d0d7de;
+      --text: #1f2328;
+      --heading: #1f2328;
+      --muted: #656d76;
+      --link: #0969da;
+      --pass: #1a7f37;
+      --fail: #cf222e;
+      --th-bg: #f6f8fa;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0d1117;
+        --section-bg: #161b22;
+        --border: #21262d;
+        --text: #c9d1d9;
+        --heading: #f0f6fc;
+        --muted: #8b949e;
+        --link: #58a6ff;
+        --pass: #3fb950;
+        --fail: #f85149;
+        --th-bg: #161b22;
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 2em;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    h1 { color: var(--link); margin-bottom: 0.3em; font-size: 1.7em; }
+    h2 {
+      color: var(--heading);
+      margin: 1.5em 0 0.8em;
+      font-size: 1.2em;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.4em;
+    }
+    .subtitle { color: var(--muted); margin-bottom: 1.4em; font-size: 0.95em; }
+    .subtitle a { color: var(--link); text-decoration: none; }
+    .subtitle a:hover { text-decoration: underline; }
+    .badge-row { display: flex; gap: 0.5em; flex-wrap: wrap; margin-bottom: 1.3em; }
+    .badge-row img { height: 20px; }
+    .section {
+      background: var(--section-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.2em;
+      margin-bottom: 1.5em;
+    }
+    .vi-browser {
+      display: flex;
+      align-items: center;
+      gap: 1em;
+    }
+    .vi-browser a { color: var(--link); text-decoration: none; font-size: 1.05em; font-weight: 600; }
+    .vi-browser a:hover { text-decoration: underline; }
+    .vi-browser p { color: var(--muted); font-size: 0.85em; margin-top: 0.2em; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    th {
+      text-align: left;
+      padding: 0.6em 0.8em;
+      background: var(--th-bg);
+      color: var(--muted);
+      font-size: 0.85em;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+    }
+    td { padding: 0.6em 0.8em; border-bottom: 1px solid var(--border); vertical-align: top; }
+    td a { color: var(--link); text-decoration: none; }
+    td a:hover { text-decoration: underline; }
+    .commit-sha { font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.9em; }
+    .revision-title {
+      color: var(--heading);
+      font-size: 0.92em;
+      font-weight: 600;
+      text-decoration: none;
+      display: block;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      line-height: 1.25;
+    }
+    .revision-meta {
+      margin-top: 0.2em;
+      color: var(--muted);
+      font-size: 0.8em;
+    }
+    .ci-only-tag {
+      color: var(--muted);
+      margin-left: 0.5em;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      font-size: 0.75em;
+    }
+    .summary { font-size: 0.85em; }
+    .pass { color: var(--pass); }
+    .fail { color: var(--fail); }
+    .neutral { color: var(--muted); }
+    .empty { color: var(--muted); font-style: italic; padding: 0.8em 0; }
+    .info-line { color: var(--muted); font-size: 0.82em; }
+    .table-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5em; margin-bottom: 0.7em; }
+    .ci-filter-label { display: flex; align-items: center; gap: 0.35em; font-size: 0.82em; color: var(--muted); cursor: pointer; white-space: nowrap; user-select: none; }
+    .ci-filter-label input[type="checkbox"] { cursor: pointer; }
+    #reports-table.hide-ci-only tr[data-ci-only="true"] { display: none; }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>VI Browser</h1>
-    <p class="subtitle">
-      <a href="../">← Back to Dashboard</a> ·
-      <a href="https://github.com/elijah286/mini-system-manager">elijah286/mini-system-manager</a>
-      — Front Panel &amp; Block Diagram snapshots for every VI
-    </p>
+  <h1>CI Reports Dashboard</h1>
+  <p class="subtitle">
+    <a href="https://github.com/elijah286/mini-system-manager">elijah286/mini-system-manager</a>
+    - LabVIEW CI/CD Pipeline Reports
+  </p>
+
+  <div class="badge-row">
+    <a href="https://github.com/elijah286/mini-system-manager/actions/workflows/masscompile-windows-container.yml"><img src="https://github.com/elijah286/mini-system-manager/actions/workflows/masscompile-windows-container.yml/badge.svg" alt="Mass Compile"></a>
+    <a href="https://github.com/elijah286/mini-system-manager/actions/workflows/run-vi-analyzer-windows-container.yml"><img src="https://github.com/elijah286/mini-system-manager/actions/workflows/run-vi-analyzer-windows-container.yml/badge.svg" alt="VI Analyzer"></a>
+    <a href="https://github.com/elijah286/mini-system-manager/actions/workflows/vidiff-windows-container.yml"><img src="https://github.com/elijah286/mini-system-manager/actions/workflows/vidiff-windows-container.yml/badge.svg" alt="VIDiff"></a>
   </div>
-  <div class="toolbar">
-    <label for="commit-sel" style="color:#8b949e;font-size:.85em">Commit:</label>
-    <select id="commit-sel" class="commit-select"><option>Loading…</option></select>
-    <a id="diff-link" class="toolbar-btn" href="#" style="display:none">View VIDiff Report →</a>
-    <span id="commit-meta" class="commit-meta"></span>
+
+  <div class="section vi-browser">
+    <span style="font-size: 1.5em;">📂</span>
+    <div>
+      <a href="vi-snapshots/">VI Browser</a>
+      <p>View front panel and block diagram snapshots for every VI in the project</p>
+    </div>
   </div>
-  <div class="content" id="content"><p class="loading">Loading…</p></div>
+
+  <h2>Reports by Commit</h2>
+  <div class="section">
+    <div class="table-toolbar">
+      <p class="info-line">Live status from GitHub Actions. Report rows refresh every 30s; workflow states refresh every 5m.</p>
+      <label class="ci-filter-label"><input type="checkbox" id="show-ci-only"> Show CI-only revisions</label>
+    </div>
+    <div id="reports-table" class="empty hide-ci-only">Loading reports...</div>
+  </div>
 
   <script>
-    let commits=[], cur=null;
-    const BASE=location.pathname.replace(/\/index\.html$/,'/').replace(/\/$/,'/');
+    const OWNER = "elijah286";
+    const REPO = "mini-system-manager";
+    const PAGES_BASE = `https://${OWNER}.github.io/${REPO}`;
+    const API_BASE = `https://api.github.com/repos/${OWNER}/${REPO}`;
+    const WORKFLOW_TO_KEY = {
+      "MassCompile - Windows Container": "mc",
+      "Run VI Analyzer - Windows Container": "via",
+      "VIDiff Report - Windows Container": "vd"
+    };
 
-    async function init(){
-      try{
-        const r=await fetch(BASE+'commits.json');
-        if(!r.ok) throw new Error('No commits.json');
-        commits=await r.json();
-      }catch(e){
-        document.getElementById('content').innerHTML='<p class="error">'+esc(e.message)+'</p>';
-        return;
+    async function fetchSnapshotCommits() {
+      try {
+        const res = await fetch(`${PAGES_BASE}/vi-snapshots/commits.json`);
+        if (!res.ok) return [];
+        const data = await res.json();
+        return Array.isArray(data) ? data : [];
+      } catch {
+        return [];
       }
-      if(!commits.length){
-        document.getElementById('content').innerHTML='<p class="loading">No snapshots available yet.</p>';
-        return;
+    }
+
+    async function fetchWorkflowRunsBySha() {
+      try {
+        const [pushRes, dispatchRes] = await Promise.all([
+          fetch(`${API_BASE}/actions/runs?per_page=100&branch=main&event=push`),
+          fetch(`${API_BASE}/actions/runs?per_page=100&branch=main&event=workflow_dispatch`)
+        ]);
+        const pushRuns = pushRes.ok ? ((await pushRes.json()).workflow_runs || []) : [];
+        const dispatchRuns = dispatchRes.ok ? ((await dispatchRes.json()).workflow_runs || []) : [];
+        const runs = [...pushRuns, ...dispatchRuns];
+        const bySha = {};
+
+        runs.forEach((run) => {
+          const key = WORKFLOW_TO_KEY[run.name];
+          if (!key || !run.head_sha) return;
+
+          if (!bySha[run.head_sha]) bySha[run.head_sha] = {};
+          const prev = bySha[run.head_sha][key];
+          if (!prev || (new Date(run.created_at) > new Date(prev.createdAt))) {
+            bySha[run.head_sha][key] = {
+              status: run.status,
+              conclusion: run.conclusion,
+              url: run.html_url,
+              createdAt: run.created_at,
+              title: run.display_title
+            };
+          }
+        });
+
+        return bySha;
+      } catch {
+        return {};
       }
-      const sel=document.getElementById('commit-sel');
-      sel.innerHTML='';
-      commits.forEach((c,i)=>{
-        const o=document.createElement('option');
-        o.value=c.sha;
-        const d=new Date(c.date).toLocaleDateString();
-        o.textContent=c.short_sha+' — '+c.message+' ('+d+')'+(i===0?' ★':'');
-        sel.appendChild(o);
+    }
+
+    async function fetchPrebuiltDashboardData() {
+      try {
+        const stamp = Math.floor(Date.now() / 30000);
+        const res = await fetch(`${PAGES_BASE}/dashboard-data.json?v=${stamp}`);
+        if (!res.ok) return null;
+        const data = await res.json();
+        if (!data || typeof data !== "object") return null;
+        return data;
+      } catch {
+        return null;
+      }
+    }
+
+    async function fetchGhPagesTree() {
+      try {
+        const res = await fetch(`${API_BASE}/git/trees/gh-pages?recursive=1`);
+        if (!res.ok) return [];
+        const data = await res.json();
+        return Array.isArray(data.tree) ? data.tree : [];
+      } catch {
+        return [];
+      }
+    }
+
+    async function urlExists(url) {
+      try {
+        const head = await fetch(url, { method: "HEAD" });
+        if (head.ok) return true;
+        if (head.status !== 405) return false;
+        const get = await fetch(url);
+        return get.ok;
+      } catch {
+        return false;
+      }
+    }
+
+    async function fetchReportSummary(url) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const html = await res.text();
+        const get = (label) => {
+          const m = html.match(new RegExp(label + "(?:\\s+|</td>\\s*<td>)(\\d+)"));
+          return m ? parseInt(m[1], 10) : null;
+        };
+        return {
+          visAnalyzed: get("VIs Analyzed"),
+          testsRun: get("Total Tests Run"),
+          passed: get("Passed Tests"),
+          failed: get("Failed Tests")
+        };
+      } catch {
+        return null;
+      }
+    }
+
+    async function fetchMCSummary(url) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const html = await res.text();
+        const get = (label) => {
+          const m = html.match(new RegExp(label + "(?:\\s+|</td>\\s*<td>)(\\d+)"));
+          return m ? parseInt(m[1], 10) : null;
+        };
+        return {
+          total: get("Total VIs"),
+          compiled: get("Compiled Successfully"),
+          failed: get("Failed to Compile"),
+          missingDeps: get("Missing Dependencies")
+        };
+      } catch {
+        return null;
+      }
+    }
+
+    async function fetchVidiffFiles(indexUrl) {
+      try {
+        const res = await fetch(indexUrl);
+        if (!res.ok) return [];
+        const html = await res.text();
+        const files = [];
+        const hrefRe = /href="([^"]+\.html)"/g;
+        let m;
+        while ((m = hrefRe.exec(html)) !== null) {
+          const file = decodeURIComponent(m[1]);
+          if (file !== "index.html") files.push(file);
+        }
+        return [...new Set(files)];
+      } catch {
+        return [];
+      }
+    }
+
+    function viaSummaryHtml(s) {
+      if (!s) return '<span class="neutral">...</span>';
+      if (s.testsRun === 0) return '<span class="neutral">0 tests run</span>';
+      const parts = [];
+      if (s.failed > 0) parts.push(`<span class="fail">${s.failed} failed</span>`);
+      if (s.passed > 0) parts.push(`<span class="pass">${s.passed} passed</span>`);
+      parts.push(`<span class="neutral">${s.visAnalyzed} VIs</span>`);
+      return parts.join(" · ");
+    }
+
+    function mcSummaryHtml(s) {
+      if (!s) return '<span class="neutral">...</span>';
+      if (s.total === null) return '<span class="neutral">no data</span>';
+      const parts = [];
+      if (s.failed > 0) parts.push(`<span class="fail">${s.failed} failed</span>`);
+      if (s.compiled > 0) parts.push(`<span class="pass">${s.compiled} compiled</span>`);
+      parts.push(`<span class="neutral">${s.total} VIs</span>`);
+      if (s.missingDeps > 0) parts.push(`<span class="fail">${s.missingDeps} missing deps</span>`);
+      return parts.join(" · ");
+    }
+
+    function runStateHtml(run, successText) {
+      if (!run) return '<span class="neutral">-</span>';
+      if (run.status !== "completed") {
+        return `<span class="neutral">running...</span> <a href="${run.url}">actions</a>`;
+      }
+      if (run.conclusion === "success") {
+        return `<span class="pass">${successText}</span> <a href="${run.url}">actions</a>`;
+      }
+      if (run.conclusion === "cancelled") {
+        return `<span class="neutral">cancelled</span> <a href="${run.url}">actions</a>`;
+      }
+      return `<span class="fail">${run.conclusion || "failed"}</span> <a href="${run.url}">actions</a>`;
+    }
+
+    function escapeHtml(text) {
+      return String(text || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function compactRevisionLabel(message, fallback) {
+      const line = (message || "").split("\n")[0].trim();
+      if (!line) return fallback;
+      return line.length > 96 ? `${line.slice(0, 93)}...` : line;
+    }
+
+    async function fetchRecentCommits() {
+      try {
+        const res = await fetch(`${API_BASE}/commits?sha=main&per_page=60`);
+        if (!res.ok) return [];
+        const data = await res.json();
+        if (!Array.isArray(data)) return [];
+        return data
+          .filter((c) => c && c.sha && c.commit)
+          .map((c) => ({
+            sha: c.sha,
+            date: c.commit.author?.date || c.commit.committer?.date || "",
+            message: c.commit.message || ""
+          }));
+      } catch {
+        return [];
+      }
+    }
+
+    async function buildReportMapsFromTree(tree) {
+      const viaReports = {};
+      const mcReports = {};
+      const vdReports = {};
+
+      tree.forEach((n) => {
+        const path = typeof n === "string" ? n : n?.path;
+        if (!path) return;
+
+        const mc = path.match(/^masscompile\/masscompile\/([a-f0-9]+)\/index\.html$/);
+        if (mc) {
+          mcReports[mc[1]] = { url: `${PAGES_BASE}/${path}` };
+        }
+
+        const va = path.match(/^vi-analyzer\/vi-analyzer\/([a-f0-9]+)\/index\.html$/);
+        if (va) {
+          viaReports[va[1]] = { url: `${PAGES_BASE}/${path}` };
+        }
+
+        const vd = path.match(/^vidiff\/push-([a-f0-9]+)\/windows\/(.+\.html)$/);
+        if (vd) {
+          if (!vdReports[vd[1]]) {
+            vdReports[vd[1]] = {
+              files: [],
+              url: `${PAGES_BASE}/vidiff/push-${vd[1]}/windows/`
+            };
+          }
+          if (vd[2] !== "index.html") vdReports[vd[1]].files.push(vd[2]);
+        }
       });
-      sel.addEventListener('change',()=>load(sel.value));
-      const h=location.hash.slice(1);
-      const hc=commits.find(c=>c.sha===h||c.short_sha===h);
-      load(hc?hc.sha:commits[0].sha);
+
+      return { viaReports, mcReports, vdReports };
     }
 
-    async function load(sha){
-      cur=sha;
-      const short=sha.slice(0,7);
-      location.hash=short;
-      const ci=commits.find(c=>c.sha===sha);
-      document.getElementById('commit-sel').value=sha;
+    async function renderCombinedTable(commits, runsBySha, tree) {
+      const container = document.getElementById("reports-table");
+      const { viaReports, mcReports, vdReports } = await buildReportMapsFromTree(tree || []);
 
-      // diff link
-      const dl=document.getElementById('diff-link');
-      dl.href='../vidiff/push-'+short+'/';
-      dl.style.display='inline-block';
+      // Normalize everything to 7-char short SHAs so they match the report directory names
+      const commitMeta = {};
+      commits.forEach((c) => {
+        const short = c.sha.slice(0, 7);
+        if (!commitMeta[short]) {
+          commitMeta[short] = { date: c.date, message: c.message, ciOnly: c.ciOnly === true, fullSha: c.sha };
+        }
+      });
 
-      // commit meta
-      const cm=document.getElementById('commit-meta');
-      if(ci) cm.textContent=new Date(ci.date).toLocaleString()+(ci.stats?' · '+ci.stats.succeeded+'/'+ci.stats.total+' VIs':'');
+      const runsShort = {};
+      Object.entries(runsBySha || {}).forEach(([sha, runs]) => {
+        const short = sha.slice(0, 7);
+        if (!runsShort[short]) runsShort[short] = runs;
+      });
 
-      const el=document.getElementById('content');
-      el.innerHTML='<p class="loading">Loading snapshots…</p>';
-      try{
-        const r=await fetch(BASE+'commits/'+sha+'/manifest.json');
-        if(!r.ok) throw new Error('Manifest not found for '+short);
-        render(await r.json(),sha);
-      }catch(e){el.innerHTML='<p class="error">'+esc(e.message)+'</p>';}
-    }
+      const allShas = [...new Set([
+        ...Object.keys(commitMeta),
+        ...Object.keys(viaReports),
+        ...Object.keys(mcReports),
+        ...Object.keys(vdReports),
+        ...Object.keys(runsShort)
+      ])];
 
-    function render(m,sha){
-      const el=document.getElementById('content');
-      el.innerHTML='';
-      const dir='commits/'+sha+'/';
-      if(m.tree&&m.tree.length){
-        const ul=document.createElement('ul');
-        ul.className='tree';
-        m.tree.forEach(n=>ul.appendChild(mkNode(n,dir)));
-        el.appendChild(ul);
+      if (allShas.length === 0) {
+        container.innerHTML = '<p class="empty">No reports found yet.</p>';
+        return;
       }
-      if(m.nonProjectFiles&&m.nonProjectFiles.length){
-        const lbl=document.createElement('p');
-        lbl.className='section-label';
-        lbl.textContent='Files not in project';
-        el.appendChild(lbl);
-        const ul=document.createElement('ul');
-        ul.className='tree';
-        m.nonProjectFiles.forEach(f=>{
-          const li=document.createElement('li');
-          li.innerHTML=mkFile(f,dir);
-          ul.appendChild(li);
+
+      allShas.forEach((sha) => {
+        if (commitMeta[sha]) return;
+        const run = runsShort[sha];
+        if (!run) return;
+        const first = run.via || run.mc || run.vd;
+        if (!first) return;
+        commitMeta[sha] = {
+          date: first.createdAt,
+          message: first.title || "Pending CI reports",
+          ciOnly: false
+        };
+      });
+
+      allShas.sort((a, b) => {
+        const da = commitMeta[a]?.date || "";
+        const db = commitMeta[b]?.date || "";
+        return db.localeCompare(da);
+      });
+
+      const formatDate = (iso) => {
+        if (!iso) return '<span class="neutral">-</span>';
+        const d = new Date(iso);
+        return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+      };
+
+      let html = "<table><thead><tr><th style=\"width:48%\">Revision</th><th style=\"width:10%\">Date</th><th style=\"width:16%\">Mass Compile</th><th style=\"width:16%\">VI Analyzer</th><th style=\"width:10%\">VIDiff</th></tr></thead><tbody>";
+      for (const sha of allShas) {
+        const via = viaReports[sha];
+        const mc = mcReports[sha];
+        const vd = vdReports[sha];
+        const run = runsShort[sha] || {};
+        const info = commitMeta[sha] || {};
+        const isCiOnly = info.ciOnly === true;
+
+        const dateCell = formatDate(info.date);
+        const titleAttr = info.message ? ` title="${info.message.replace(/"/g, "&quot;")}"` : "";
+        const shortSha = sha.slice(0, 7);
+        const revisionLabel = compactRevisionLabel(info.message, shortSha);
+        const revisionLabelEscaped = escapeHtml(revisionLabel);
+        const shortShaEscaped = escapeHtml(shortSha);
+        const commitUrl = `https://github.com/${OWNER}/${REPO}/commit/${sha}`;
+        const ciOnlyTag = isCiOnly ? '<span class="ci-only-tag">CI only</span>' : "";
+        const trCiAttr = isCiOnly ? ' data-ci-only="true"' : '';
+
+        let mcCell = mc
+          ? `<span class="summary" id="mc-${sha}"><span class="neutral">...</span></span> <a href="${mc.url}">report</a>`
+          : runStateHtml(run.mc, "completed");
+        let viaCell = via
+          ? `<span class="summary" id="via-${sha}"><span class="neutral">...</span></span> <a href="${via.url}">report</a>`
+          : runStateHtml(run.via, "completed");
+        let vdCell = vd
+          ? `<span class="summary" id="vd-${sha}"><span class="neutral">...</span></span> <a href="${vd.url}">report</a>`
+          : runStateHtml(run.vd, "completed");
+
+        if (isCiOnly && !mc && !run.mc) mcCell = '<span class="neutral">CI only</span>';
+        if (isCiOnly && !via && !run.via) viaCell = '<span class="neutral">CI only</span>';
+        if (isCiOnly && !vd && !run.vd) vdCell = '<span class="neutral">CI only</span>';
+
+        html += `<tr${trCiAttr}><td${titleAttr}><a class="revision-title" href="${commitUrl}">${revisionLabelEscaped}</a><div class="revision-meta"><span class="commit-sha">${shortShaEscaped}</span>${ciOnlyTag}</div></td><td>${dateCell}</td><td>${mcCell}</td><td>${viaCell}</td><td>${vdCell}</td></tr>`;
+      }
+      html += "</tbody></table>";
+      container.innerHTML = html;
+
+      const mcFetches = Object.entries(mcReports).map(async ([sha, r]) => {
+        const s = await fetchMCSummary(r.url);
+        const el = document.getElementById(`mc-${sha}`);
+        if (el) el.innerHTML = mcSummaryHtml(s);
+      });
+
+      const viaFetches = Object.entries(viaReports).map(async ([sha, r]) => {
+        const s = await fetchReportSummary(r.url);
+        const el = document.getElementById(`via-${sha}`);
+        if (el) el.innerHTML = viaSummaryHtml(s);
+      });
+
+      const vdFetches = Object.entries(vdReports).map(async ([sha, r]) => {
+        let materialCount = 0;
+        const checks = r.files.map(async (file) => {
+          try {
+            const res = await fetch(`${r.url}${encodeURIComponent(file)}`);
+            if (!res.ok) return false;
+            const text = await res.text();
+            const idx = text.indexOf("Detailed Information");
+            if (idx === -1) return false;
+            return text.slice(idx).includes("<details");
+          } catch {
+            return false;
+          }
         });
-        el.appendChild(ul);
+
+        const results = await Promise.all(checks);
+        materialCount = results.filter(Boolean).length;
+
+        const el = document.getElementById(`vd-${sha}`);
+        if (!el) return;
+        const total = r.files.length;
+        if (total === 0) {
+          el.innerHTML = '<span class="neutral">no files</span>';
+        } else if (materialCount > 0) {
+          el.innerHTML = `<span class="fail">${materialCount} change${materialCount !== 1 ? "s" : ""}</span> · <span class="neutral">${total} file${total !== 1 ? "s" : ""}</span>`;
+        } else {
+          el.innerHTML = `<span class="pass">no material changes</span> · <span class="neutral">${total} file${total !== 1 ? "s" : ""}</span>`;
+        }
+      });
+
+      await Promise.all([...mcFetches, ...viaFetches, ...vdFetches]);
+    }
+
+    let runsByShaCache = null;
+    let treeCache = null;
+    let recentCommitsCache = null;
+
+    async function refreshDashboard(refreshRuns, refreshTree) {
+      try {
+        const prebuilt = await fetchPrebuiltDashboardData();
+
+        if (refreshRuns || !runsByShaCache) {
+          if (prebuilt && prebuilt.runsBySha && typeof prebuilt.runsBySha === "object") {
+            runsByShaCache = prebuilt.runsBySha;
+          } else {
+            runsByShaCache = await fetchWorkflowRunsBySha();
+          }
+        }
+
+        if (refreshTree || !treeCache) {
+          if (prebuilt && Array.isArray(prebuilt.tree)) {
+            treeCache = prebuilt.tree;
+          } else {
+            treeCache = await fetchGhPagesTree();
+          }
+        }
+
+        if (refreshRuns || !recentCommitsCache) {
+          if (prebuilt && Array.isArray(prebuilt.recentCommits)) {
+            recentCommitsCache = prebuilt.recentCommits;
+          } else {
+            recentCommitsCache = await fetchRecentCommits();
+          }
+        }
+
+        const snapshotCommits = await fetchSnapshotCommits();
+        const commits = [...(recentCommitsCache || []), ...snapshotCommits];
+        await renderCombinedTable(commits, runsByShaCache || {}, treeCache || []);
+      } catch (err) {
+        document.getElementById("reports-table").innerHTML = `<p class="empty">Error loading reports: ${err.message}</p>`;
       }
     }
 
-    function mkNode(n,dir){
-      const li=document.createElement('li');
-      if(n.type==='folder'||n.type==='target'){
-        const row=document.createElement('span');
-        row.className='folder-row';
-        const caret=document.createElement('span');
-        caret.className='caret open';
-        caret.textContent='▶';
-        row.appendChild(caret);
-        row.appendChild(document.createTextNode(' 📁 '+n.name));
-        const sub=document.createElement('ul');
-        if(n.children) n.children.forEach(c=>sub.appendChild(mkNode(c,dir)));
-        row.addEventListener('click',e=>{
-          e.stopPropagation();
-          caret.classList.toggle('open');
-          sub.style.display=sub.style.display==='none'?'':'none';
-        });
-        li.appendChild(row);
-        li.appendChild(sub);
-      }else{
-        li.innerHTML=mkFile(n,dir);
-      }
-      return li;
-    }
+    refreshDashboard(true, true);
+    setInterval(() => refreshDashboard(false, false), 30000);
+    setInterval(() => refreshDashboard(true, true), 300000);
 
-    function mkFile(n,dir){
-      const ext=(n.name||'').split('.').pop().toLowerCase();
-      const badge=ext==='ctl'?'CTL':'VI';
-      if(n.html){
-        const href=dir+n.html.replace(/\\/g,'/').split('/').map(encodeURIComponent).join('/');
-        return '<span class="file-row"><span class="icon">📄</span><a class="file-link" href="'+href+'">'+esc(n.name)+'</a><span class="badge">'+badge+'</span></span>';
-      }
-      return '<span class="file-row"><span class="icon">📄</span><span style="color:#484f58">'+esc(n.name)+'</span><span class="badge" style="color:#484f58">'+badge+'</span></span>';
-    }
-
-    function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-
-    init();
+    document.getElementById('show-ci-only').addEventListener('change', function () {
+      document.getElementById('reports-table').classList.toggle('hide-ci-only', !this.checked);
+    });
   </script>
 </body>
 </html>
