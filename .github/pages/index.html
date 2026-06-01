@@ -144,6 +144,19 @@
       }
     }
 
+    async function fetchPrebuiltDashboardData() {
+      try {
+        const stamp = Math.floor(Date.now() / 30000);
+        const res = await fetch(`${PAGES_BASE}/dashboard-data.json?v=${stamp}`);
+        if (!res.ok) return null;
+        const data = await res.json();
+        if (!data || typeof data !== "object") return null;
+        return data;
+      } catch {
+        return null;
+      }
+    }
+
     async function fetchGhPagesTree() {
       try {
         const res = await fetch(`${API_BASE}/git/trees/gh-pages?recursive=1`);
@@ -266,17 +279,20 @@
       const vdReports = {};
 
       tree.forEach((n) => {
-        const mc = n.path.match(/^masscompile\/masscompile\/([a-f0-9]+)\/index\.html$/);
+        const path = typeof n === "string" ? n : n?.path;
+        if (!path) return;
+
+        const mc = path.match(/^masscompile\/masscompile\/([a-f0-9]+)\/index\.html$/);
         if (mc) {
-          mcReports[mc[1]] = { url: `${PAGES_BASE}/${n.path}` };
+          mcReports[mc[1]] = { url: `${PAGES_BASE}/${path}` };
         }
 
-        const va = n.path.match(/^vi-analyzer\/vi-analyzer\/([a-f0-9]+)\/index\.html$/);
+        const va = path.match(/^vi-analyzer\/vi-analyzer\/([a-f0-9]+)\/index\.html$/);
         if (va) {
-          viaReports[va[1]] = { url: `${PAGES_BASE}/${n.path}` };
+          viaReports[va[1]] = { url: `${PAGES_BASE}/${path}` };
         }
 
-        const vd = n.path.match(/^vidiff\/push-([a-f0-9]+)\/windows\/(.+\.html)$/);
+        const vd = path.match(/^vidiff\/push-([a-f0-9]+)\/windows\/(.+\.html)$/);
         if (vd) {
           if (!vdReports[vd[1]]) {
             vdReports[vd[1]] = {
@@ -411,12 +427,24 @@
 
     async function refreshDashboard(refreshRuns, refreshTree) {
       try {
+        const prebuilt = await fetchPrebuiltDashboardData();
+
         if (refreshRuns || !runsByShaCache) {
-          runsByShaCache = await fetchWorkflowRunsBySha();
+          if (prebuilt && prebuilt.runsBySha && typeof prebuilt.runsBySha === "object") {
+            runsByShaCache = prebuilt.runsBySha;
+          } else {
+            runsByShaCache = await fetchWorkflowRunsBySha();
+          }
         }
+
         if (refreshTree || !treeCache) {
-          treeCache = await fetchGhPagesTree();
+          if (prebuilt && Array.isArray(prebuilt.tree)) {
+            treeCache = prebuilt.tree;
+          } else {
+            treeCache = await fetchGhPagesTree();
+          }
         }
+
         const commits = await fetchSnapshotCommits();
         await renderCombinedTable(commits, runsByShaCache || {}, treeCache || []);
       } catch (err) {
