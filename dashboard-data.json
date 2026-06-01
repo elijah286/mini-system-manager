@@ -1,5 +1,5 @@
 {
-  "generatedAt": "26768081136",
+  "generatedAt": "26768332285",
   "tree": [
     ".nojekyll",
     "dashboard-data.json",
@@ -1516,6 +1516,22 @@
     "vidiff/push-f0e2b16/windows/main (Modified)_files/support/unchecked-image.png"
   ],
   "runsBySha": {
+    "0faf3879605cde0b5d3f84e9a18c48619b7105b2": {
+      "mc": {
+        "status": "pending",
+        "conclusion": null,
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768332472",
+        "createdAt": "2026-06-01T16:38:22Z",
+        "title": "Fix dashboard report links: normalize SHAs to 7 chars to match report\u2026"
+      },
+      "via": {
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768332250",
+        "createdAt": "2026-06-01T16:38:22Z",
+        "title": "Fix dashboard report links: normalize SHAs to 7 chars to match report\u2026"
+      }
+    },
     "2006d0449b590e7878214b0e3e01180fdfe68e38": {
       "mc": {
         "status": "in_progress",
@@ -1525,8 +1541,8 @@
         "title": "Dashboard: system theme, filter CI-only rows, fix links to reports"
       },
       "via": {
-        "status": "pending",
-        "conclusion": null,
+        "status": "completed",
+        "conclusion": "cancelled",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768080857",
         "createdAt": "2026-06-01T16:33:22Z",
         "title": "Dashboard: system theme, filter CI-only rows, fix links to reports"
@@ -2117,33 +2133,16 @@
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26684595903",
         "createdAt": "2026-05-30T13:07:13Z",
         "title": "Diagnostic: comprehensive search for VI Analyzer test LLBs in container"
-      },
-      "via": {
-        "status": "completed",
-        "conclusion": "cancelled",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26684595918",
-        "createdAt": "2026-05-30T13:07:13Z",
-        "title": "Diagnostic: comprehensive search for VI Analyzer test LLBs in container"
-      },
-      "vd": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26684595908",
-        "createdAt": "2026-05-30T13:07:13Z",
-        "title": "Diagnostic: comprehensive search for VI Analyzer test LLBs in container"
-      }
-    },
-    "1c44635abbd5d0c2363ec9300ceeba225b2726e7": {
-      "via": {
-        "status": "completed",
-        "conclusion": "cancelled",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26684432994",
-        "createdAt": "2026-05-30T12:59:10Z",
-        "title": "Dashboard: combine VIA and VIDiff into single table by commit"
       }
     }
   },
   "recentCommits": [
+    {
+      "sha": "0faf3879605cde0b5d3f84e9a18c48619b7105b2",
+      "date": "2026-06-01T16:38:16Z",
+      "message": "Fix dashboard report links: normalize SHAs to 7 chars to match report directories",
+      "ciOnly": true
+    },
     {
       "sha": "2006d0449b590e7878214b0e3e01180fdfe68e38",
       "date": "2026-06-01T16:33:16Z",
@@ -2496,12 +2495,6 @@
       "sha": "250f6e937df5659ae34051d901c91a9f0212e1ae",
       "date": "2026-02-09T23:11:29Z",
       "message": "Delete screenshot instructions from README\n\nRemove instructions for adding a screenshot of the main block diagram.",
-      "ciOnly": false
-    },
-    {
-      "sha": "287a21aa37fd0e84d3abeac560147405162c0c66",
-      "date": "2026-02-09T23:10:46Z",
-      "message": "Enhance README with detailed project information\n\nExpanded the README to provide detailed information about the Mini System Manager, including its purpose, functionality, supported systems, architecture, and getting started instructions.",
       "ciOnly": false
     }
   ]

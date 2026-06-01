@@ -396,9 +396,19 @@
       const container = document.getElementById("reports-table");
       const { viaReports, mcReports, vdReports } = await buildReportMapsFromTree(tree || []);
 
+      // Normalize everything to 7-char short SHAs so they match the report directory names
       const commitMeta = {};
       commits.forEach((c) => {
-        commitMeta[c.sha] = { date: c.date, message: c.message, ciOnly: c.ciOnly === true };
+        const short = c.sha.slice(0, 7);
+        if (!commitMeta[short]) {
+          commitMeta[short] = { date: c.date, message: c.message, ciOnly: c.ciOnly === true, fullSha: c.sha };
+        }
+      });
+
+      const runsShort = {};
+      Object.entries(runsBySha || {}).forEach(([sha, runs]) => {
+        const short = sha.slice(0, 7);
+        if (!runsShort[short]) runsShort[short] = runs;
       });
 
       const allShas = [...new Set([
@@ -406,7 +416,7 @@
         ...Object.keys(viaReports),
         ...Object.keys(mcReports),
         ...Object.keys(vdReports),
-        ...Object.keys(runsBySha || {})
+        ...Object.keys(runsShort)
       ])];
 
       if (allShas.length === 0) {
@@ -416,7 +426,7 @@
 
       allShas.forEach((sha) => {
         if (commitMeta[sha]) return;
-        const run = runsBySha?.[sha];
+        const run = runsShort[sha];
         if (!run) return;
         const first = run.via || run.mc || run.vd;
         if (!first) return;
@@ -444,7 +454,7 @@
         const via = viaReports[sha];
         const mc = mcReports[sha];
         const vd = vdReports[sha];
-        const run = runsBySha?.[sha] || {};
+        const run = runsShort[sha] || {};
         const info = commitMeta[sha] || {};
         const isCiOnly = info.ciOnly === true;
 
