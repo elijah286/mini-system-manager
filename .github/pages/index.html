@@ -5,31 +5,57 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CI Reports Dashboard - Mini System Manager</title>
   <style>
+    :root {
+      --bg: #ffffff;
+      --section-bg: #f6f8fa;
+      --border: #d0d7de;
+      --text: #1f2328;
+      --heading: #1f2328;
+      --muted: #656d76;
+      --link: #0969da;
+      --pass: #1a7f37;
+      --fail: #cf222e;
+      --th-bg: #f6f8fa;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0d1117;
+        --section-bg: #161b22;
+        --border: #21262d;
+        --text: #c9d1d9;
+        --heading: #f0f6fc;
+        --muted: #8b949e;
+        --link: #58a6ff;
+        --pass: #3fb950;
+        --fail: #f85149;
+        --th-bg: #161b22;
+      }
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #0d1117;
-      color: #c9d1d9;
+      background: var(--bg);
+      color: var(--text);
       padding: 2em;
       max-width: 1000px;
       margin: 0 auto;
     }
-    h1 { color: #58a6ff; margin-bottom: 0.3em; font-size: 1.7em; }
+    h1 { color: var(--link); margin-bottom: 0.3em; font-size: 1.7em; }
     h2 {
-      color: #f0f6fc;
+      color: var(--heading);
       margin: 1.5em 0 0.8em;
       font-size: 1.2em;
-      border-bottom: 1px solid #21262d;
+      border-bottom: 1px solid var(--border);
       padding-bottom: 0.4em;
     }
-    .subtitle { color: #8b949e; margin-bottom: 1.4em; font-size: 0.95em; }
-    .subtitle a { color: #58a6ff; text-decoration: none; }
+    .subtitle { color: var(--muted); margin-bottom: 1.4em; font-size: 0.95em; }
+    .subtitle a { color: var(--link); text-decoration: none; }
     .subtitle a:hover { text-decoration: underline; }
     .badge-row { display: flex; gap: 0.5em; flex-wrap: wrap; margin-bottom: 1.3em; }
     .badge-row img { height: 20px; }
     .section {
-      background: #161b22;
-      border: 1px solid #21262d;
+      background: var(--section-bg);
+      border: 1px solid var(--border);
       border-radius: 6px;
       padding: 1.2em;
       margin-bottom: 1.5em;
@@ -39,26 +65,26 @@
       align-items: center;
       gap: 1em;
     }
-    .vi-browser a { color: #58a6ff; text-decoration: none; font-size: 1.05em; font-weight: 600; }
+    .vi-browser a { color: var(--link); text-decoration: none; font-size: 1.05em; font-weight: 600; }
     .vi-browser a:hover { text-decoration: underline; }
-    .vi-browser p { color: #8b949e; font-size: 0.85em; margin-top: 0.2em; }
+    .vi-browser p { color: var(--muted); font-size: 0.85em; margin-top: 0.2em; }
     table { width: 100%; border-collapse: collapse; table-layout: fixed; }
     th {
       text-align: left;
       padding: 0.6em 0.8em;
-      background: #161b22;
-      color: #8b949e;
+      background: var(--th-bg);
+      color: var(--muted);
       font-size: 0.85em;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      border-bottom: 1px solid #21262d;
+      border-bottom: 1px solid var(--border);
     }
-    td { padding: 0.6em 0.8em; border-bottom: 1px solid #21262d; vertical-align: top; }
-    td a { color: #58a6ff; text-decoration: none; }
+    td { padding: 0.6em 0.8em; border-bottom: 1px solid var(--border); vertical-align: top; }
+    td a { color: var(--link); text-decoration: none; }
     td a:hover { text-decoration: underline; }
     .commit-sha { font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.9em; }
     .revision-title {
-      color: #f0f6fc;
+      color: var(--heading);
       font-size: 0.92em;
       font-weight: 600;
       text-decoration: none;
@@ -70,11 +96,11 @@
     }
     .revision-meta {
       margin-top: 0.2em;
-      color: #8b949e;
+      color: var(--muted);
       font-size: 0.8em;
     }
     .ci-only-tag {
-      color: #8b949e;
+      color: var(--muted);
       margin-left: 0.5em;
       font-weight: 600;
       text-transform: uppercase;
@@ -82,11 +108,11 @@
       font-size: 0.75em;
     }
     .summary { font-size: 0.85em; }
-    .pass { color: #3fb950; }
-    .fail { color: #f85149; }
-    .neutral { color: #8b949e; }
-    .empty { color: #8b949e; font-style: italic; padding: 0.8em 0; }
-    .info-line { color: #8b949e; font-size: 0.82em; margin-bottom: 0.7em; }
+    .pass { color: var(--pass); }
+    .fail { color: var(--fail); }
+    .neutral { color: var(--muted); }
+    .empty { color: var(--muted); font-style: italic; padding: 0.8em 0; }
+    .info-line { color: var(--muted); font-size: 0.82em; margin-bottom: 0.7em; }
   </style>
 </head>
 <body>
@@ -283,13 +309,15 @@
       return parts.join(" · ");
     }
 
-    function runStateHtml(run, successText) {
+    function runStateHtml(run, successText, reportUrl) {
       if (!run) return '<span class="neutral">-</span>';
       if (run.status !== "completed") {
         return `<span class="neutral">running...</span> <a href="${run.url}">actions</a>`;
       }
       if (run.conclusion === "success") {
-        return `<span class="pass">${successText}</span> <a href="${run.url}">actions</a>`;
+        const href = reportUrl || run.url;
+        const text = reportUrl ? 'report' : 'actions';
+        return `<span class="pass">${successText}</span> <a href="${href}">${text}</a>`;
       }
       if (run.conclusion === "cancelled") {
         return `<span class="neutral">cancelled</span> <a href="${run.url}">actions</a>`;
@@ -418,9 +446,13 @@
         const vd = vdReports[sha];
         const run = runsBySha?.[sha] || {};
         const info = commitMeta[sha] || {};
+        const isCiOnly = info.ciOnly === true;
+
+        // Skip CI-only commits that have no reports and no active workflows
+        if (isCiOnly && !mc && !via && !vd && !run.mc && !run.via && !run.vd) continue;
+
         const dateCell = formatDate(info.date);
         const titleAttr = info.message ? ` title="${info.message.replace(/"/g, "&quot;")}"` : "";
-        const isCiOnly = info.ciOnly === true;
         const shortSha = sha.slice(0, 7);
         const revisionLabel = compactRevisionLabel(info.message, shortSha);
         const revisionLabelEscaped = escapeHtml(revisionLabel);
@@ -430,13 +462,13 @@
 
         let mcCell = mc
           ? `<span class="summary" id="mc-${sha}"><span class="neutral">...</span></span> <a href="${mc.url}">report</a>`
-          : runStateHtml(run.mc, "completed");
+          : runStateHtml(run.mc, "completed", `${PAGES_BASE}/masscompile/masscompile/${sha}/index.html`);
         let viaCell = via
           ? `<span class="summary" id="via-${sha}"><span class="neutral">...</span></span> <a href="${via.url}">report</a>`
-          : runStateHtml(run.via, "completed");
+          : runStateHtml(run.via, "completed", `${PAGES_BASE}/vi-analyzer/vi-analyzer/${sha}/index.html`);
         let vdCell = vd
           ? `<span class="summary" id="vd-${sha}"><span class="neutral">...</span></span> <a href="${vd.url}">report</a>`
-          : runStateHtml(run.vd, "completed");
+          : runStateHtml(run.vd, "completed", `${PAGES_BASE}/vidiff/push-${sha}/windows/`);
 
         if (isCiOnly && !mc && !run.mc) mcCell = '<span class="neutral">CI only</span>';
         if (isCiOnly && !via && !run.via) viaCell = '<span class="neutral">CI only</span>';
