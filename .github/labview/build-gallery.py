@@ -217,6 +217,17 @@ def main():
     # --- Copy gallery index.html ---
     shutil.copy2(gallery_html, os.path.join(deploy_dir, "index.html"))
 
+    # --- Copy other HTML assets from the same pages directory ---
+    pages_dir = os.path.dirname(os.path.abspath(gallery_html))
+    gallery_basename = os.path.basename(gallery_html)
+    for fname in os.listdir(pages_dir):
+        if fname.endswith(".html") and fname != gallery_basename:
+            shutil.copy2(
+                os.path.join(pages_dir, fname),
+                os.path.join(deploy_dir, fname),
+            )
+            print(f"  Copied pages asset: {fname}")
+
     print("Gallery build complete.")
 
 

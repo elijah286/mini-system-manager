@@ -11,6 +11,7 @@ on:
       - '.github/labview/export-vi-snapshots.ps1'
       - '.github/labview/build-gallery.py'
       - '.github/pages/vi-browser.html'
+      - '.github/pages/vi-interactive.html'
       - '.github/workflows/vi-snapshots.yml'
   workflow_dispatch:
 

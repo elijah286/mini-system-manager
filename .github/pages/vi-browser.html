@@ -29,6 +29,8 @@
     .file-link:hover{text-decoration:underline}
     .file-row{display:inline-flex;align-items:center;gap:.4em}
     .badge{display:inline-block;background:#21262d;color:#8b949e;font-size:.7em;padding:.1em .45em;border-radius:3px}
+    .ibadge{display:inline-block;background:#21262d;color:#e3b341;font-size:.7em;padding:.1em .45em;border-radius:3px;text-decoration:none;border:none}
+    .ibadge:hover{background:#30363d;color:#f0c060}
     .icon{font-size:.9em}
     .section-label{color:#8b949e;font-size:.8em;margin-top:2em;margin-bottom:.5em;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid #21262d;padding-bottom:.3em}
     .loading{color:#8b949e;font-style:italic;padding:2em}
@@ -166,7 +168,9 @@
       const badge=ext==='ctl'?'CTL':'VI';
       if(n.html){
         const href=dir+n.html.replace(/\\/g,'/').split('/').map(encodeURIComponent).join('/');
-        return '<span class="file-row"><span class="icon">📄</span><a class="file-link" href="'+href+'">'+esc(n.name)+'</a><span class="badge">'+badge+'</span></span>';
+        const rawPath=dir+n.html.replace(/\\/g,'/');
+        const iHref='vi-interactive.html?src='+encodeURIComponent(rawPath)+'&title='+encodeURIComponent(n.name||'');
+        return '<span class="file-row"><span class="icon">📄</span><a class="file-link" href="'+href+'">'+esc(n.name)+'</a><span class="badge">'+badge+'</span><a class="ibadge" href="'+iHref+'" title="Open Interactive Viewer">⚡</a></span>';
       }
       return '<span class="file-row"><span class="icon">📄</span><span style="color:#484f58">'+esc(n.name)+'</span><span class="badge" style="color:#484f58">'+badge+'</span></span>';
     }
