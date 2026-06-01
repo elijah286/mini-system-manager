@@ -1,5 +1,5 @@
 {
-  "generatedAt": "26764660782",
+  "generatedAt": "26768081136",
   "tree": [
     ".nojekyll",
     "dashboard-data.json",
@@ -1516,6 +1516,22 @@
     "vidiff/push-f0e2b16/windows/main (Modified)_files/support/unchecked-image.png"
   ],
   "runsBySha": {
+    "2006d0449b590e7878214b0e3e01180fdfe68e38": {
+      "mc": {
+        "status": "in_progress",
+        "conclusion": null,
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768081116",
+        "createdAt": "2026-06-01T16:33:22Z",
+        "title": "Dashboard: system theme, filter CI-only rows, fix links to reports"
+      },
+      "via": {
+        "status": "pending",
+        "conclusion": null,
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768080857",
+        "createdAt": "2026-06-01T16:33:22Z",
+        "title": "Dashboard: system theme, filter CI-only rows, fix links to reports"
+      }
+    },
     "2d213d98abc9dce82e0ede185e2f03f083c68907": {
       "via": {
         "status": "completed",
@@ -2125,36 +2141,15 @@
         "createdAt": "2026-05-30T12:59:10Z",
         "title": "Dashboard: combine VIA and VIDiff into single table by commit"
       }
-    },
-    "cc1b29a09e5247d4e976935f18dda51d472210b6": {
-      "via": {
-        "status": "completed",
-        "conclusion": "cancelled",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26684377243",
-        "createdAt": "2026-05-30T12:56:21Z",
-        "title": "Dashboard: distinguish material VIDiff changes from binary-only diffs"
-      }
-    },
-    "584b344159829faeb804021f30bdede829f69014": {
-      "via": {
-        "status": "completed",
-        "conclusion": "cancelled",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26684237309",
-        "createdAt": "2026-05-30T12:49:35Z",
-        "title": "Link badges to dashboard, add summary columns to dashboard"
-      }
-    },
-    "22699198fcda3d3282c07d96c98747e9c45852a3": {
-      "mc": {
-        "status": "completed",
-        "conclusion": "failure",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26684089003",
-        "createdAt": "2026-05-30T12:42:13Z",
-        "title": "Add Docker daemon startup step to all workflows (windows-2022 runner \u2026"
-      }
     }
   },
   "recentCommits": [
+    {
+      "sha": "2006d0449b590e7878214b0e3e01180fdfe68e38",
+      "date": "2026-06-01T16:33:16Z",
+      "message": "Dashboard: system theme, filter CI-only rows, fix links to reports",
+      "ciOnly": true
+    },
     {
       "sha": "2d213d98abc9dce82e0ede185e2f03f083c68907",
       "date": "2026-06-01T09:27:51Z",
@@ -2507,12 +2502,6 @@
       "sha": "287a21aa37fd0e84d3abeac560147405162c0c66",
       "date": "2026-02-09T23:10:46Z",
       "message": "Enhance README with detailed project information\n\nExpanded the README to provide detailed information about the Mini System Manager, including its purpose, functionality, supported systems, architecture, and getting started instructions.",
-      "ciOnly": false
-    },
-    {
-      "sha": "8932135f5d7cf931fd409ac03f191e62ef1ccb61",
-      "date": "2025-01-29T00:45:35Z",
-      "message": "Create README.md",
       "ciOnly": false
     }
   ]
