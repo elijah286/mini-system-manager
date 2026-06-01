@@ -57,6 +57,23 @@
     td a { color: #58a6ff; text-decoration: none; }
     td a:hover { text-decoration: underline; }
     .commit-sha { font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.9em; }
+    .revision-title {
+      color: #f0f6fc;
+      font-size: 0.92em;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-block;
+      max-width: 420px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      vertical-align: bottom;
+    }
+    .revision-meta {
+      margin-top: 0.2em;
+      color: #8b949e;
+      font-size: 0.8em;
+    }
     .summary { font-size: 0.85em; }
     .pass { color: #3fb950; }
     .fail { color: #f85149; }
@@ -273,6 +290,21 @@
       return `<span class="fail">${run.conclusion || "failed"}</span> <a href="${run.url}">actions</a>`;
     }
 
+    function escapeHtml(text) {
+      return String(text || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function compactRevisionLabel(message, fallback) {
+      const line = (message || "").split("\n")[0].trim();
+      if (!line) return fallback;
+      return line.length > 66 ? `${line.slice(0, 63)}...` : line;
+    }
+
     async function buildReportMapsFromTree(tree) {
       const viaReports = {};
       const mcReports = {};
@@ -361,6 +393,11 @@
         const info = commitMeta[sha] || {};
         const dateCell = formatDate(info.date);
         const titleAttr = info.message ? ` title="${info.message.replace(/"/g, "&quot;")}"` : "";
+        const shortSha = sha.slice(0, 7);
+        const revisionLabel = compactRevisionLabel(info.message, shortSha);
+        const revisionLabelEscaped = escapeHtml(revisionLabel);
+        const shortShaEscaped = escapeHtml(shortSha);
+        const commitUrl = `https://github.com/${OWNER}/${REPO}/commit/${sha}`;
 
         const mcCell = mc
           ? `<span class="summary" id="mc-${sha}"><span class="neutral">...</span></span> <a href="${mc.url}">report</a>`
@@ -372,7 +409,7 @@
           ? `<span class="summary" id="vd-${sha}"><span class="neutral">...</span></span> <a href="${vd.url}">report</a>`
           : runStateHtml(run.vd, "completed");
 
-        html += `<tr><td class="commit-sha"${titleAttr}>${sha}</td><td>${dateCell}</td><td>${mcCell}</td><td>${viaCell}</td><td>${vdCell}</td></tr>`;
+        html += `<tr><td${titleAttr}><a class="revision-title" href="${commitUrl}">${revisionLabelEscaped}</a><div class="revision-meta"><span class="commit-sha">${shortShaEscaped}</span></div></td><td>${dateCell}</td><td>${mcCell}</td><td>${viaCell}</td><td>${vdCell}</td></tr>`;
       }
       html += "</tbody></table>";
       container.innerHTML = html;
