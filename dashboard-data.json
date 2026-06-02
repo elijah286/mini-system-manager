@@ -1,5 +1,5 @@
 {
-  "generatedAt": "26788728820",
+  "generatedAt": "26790055412",
   "tree": [
     ".nojekyll",
     "dashboard-data.json",
@@ -1628,6 +1628,13 @@
       }
     },
     "b33292157dbaff8cceb65efd57a6dd684356461c": {
+      "mc": {
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26776141547",
+        "createdAt": "2026-06-01T19:11:27Z",
+        "title": "Add interactive VI viewer with case structure navigation"
+      },
       "via": {
         "status": "completed",
         "conclusion": "cancelled",
@@ -1641,27 +1648,20 @@
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26776141656",
         "createdAt": "2026-06-01T19:11:27Z",
         "title": "Add interactive VI viewer with case structure navigation"
-      },
-      "mc": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26776141547",
-        "createdAt": "2026-06-01T19:11:27Z",
-        "title": "Add interactive VI viewer with case structure navigation"
       }
     },
     "a8c303445778052ffea52fcb30a7685dc7b6f02e": {
-      "mc": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26769728828",
-        "createdAt": "2026-06-01T17:05:47Z",
-        "title": "Dashboard: add Show CI-only revisions checkbox, unchecked by default"
-      },
       "via": {
         "status": "completed",
         "conclusion": "cancelled",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26769728771",
+        "createdAt": "2026-06-01T17:05:47Z",
+        "title": "Dashboard: add Show CI-only revisions checkbox, unchecked by default"
+      },
+      "mc": {
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26769728828",
         "createdAt": "2026-06-01T17:05:47Z",
         "title": "Dashboard: add Show CI-only revisions checkbox, unchecked by default"
       }
@@ -1683,33 +1683,33 @@
       }
     },
     "0faf3879605cde0b5d3f84e9a18c48619b7105b2": {
-      "via": {
-        "status": "completed",
-        "conclusion": "cancelled",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768332250",
-        "createdAt": "2026-06-01T16:38:22Z",
-        "title": "Fix dashboard report links: normalize SHAs to 7 chars to match report\u2026"
-      },
       "mc": {
         "status": "completed",
         "conclusion": "cancelled",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768332472",
         "createdAt": "2026-06-01T16:38:22Z",
         "title": "Fix dashboard report links: normalize SHAs to 7 chars to match report\u2026"
-      }
-    },
-    "2006d0449b590e7878214b0e3e01180fdfe68e38": {
+      },
       "via": {
         "status": "completed",
         "conclusion": "cancelled",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768080857",
-        "createdAt": "2026-06-01T16:33:22Z",
-        "title": "Dashboard: system theme, filter CI-only rows, fix links to reports"
-      },
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768332250",
+        "createdAt": "2026-06-01T16:38:22Z",
+        "title": "Fix dashboard report links: normalize SHAs to 7 chars to match report\u2026"
+      }
+    },
+    "2006d0449b590e7878214b0e3e01180fdfe68e38": {
       "mc": {
         "status": "completed",
         "conclusion": "success",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768081116",
+        "createdAt": "2026-06-01T16:33:22Z",
+        "title": "Dashboard: system theme, filter CI-only rows, fix links to reports"
+      },
+      "via": {
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768080857",
         "createdAt": "2026-06-01T16:33:22Z",
         "title": "Dashboard: system theme, filter CI-only rows, fix links to reports"
       }
