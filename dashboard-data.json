@@ -1,5 +1,5 @@
 {
-  "generatedAt": "26828961585",
+  "generatedAt": "26834162562",
   "tree": [
     ".nojekyll",
     "dashboard-data.json",
@@ -1665,6 +1665,38 @@
     "vidiff/push-f0e2b16/windows/main (Modified)_files/support/unchecked-image.png"
   ],
   "runsBySha": {
+    "e778d68ee2b8cb4cdc8f97ca618fd57205d3c7b2": {
+      "via": {
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26834162576",
+        "createdAt": "2026-06-02T16:41:04Z",
+        "title": "Deploy vi-browser.html + vi-interactive.html via fast dashboard workflow"
+      },
+      "mc": {
+        "status": "pending",
+        "conclusion": null,
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26834162218",
+        "createdAt": "2026-06-02T16:41:03Z",
+        "title": "Deploy vi-browser.html + vi-interactive.html via fast dashboard workflow"
+      }
+    },
+    "aeb493778b2251463cd3f4007b894e2559823c42": {
+      "via": {
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26833773738",
+        "createdAt": "2026-06-02T16:33:51Z",
+        "title": "Fix vi-browser.html BASE path: strip filename not just index.html"
+      },
+      "mc": {
+        "status": "in_progress",
+        "conclusion": null,
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26833770543",
+        "createdAt": "2026-06-02T16:33:48Z",
+        "title": "Fix vi-browser.html BASE path: strip filename not just index.html"
+      }
+    },
     "8ad4528bb13931d844809865a289aea86b7cd779": {
       "via": {
         "status": "completed",
@@ -2197,56 +2229,22 @@
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26712068244",
         "createdAt": "2026-05-31T12:02:32Z",
         "title": "VIA: treat exit code 3 (failures found) as success, fix heredoc inden\u2026"
-      },
-      "via": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26712068217",
-        "createdAt": "2026-05-31T12:02:32Z",
-        "title": "VIA: treat exit code 3 (failures found) as success, fix heredoc inden\u2026"
-      }
-    },
-    "518f8bb0e81e001c0ec421f4a741714a22651047": {
-      "vd": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26709814225",
-        "createdAt": "2026-05-31T10:13:15Z",
-        "title": "VIA: use default tests by pointing ConfigPath at workspace folder, ge\u2026"
-      },
-      "mc": {
-        "status": "completed",
-        "conclusion": "failure",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26709814212",
-        "createdAt": "2026-05-31T10:13:15Z",
-        "title": "VIA: use default tests by pointing ConfigPath at workspace folder, ge\u2026"
-      },
-      "via": {
-        "status": "completed",
-        "conclusion": "failure",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26709814223",
-        "createdAt": "2026-05-31T10:13:15Z",
-        "title": "VIA: use default tests by pointing ConfigPath at workspace folder, ge\u2026"
-      }
-    },
-    "09f06281631fe65ed017036d115cf355fa5cb605": {
-      "vd": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26688318237",
-        "createdAt": "2026-05-30T15:58:37Z",
-        "title": "VIA: fix nipkg feed-add syntax, try multiple variations"
-      },
-      "via": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26688318232",
-        "createdAt": "2026-05-30T15:58:37Z",
-        "title": "VIA: fix nipkg feed-add syntax, try multiple variations"
       }
     }
   },
   "recentCommits": [
+    {
+      "sha": "e778d68ee2b8cb4cdc8f97ca618fd57205d3c7b2",
+      "date": "2026-06-02T16:40:58Z",
+      "message": "Deploy vi-browser.html + vi-interactive.html via fast dashboard workflow",
+      "ciOnly": true
+    },
+    {
+      "sha": "aeb493778b2251463cd3f4007b894e2559823c42",
+      "date": "2026-06-02T16:33:43Z",
+      "message": "Fix vi-browser.html BASE path: strip filename not just index.html",
+      "ciOnly": true
+    },
     {
       "sha": "8ad4528bb13931d844809865a289aea86b7cd779",
       "date": "2026-06-02T10:12:57Z",
@@ -2593,18 +2591,6 @@
       "sha": "e79a32f54939ad389f937054972907717d0f40e1",
       "date": "2026-05-29T12:39:35Z",
       "message": "Merge branch 'main' of https://github.com/elijah286/mini-system-manager",
-      "ciOnly": true
-    },
-    {
-      "sha": "18f9d59a3f2763a5f651ac35fbf87eb72106238c",
-      "date": "2026-05-29T12:38:27Z",
-      "message": "moved a constant",
-      "ciOnly": false
-    },
-    {
-      "sha": "970ae2364ee44b912fd144d7f1a6ce4ec9ff4b19",
-      "date": "2026-05-29T12:37:27Z",
-      "message": "Trigger VIDiff on push to main (not just PRs)\n\nCompare against previous commit on push events. Deploy reports\nunder push-<sha> path. PR commenting only runs for PR-triggered builds.",
       "ciOnly": true
     }
   ]
