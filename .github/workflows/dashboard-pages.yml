@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - '.github/pages/index.html'
+      - '.github/pages/vi-browser.html'
+      - '.github/pages/vi-interactive.html'
       - '.github/workflows/dashboard-pages.yml'
   schedule:
     - cron: '*/15 * * * *'
@@ -28,8 +30,10 @@ jobs:
 
       - name: Prepare dashboard content
         run: |
-          mkdir -p pages-content
+          mkdir -p pages-content/vi-snapshots
           cp .github/pages/index.html pages-content/index.html
+          cp .github/pages/vi-browser.html pages-content/vi-snapshots/vi-browser.html
+          cp .github/pages/vi-interactive.html pages-content/vi-snapshots/vi-interactive.html
 
       - name: Build dashboard data
         env:
