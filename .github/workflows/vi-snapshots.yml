@@ -97,6 +97,8 @@ jobs:
           # Pass commit message via env var to avoid shell escaping issues
           export COMMIT_MSG=$(git log -1 --format=%s 2>/dev/null || echo "unknown")
           export COMMIT_DATE=$(git log -1 --format=%cI 2>/dev/null || date -Iseconds)
+          export GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}"
+          export GITHUB_REPOSITORY="${{ github.repository }}"
 
           python3 "$WORKSPACE/.github/labview/build-gallery.py" \
             "$WORKSPACE" \

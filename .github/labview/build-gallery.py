@@ -103,6 +103,30 @@ def fetch_existing_commits(pages_url):
         return []
 
 
+def fetch_changed_vis(commit_sha, token, repo):
+    """Return basenames of .vi/.ctl files changed in this commit via GitHub API."""
+    if not token or not repo:
+        return []
+    try:
+        url = f"https://api.github.com/repos/{repo}/commits/{commit_sha}"
+        req = urllib.request.Request(url, headers={
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/vnd.github+json",
+            "User-Agent": "GitHub-Actions",
+            "X-GitHub-Api-Version": "2022-11-28",
+        })
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        return [
+            os.path.basename(f.get("filename", ""))
+            for f in data.get("files", [])
+            if f.get("filename", "").lower().endswith((".vi", ".ctl"))
+        ]
+    except Exception as e:
+        print(f"  Could not fetch changed files: {e}")
+        return []
+
+
 def main():
     workspace = sys.argv[1]          # e.g. D:\a\mini-system-manager\mini-system-manager
     snapshot_dir = sys.argv[2]        # e.g. D:\a\...\vi-snapshots
@@ -114,6 +138,8 @@ def main():
     # Read from env to avoid shell escaping issues
     commit_msg = os.environ.get("COMMIT_MSG", "unknown")
     commit_date = os.environ.get("COMMIT_DATE", "")
+    github_token = os.environ.get("GITHUB_TOKEN", "")
+    github_repo = os.environ.get("GITHUB_REPOSITORY", "")
 
     short_sha = commit_sha[:7]
     commit_dir = os.path.join(deploy_dir, "commits", commit_sha)
@@ -190,6 +216,9 @@ def main():
     print("  Fetching existing commits.json...")
     existing = fetch_existing_commits(pages_url)
 
+    changed_vis = fetch_changed_vis(commit_sha, github_token, github_repo)
+    print(f"  Changed VIs: {len(changed_vis)}")
+
     new_entry = {
         "sha": commit_sha,
         "short_sha": short_sha,
@@ -199,6 +228,7 @@ def main():
             "total": len(exported_map),
             "succeeded": len(exported_map),
         },
+        "changedVIs": changed_vis,
     }
 
     # Remove duplicate if re-running same commit
