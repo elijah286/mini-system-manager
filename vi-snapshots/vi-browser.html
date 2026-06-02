@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VI Browser — Mini System Manager</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0d1117;color:#c9d1d9}
+    .header{padding:1.5em 2em;border-bottom:1px solid #21262d}
+    h1{color:#58a6ff;margin-bottom:.3em;font-size:1.6em}
+    .subtitle{color:#8b949e;font-size:.95em}
+    .subtitle a{color:#58a6ff;text-decoration:none}
+    .subtitle a:hover{text-decoration:underline}
+    .toolbar{padding:1em 2em;background:#161b22;border-bottom:1px solid #21262d;display:flex;align-items:center;gap:1em;flex-wrap:wrap}
+    .commit-select{background:#21262d;color:#c9d1d9;border:1px solid #30363d;border-radius:6px;padding:.5em 1em;font-size:.9em;min-width:300px;max-width:100%}
+    .toolbar-btn{color:#58a6ff;text-decoration:none;font-size:.85em;padding:.5em 1em;border:1px solid #30363d;border-radius:6px;background:#21262d;white-space:nowrap}
+    .toolbar-btn:hover{background:#30363d}
+    .commit-meta{color:#8b949e;font-size:.8em;margin-left:auto}
+    .content{padding:2em;max-width:960px;margin:0 auto}
+    .tree{list-style:none}
+    .tree ul{list-style:none;padding-left:1.5em}
+    .tree li{padding:.15em 0}
+    .folder-row{cursor:pointer;user-select:none;color:#f0f6fc;font-weight:500;font-size:.95em;display:inline-flex;align-items:center;gap:.3em}
+    .folder-row:hover{color:#58a6ff}
+    .caret{display:inline-block;width:.8em;text-align:center;font-size:.7em;color:#484f58;transition:transform .15s}
+    .caret.open{transform:rotate(90deg)}
+    .file-link{color:#58a6ff;text-decoration:none;font-family:'SFMono-Regular',Consolas,monospace;font-size:.88em}
+    .file-link:hover{text-decoration:underline}
+    .file-row{display:inline-flex;align-items:center;gap:.4em}
+    .badge{display:inline-block;background:#21262d;color:#8b949e;font-size:.7em;padding:.1em .45em;border-radius:3px}
+    .ibadge{display:inline-block;background:#21262d;color:#e3b341;font-size:.7em;padding:.1em .45em;border-radius:3px;text-decoration:none;border:none}
+    .ibadge:hover{background:#30363d;color:#f0c060}
+    .icon{font-size:.9em}
+    .section-label{color:#8b949e;font-size:.8em;margin-top:2em;margin-bottom:.5em;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid #21262d;padding-bottom:.3em}
+    .loading{color:#8b949e;font-style:italic;padding:2em}
+    .error{color:#f85149;padding:2em}
+    .stats{color:#484f58;font-size:.8em;margin-top:.5em}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>VI Browser</h1>
+    <p class="subtitle">
+      <a href="../">← Back to Dashboard</a> ·
+      <a href="https://github.com/elijah286/mini-system-manager">elijah286/mini-system-manager</a>
+      — Front Panel &amp; Block Diagram snapshots for every VI
+    </p>
+  </div>
+  <div class="toolbar">
+    <label for="commit-sel" style="color:#8b949e;font-size:.85em">Commit:</label>
+    <select id="commit-sel" class="commit-select"><option>Loading…</option></select>
+    <a id="diff-link" class="toolbar-btn" href="#" style="display:none">View VIDiff Report →</a>
+    <span id="commit-meta" class="commit-meta"></span>
+  </div>
+  <div class="content" id="content"><p class="loading">Loading…</p></div>
+
+  <script>
+    let commits=[], cur=null;
+    const BASE=location.pathname.replace(/\/index\.html$/,'/').replace(/\/$/,'/');
+
+    async function init(){
+      try{
+        const r=await fetch(BASE+'commits.json');
+        if(!r.ok) throw new Error('No commits.json');
+        commits=await r.json();
+      }catch(e){
+        document.getElementById('content').innerHTML='<p class="error">'+esc(e.message)+'</p>';
+        return;
+      }
+      if(!commits.length){
+        document.getElementById('content').innerHTML='<p class="loading">No snapshots available yet.</p>';
+        return;
+      }
+      const sel=document.getElementById('commit-sel');
+      sel.innerHTML='';
+      commits.forEach((c,i)=>{
+        const o=document.createElement('option');
+        o.value=c.sha;
+        const d=new Date(c.date).toLocaleDateString();
+        o.textContent=c.short_sha+' — '+c.message+' ('+d+')'+(i===0?' ★':'');
+        sel.appendChild(o);
+      });
+      sel.addEventListener('change',()=>load(sel.value));
+      const h=location.hash.slice(1);
+      const hc=commits.find(c=>c.sha===h||c.short_sha===h);
+      load(hc?hc.sha:commits[0].sha);
+    }
+
+    async function load(sha){
+      cur=sha;
+      const short=sha.slice(0,7);
+      location.hash=short;
+      const ci=commits.find(c=>c.sha===sha);
+      document.getElementById('commit-sel').value=sha;
+
+      // diff link
+      const dl=document.getElementById('diff-link');
+      dl.href='../vidiff/push-'+short+'/';
+      dl.style.display='inline-block';
+
+      // commit meta
+      const cm=document.getElementById('commit-meta');
+      if(ci) cm.textContent=new Date(ci.date).toLocaleString()+(ci.stats?' · '+ci.stats.succeeded+'/'+ci.stats.total+' VIs':'');
+
+      const el=document.getElementById('content');
+      el.innerHTML='<p class="loading">Loading snapshots…</p>';
+      try{
+        const r=await fetch(BASE+'commits/'+sha+'/manifest.json');
+        if(!r.ok) throw new Error('Manifest not found for '+short);
+        render(await r.json(),sha);
+      }catch(e){el.innerHTML='<p class="error">'+esc(e.message)+'</p>';}
+    }
+
+    function render(m,sha){
+      const el=document.getElementById('content');
+      el.innerHTML='';
+      const dir='commits/'+sha+'/';
+      if(m.tree&&m.tree.length){
+        const ul=document.createElement('ul');
+        ul.className='tree';
+        m.tree.forEach(n=>ul.appendChild(mkNode(n,dir)));
+        el.appendChild(ul);
+      }
+      if(m.nonProjectFiles&&m.nonProjectFiles.length){
+        const lbl=document.createElement('p');
+        lbl.className='section-label';
+        lbl.textContent='Files not in project';
+        el.appendChild(lbl);
+        const ul=document.createElement('ul');
+        ul.className='tree';
+        m.nonProjectFiles.forEach(f=>{
+          const li=document.createElement('li');
+          li.innerHTML=mkFile(f,dir);
+          ul.appendChild(li);
+        });
+        el.appendChild(ul);
+      }
+    }
+
+    function mkNode(n,dir){
+      const li=document.createElement('li');
+      if(n.type==='folder'||n.type==='target'){
+        const row=document.createElement('span');
+        row.className='folder-row';
+        const caret=document.createElement('span');
+        caret.className='caret open';
+        caret.textContent='▶';
+        row.appendChild(caret);
+        row.appendChild(document.createTextNode(' 📁 '+n.name));
+        const sub=document.createElement('ul');
+        if(n.children) n.children.forEach(c=>sub.appendChild(mkNode(c,dir)));
+        row.addEventListener('click',e=>{
+          e.stopPropagation();
+          caret.classList.toggle('open');
+          sub.style.display=sub.style.display==='none'?'':'none';
+        });
+        li.appendChild(row);
+        li.appendChild(sub);
+      }else{
+        li.innerHTML=mkFile(n,dir);
+      }
+      return li;
+    }
+
+    function mkFile(n,dir){
+      const ext=(n.name||'').split('.').pop().toLowerCase();
+      const badge=ext==='ctl'?'CTL':'VI';
+      if(n.html){
+        const href=dir+n.html.replace(/\\/g,'/').split('/').map(encodeURIComponent).join('/');
+        const rawPath=dir+n.html.replace(/\\/g,'/');
+        const iHref='vi-interactive.html?src='+encodeURIComponent(rawPath)+'&title='+encodeURIComponent(n.name||'');
+        return '<span class="file-row"><span class="icon">📄</span><a class="file-link" href="'+href+'">'+esc(n.name)+'</a><span class="badge">'+badge+'</span><a class="ibadge" href="'+iHref+'" title="Open Interactive Viewer">⚡</a></span>';
+      }
+      return '<span class="file-row"><span class="icon">📄</span><span style="color:#484f58">'+esc(n.name)+'</span><span class="badge" style="color:#484f58">'+badge+'</span></span>';
+    }
+
+    function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+    init();
+  </script>
+</body>
+</html>

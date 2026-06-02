@@ -1,5 +1,15 @@
 [
   {
+    "sha": "8ad4528bb13931d844809865a289aea86b7cd779",
+    "short_sha": "8ad4528",
+    "message": "Fix VI Browser link: point to vi-browser.html directly, also deploy under that name",
+    "date": "2026-06-02T05:12:57-05:00",
+    "stats": {
+      "total": 42,
+      "succeeded": 42
+    }
+  },
+  {
     "sha": "b33292157dbaff8cceb65efd57a6dd684356461c",
     "short_sha": "b332921",
     "message": "Add interactive VI viewer with case structure navigation",
