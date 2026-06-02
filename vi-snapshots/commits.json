@@ -1,5 +1,15 @@
 [
   {
+    "sha": "a89d3d15db6f0c72b72b7e32fcbc551277d827f9",
+    "short_sha": "a89d3d1",
+    "message": "Honor system dark/light mode in VI Browser and Interactive Viewer",
+    "date": "2026-06-02T11:48:47-05:00",
+    "stats": {
+      "total": 42,
+      "succeeded": 42
+    }
+  },
+  {
     "sha": "aeb493778b2251463cd3f4007b894e2559823c42",
     "short_sha": "aeb4937",
     "message": "Fix vi-browser.html BASE path: strip filename not just index.html",
