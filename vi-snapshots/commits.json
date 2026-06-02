@@ -1,5 +1,16 @@
 [
   {
+    "sha": "57db71125be89cef644d738bbf9a3b2dafc80347",
+    "short_sha": "57db711",
+    "message": "VI Browser: revision label, highlight changed files, per-file diff badge",
+    "date": "2026-06-02T12:08:29-05:00",
+    "stats": {
+      "total": 42,
+      "succeeded": 42
+    },
+    "changedVIs": []
+  },
+  {
     "sha": "a89d3d15db6f0c72b72b7e32fcbc551277d827f9",
     "short_sha": "a89d3d1",
     "message": "Honor system dark/light mode in VI Browser and Interactive Viewer",
