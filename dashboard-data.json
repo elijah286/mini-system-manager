@@ -1,5 +1,5 @@
 {
-  "generatedAt": "26834162562",
+  "generatedAt": "26834584087",
   "tree": [
     ".nojekyll",
     "dashboard-data.json",
@@ -1665,6 +1665,22 @@
     "vidiff/push-f0e2b16/windows/main (Modified)_files/support/unchecked-image.png"
   ],
   "runsBySha": {
+    "a89d3d15db6f0c72b72b7e32fcbc551277d827f9": {
+      "mc": {
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26834584896",
+        "createdAt": "2026-06-02T16:48:55Z",
+        "title": "Honor system dark/light mode in VI Browser and Interactive Viewer"
+      },
+      "via": {
+        "status": "pending",
+        "conclusion": null,
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26834584080",
+        "createdAt": "2026-06-02T16:48:54Z",
+        "title": "Honor system dark/light mode in VI Browser and Interactive Viewer"
+      }
+    },
     "e778d68ee2b8cb4cdc8f97ca618fd57205d3c7b2": {
       "via": {
         "status": "completed",
@@ -1674,8 +1690,8 @@
         "title": "Deploy vi-browser.html + vi-interactive.html via fast dashboard workflow"
       },
       "mc": {
-        "status": "pending",
-        "conclusion": null,
+        "status": "completed",
+        "conclusion": "cancelled",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26834162218",
         "createdAt": "2026-06-02T16:41:03Z",
         "title": "Deploy vi-browser.html + vi-interactive.html via fast dashboard workflow"
@@ -2197,42 +2213,16 @@
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26713108212",
         "createdAt": "2026-05-31T12:51:13Z",
         "title": "Add Mass Compile column to dashboard with pass/fail counts"
-      },
-      "vd": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26713108207",
-        "createdAt": "2026-05-31T12:51:13Z",
-        "title": "Add Mass Compile column to dashboard with pass/fail counts"
-      }
-    },
-    "112e147930deed2eaf06bfa6a4a341d6076c0790": {
-      "via": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26712283949",
-        "createdAt": "2026-05-31T12:12:46Z",
-        "title": "Dashboard: fix parser to handle LabVIEW native HTML report format"
-      }
-    },
-    "90167c8addc17353f684c9cea858f691b6c586e3": {
-      "vd": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26712068239",
-        "createdAt": "2026-05-31T12:02:32Z",
-        "title": "VIA: treat exit code 3 (failures found) as success, fix heredoc inden\u2026"
-      },
-      "mc": {
-        "status": "completed",
-        "conclusion": "failure",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26712068244",
-        "createdAt": "2026-05-31T12:02:32Z",
-        "title": "VIA: treat exit code 3 (failures found) as success, fix heredoc inden\u2026"
       }
     }
   },
   "recentCommits": [
+    {
+      "sha": "a89d3d15db6f0c72b72b7e32fcbc551277d827f9",
+      "date": "2026-06-02T16:48:47Z",
+      "message": "Honor system dark/light mode in VI Browser and Interactive Viewer",
+      "ciOnly": true
+    },
     {
       "sha": "e778d68ee2b8cb4cdc8f97ca618fd57205d3c7b2",
       "date": "2026-06-02T16:40:58Z",
@@ -2585,12 +2575,6 @@
       "sha": "3c15223e4428cbf35979e873fd9d6ba07a599575",
       "date": "2026-05-29T12:42:03Z",
       "message": "Add workflow_dispatch to VIDiff for retroactive runs",
-      "ciOnly": true
-    },
-    {
-      "sha": "e79a32f54939ad389f937054972907717d0f40e1",
-      "date": "2026-05-29T12:39:35Z",
-      "message": "Merge branch 'main' of https://github.com/elijah286/mini-system-manager",
       "ciOnly": true
     }
   ]
