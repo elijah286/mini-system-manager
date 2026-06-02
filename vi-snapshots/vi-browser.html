@@ -34,6 +34,10 @@
     .badge{display:inline-block;background:var(--bg3);color:var(--muted);font-size:.7em;padding:.1em .45em;border-radius:3px}
     .ibadge{display:inline-block;background:var(--bg3);color:var(--yellow);font-size:.7em;padding:.1em .45em;border-radius:3px;text-decoration:none;border:none}
     .ibadge:hover{background:var(--border2);color:var(--yellow2)}
+    .dbadge{display:inline-block;background:var(--bg3);color:var(--muted);font-size:.7em;padding:.1em .45em;border-radius:3px;text-decoration:none;border:none}
+    .dbadge:hover{background:var(--border2)}
+    .changed-row .file-link{font-weight:700}
+    .file-unavail{color:var(--dim)}
     .icon{font-size:.9em}
     .section-label{color:var(--muted);font-size:.8em;margin-top:2em;margin-bottom:.5em;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);padding-bottom:.3em}
     .loading{color:var(--muted);font-style:italic;padding:2em}
@@ -51,7 +55,7 @@
     </p>
   </div>
   <div class="toolbar">
-    <label for="commit-sel" class="commit-label">Commit:</label>
+    <label for="commit-sel" class="commit-label">Revision:</label>
     <select id="commit-sel" class="commit-select"><option>Loading…</option></select>
     <a id="diff-link" class="toolbar-btn" href="#" style="display:none">View VIDiff Report →</a>
     <span id="commit-meta" class="commit-meta"></span>
@@ -106,23 +110,24 @@
       const cm=document.getElementById('commit-meta');
       if(ci) cm.textContent=new Date(ci.date).toLocaleString()+(ci.stats?' · '+ci.stats.succeeded+'/'+ci.stats.total+' VIs':'');
 
+      const changed=new Set((ci&&ci.changedVIs)||[]);
       const el=document.getElementById('content');
       el.innerHTML='<p class="loading">Loading snapshots…</p>';
       try{
         const r=await fetch(BASE+'commits/'+sha+'/manifest.json');
         if(!r.ok) throw new Error('Manifest not found for '+short);
-        render(await r.json(),sha);
+        render(await r.json(),sha,short,changed);
       }catch(e){el.innerHTML='<p class="error">'+esc(e.message)+'</p>';}
     }
 
-    function render(m,sha){
+    function render(m,sha,short,changed){
       const el=document.getElementById('content');
       el.innerHTML='';
       const dir='commits/'+sha+'/';
       if(m.tree&&m.tree.length){
         const ul=document.createElement('ul');
         ul.className='tree';
-        m.tree.forEach(n=>ul.appendChild(mkNode(n,dir)));
+        m.tree.forEach(n=>ul.appendChild(mkNode(n,dir,short,changed)));
         el.appendChild(ul);
       }
       if(m.nonProjectFiles&&m.nonProjectFiles.length){
@@ -134,14 +139,14 @@
         ul.className='tree';
         m.nonProjectFiles.forEach(f=>{
           const li=document.createElement('li');
-          li.innerHTML=mkFile(f,dir);
+          li.innerHTML=mkFile(f,dir,short,changed);
           ul.appendChild(li);
         });
         el.appendChild(ul);
       }
     }
 
-    function mkNode(n,dir){
+    function mkNode(n,dir,short,changed){
       const li=document.createElement('li');
       if(n.type==='folder'||n.type==='target'){
         const row=document.createElement('span');
@@ -152,7 +157,7 @@
         row.appendChild(caret);
         row.appendChild(document.createTextNode(' 📁 '+n.name));
         const sub=document.createElement('ul');
-        if(n.children) n.children.forEach(c=>sub.appendChild(mkNode(c,dir)));
+        if(n.children) n.children.forEach(c=>sub.appendChild(mkNode(c,dir,short,changed)));
         row.addEventListener('click',e=>{
           e.stopPropagation();
           caret.classList.toggle('open');
@@ -161,21 +166,29 @@
         li.appendChild(row);
         li.appendChild(sub);
       }else{
-        li.innerHTML=mkFile(n,dir);
+        li.innerHTML=mkFile(n,dir,short,changed);
       }
       return li;
     }
 
-    function mkFile(n,dir){
+    function mkFile(n,dir,short,changed){
       const ext=(n.name||'').split('.').pop().toLowerCase();
       const badge=ext==='ctl'?'CTL':'VI';
+      const isChanged=changed.has(n.name||'');
+      const rowCls='file-row'+(isChanged?' changed-row':'');
       if(n.html){
         const href=dir+n.html.replace(/\\/g,'/').split('/').map(encodeURIComponent).join('/');
         const rawPath=dir+n.html.replace(/\\/g,'/');
         const iHref='vi-interactive.html?src='+encodeURIComponent(rawPath)+'&title='+encodeURIComponent(n.name||'');
-        return '<span class="file-row"><span class="icon">📄</span><a class="file-link" href="'+href+'">'+esc(n.name)+'</a><span class="badge">'+badge+'</span><a class="ibadge" href="'+iHref+'" title="Open Interactive Viewer">⚡</a></span>';
+        let diffBadge='';
+        if(isChanged){
+          const nameNoExt=(n.name||'').replace(/\.(vi|ctl)$/i,'');
+          const diffHref='../vidiff/push-'+short+'/windows/'+encodeURIComponent(nameNoExt+' (Modified)')+'.html';
+          diffBadge='<a class="dbadge" href="'+diffHref+'" title="Compare with previous revision">diff</a>';
+        }
+        return '<span class="'+rowCls+'"><span class="icon">📄</span><a class="file-link" href="'+href+'">'+esc(n.name)+'</a><span class="badge">'+badge+'</span><a class="ibadge" href="'+iHref+'" title="Open Interactive Viewer">⚡</a>'+diffBadge+'</span>';
       }
-      return '<span class="file-row"><span class="icon">📄</span><span style="color:#484f58">'+esc(n.name)+'</span><span class="badge" style="color:#484f58">'+badge+'</span></span>';
+      return '<span class="'+rowCls+'"><span class="icon">📄</span><span class="file-unavail">'+esc(n.name)+'</span><span class="badge file-unavail">'+badge+'</span></span>';
     }
 
     function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}

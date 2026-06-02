@@ -1,5 +1,5 @@
 {
-  "generatedAt": "26834775138",
+  "generatedAt": "26835641287",
   "tree": [
     ".nojekyll",
     "dashboard-data.json",
@@ -291,6 +291,64 @@
     "vi-snapshots/commits/8ad4528bb13931d844809865a289aea86b7cd779/Status String Update.vi.html",
     "vi-snapshots/commits/8ad4528bb13931d844809865a289aea86b7cd779/main.vi.html",
     "vi-snapshots/commits/8ad4528bb13931d844809865a289aea86b7cd779/manifest.json",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Controller Commands.ctl.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum Launcher.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/Generator Driver Template 1.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/Generator Driver Template 2.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/Generator Driver Template 3.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/Generator Driver Template 4.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/Generator Driver Template 5.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/subVIs",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/subVIs/Demo",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/subVIs/Demo/Demo PID Control.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/subVIs/Private",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/subVIs/Private/Default Instrument Setup.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/subVIs/Public",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/subVIs/Public/Action-Status",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/subVIs/Public/Action-Status/Init.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/subVIs/Public/Action-Status/Motor Off.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/subVIs/Public/Action-Status/Motor On.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/subVIs/Public/Close.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/subVIs/Public/Configure",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/subVIs/Public/Configure/Set Load.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/subVIs/Public/Configure/Set Speed.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/subVIs/Public/Data",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/subVIs/Public/Data/Get KW.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/subVIs/Public/Data/Get Value.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/subVIs/Public/Initialize.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/subVIs/Public/Utility",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/subVIs/Public/Utility/Error Query.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/subVIs/Public/Utility/Reset.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/subVIs/Public/Utility/Revision Query.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/subVIs/Public/Utility/Self-Test.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator API/subVIs/Public/VI Tree.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator Lessons",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator Lessons/Generator Lesson 1.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator Lessons/Generator Lesson 2.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator Lessons/Generator Lesson 3.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator Lessons/Generator Lesson 4.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator Lessons/Generator Lesson 5.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator Lessons/Generator Lesson 6.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator Lessons/Generator Lesson 7.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator Lessons/subVIs",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator Lessons/subVIs/Command with Return Value.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator Lessons/subVIs/Confirm USB Devices and IO.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator Lessons/subVIs/Get All Values.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator Lessons/subVIs/USB Device Filter.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Generator Lessons/subVIs/balance grid.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Main Power Grid",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Main Power Grid/Main Power Grid.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Solar Lessons",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Curriculum/Solar Lessons/Solar Example.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Find Curriculum.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Graph Popup.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Simple Solar Tracker v4.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/Status String Update.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/main.vi.html",
+    "vi-snapshots/commits/a89d3d15db6f0c72b72b7e32fcbc551277d827f9/manifest.json",
     "vi-snapshots/commits/aeb493778b2251463cd3f4007b894e2559823c42",
     "vi-snapshots/commits/aeb493778b2251463cd3f4007b894e2559823c42/manifest.json",
     "vi-snapshots/commits/b33292157dbaff8cceb65efd57a6dd684356461c",
@@ -1669,6 +1727,29 @@
     "vidiff/push-f0e2b16/windows/main (Modified)_files/support/unchecked-image.png"
   ],
   "runsBySha": {
+    "57db71125be89cef644d738bbf9a3b2dafc80347": {
+      "mc": {
+        "status": "pending",
+        "conclusion": null,
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26835641399",
+        "createdAt": "2026-06-02T17:08:35Z",
+        "title": "VI Browser: revision label, highlight changed files, per-file diff badge"
+      },
+      "via": {
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26835641325",
+        "createdAt": "2026-06-02T17:08:35Z",
+        "title": "VI Browser: revision label, highlight changed files, per-file diff badge"
+      },
+      "vd": {
+        "status": "in_progress",
+        "conclusion": null,
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26835641202",
+        "createdAt": "2026-06-02T17:08:35Z",
+        "title": "VI Browser: revision label, highlight changed files, per-file diff badge"
+      }
+    },
     "a89d3d15db6f0c72b72b7e32fcbc551277d827f9": {
       "mc": {
         "status": "completed",
@@ -2187,40 +2268,16 @@
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26713310663",
         "createdAt": "2026-05-31T13:00:26Z",
         "title": "Add VI Browser: export front panel & diagram snapshots for all VIs"
-      },
-      "mc": {
-        "status": "completed",
-        "conclusion": "cancelled",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26713310670",
-        "createdAt": "2026-05-31T13:00:26Z",
-        "title": "Add VI Browser: export front panel & diagram snapshots for all VIs"
-      },
-      "via": {
-        "status": "completed",
-        "conclusion": "cancelled",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26713310679",
-        "createdAt": "2026-05-31T13:00:26Z",
-        "title": "Add VI Browser: export front panel & diagram snapshots for all VIs"
-      }
-    },
-    "c58710ce3ded35a20e1edd91bd2d43656b12713d": {
-      "via": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26713108213",
-        "createdAt": "2026-05-31T12:51:13Z",
-        "title": "Add Mass Compile column to dashboard with pass/fail counts"
-      },
-      "mc": {
-        "status": "completed",
-        "conclusion": "cancelled",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26713108212",
-        "createdAt": "2026-05-31T12:51:13Z",
-        "title": "Add Mass Compile column to dashboard with pass/fail counts"
       }
     }
   },
   "recentCommits": [
+    {
+      "sha": "57db71125be89cef644d738bbf9a3b2dafc80347",
+      "date": "2026-06-02T17:08:29Z",
+      "message": "VI Browser: revision label, highlight changed files, per-file diff badge",
+      "ciOnly": true
+    },
     {
       "sha": "a89d3d15db6f0c72b72b7e32fcbc551277d827f9",
       "date": "2026-06-02T16:48:47Z",
@@ -2573,12 +2630,6 @@
       "sha": "ff3d8f6f1d773451db1fd8711ced3077a7d4344d",
       "date": "2026-05-29T12:44:17Z",
       "message": "VI Analyzer: run on every push to main, deploy HTML report to Pages",
-      "ciOnly": true
-    },
-    {
-      "sha": "3c15223e4428cbf35979e873fd9d6ba07a599575",
-      "date": "2026-05-29T12:42:03Z",
-      "message": "Add workflow_dispatch to VIDiff for retroactive runs",
       "ciOnly": true
     }
   ]
