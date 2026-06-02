@@ -1,5 +1,5 @@
 {
-  "generatedAt": "26809441199",
+  "generatedAt": "26813179611",
   "tree": [
     ".nojekyll",
     "dashboard-data.json",
@@ -1604,6 +1604,29 @@
     "vidiff/push-f0e2b16/windows/main (Modified)_files/support/unchecked-image.png"
   ],
   "runsBySha": {
+    "8ad4528bb13931d844809865a289aea86b7cd779": {
+      "via": {
+        "status": "pending",
+        "conclusion": null,
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26813179555",
+        "createdAt": "2026-06-02T10:13:01Z",
+        "title": "Fix VI Browser link: point to vi-browser.html directly, also deploy u\u2026"
+      },
+      "mc": {
+        "status": "in_progress",
+        "conclusion": null,
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26813179609",
+        "createdAt": "2026-06-02T10:13:01Z",
+        "title": "Fix VI Browser link: point to vi-browser.html directly, also deploy u\u2026"
+      },
+      "vd": {
+        "status": "in_progress",
+        "conclusion": null,
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26813179553",
+        "createdAt": "2026-06-02T10:13:01Z",
+        "title": "Fix VI Browser link: point to vi-browser.html directly, also deploy u\u2026"
+      }
+    },
     "e554867d1ef1d6484e26be23691caaafdb5778b2": {
       "mc": {
         "status": "completed",
@@ -2159,49 +2182,16 @@
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26688318232",
         "createdAt": "2026-05-30T15:58:37Z",
         "title": "VIA: fix nipkg feed-add syntax, try multiple variations"
-      },
-      "mc": {
-        "status": "completed",
-        "conclusion": "failure",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26688318242",
-        "createdAt": "2026-05-30T15:58:37Z",
-        "title": "VIA: fix nipkg feed-add syntax, try multiple variations"
-      }
-    },
-    "350eeac1dd1e423066e5040d8b43ccc18fb14687": {
-      "vd": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26687907246",
-        "createdAt": "2026-05-30T15:40:36Z",
-        "title": "VIA: add NI product feeds to nipkg before installing VI Analyzer tests"
-      },
-      "mc": {
-        "status": "completed",
-        "conclusion": "failure",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26687907216",
-        "createdAt": "2026-05-30T15:40:36Z",
-        "title": "VIA: add NI product feeds to nipkg before installing VI Analyzer tests"
-      },
-      "via": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26687907242",
-        "createdAt": "2026-05-30T15:40:36Z",
-        "title": "VIA: add NI product feeds to nipkg before installing VI Analyzer tests"
-      }
-    },
-    "c1843c7adb09bd265ff331295f6b9a7fa92e8520": {
-      "vd": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26687450350",
-        "createdAt": "2026-05-30T15:20:33Z",
-        "title": "VIA: deeper probe - nipkg update, feed config, package content, broad\u2026"
       }
     }
   },
   "recentCommits": [
+    {
+      "sha": "8ad4528bb13931d844809865a289aea86b7cd779",
+      "date": "2026-06-02T10:12:57Z",
+      "message": "Fix VI Browser link: point to vi-browser.html directly, also deploy under that name",
+      "ciOnly": true
+    },
     {
       "sha": "e554867d1ef1d6484e26be23691caaafdb5778b2",
       "date": "2026-06-01T19:26:53Z",
@@ -2555,12 +2545,6 @@
       "date": "2026-05-29T12:37:27Z",
       "message": "Trigger VIDiff on push to main (not just PRs)\n\nCompare against previous commit on push events. Deploy reports\nunder push-<sha> path. PR commenting only runs for PR-triggered builds.",
       "ciOnly": true
-    },
-    {
-      "sha": "f0e2b160d4e16d1caab904dfabf42ca85df7c772",
-      "date": "2026-05-29T12:27:27Z",
-      "message": "moved the send command button",
-      "ciOnly": false
     }
   ]
 }
