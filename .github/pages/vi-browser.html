@@ -57,7 +57,7 @@
 
   <script>
     let commits=[], cur=null;
-    const BASE=location.pathname.replace(/\/index\.html$/,'/').replace(/\/$/,'/');
+    const BASE=location.pathname.replace(/\/[^/]*$/,'/');
 
     async function init(){
       try{
