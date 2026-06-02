@@ -1,5 +1,5 @@
 {
-  "generatedAt": "26834584087",
+  "generatedAt": "26834775138",
   "tree": [
     ".nojekyll",
     "dashboard-data.json",
@@ -24,6 +24,8 @@
     "masscompile/masscompile/8ad4528/index.html",
     "masscompile/masscompile/a8c3034",
     "masscompile/masscompile/a8c3034/index.html",
+    "masscompile/masscompile/aeb4937",
+    "masscompile/masscompile/aeb4937/index.html",
     "masscompile/masscompile/b332921",
     "masscompile/masscompile/b332921/index.html",
     "masscompile/masscompile/cefa707",
@@ -289,6 +291,8 @@
     "vi-snapshots/commits/8ad4528bb13931d844809865a289aea86b7cd779/Status String Update.vi.html",
     "vi-snapshots/commits/8ad4528bb13931d844809865a289aea86b7cd779/main.vi.html",
     "vi-snapshots/commits/8ad4528bb13931d844809865a289aea86b7cd779/manifest.json",
+    "vi-snapshots/commits/aeb493778b2251463cd3f4007b894e2559823c42",
+    "vi-snapshots/commits/aeb493778b2251463cd3f4007b894e2559823c42/manifest.json",
     "vi-snapshots/commits/b33292157dbaff8cceb65efd57a6dd684356461c",
     "vi-snapshots/commits/b33292157dbaff8cceb65efd57a6dd684356461c/Controller Commands.ctl.html",
     "vi-snapshots/commits/b33292157dbaff8cceb65efd57a6dd684356461c/Curriculum Launcher.vi.html",
@@ -1674,7 +1678,7 @@
         "title": "Honor system dark/light mode in VI Browser and Interactive Viewer"
       },
       "via": {
-        "status": "pending",
+        "status": "in_progress",
         "conclusion": null,
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26834584080",
         "createdAt": "2026-06-02T16:48:54Z",
@@ -1706,8 +1710,8 @@
         "title": "Fix vi-browser.html BASE path: strip filename not just index.html"
       },
       "mc": {
-        "status": "in_progress",
-        "conclusion": null,
+        "status": "completed",
+        "conclusion": "success",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26833770543",
         "createdAt": "2026-06-02T16:33:48Z",
         "title": "Fix vi-browser.html BASE path: strip filename not just index.html"
