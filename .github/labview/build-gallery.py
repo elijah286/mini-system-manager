@@ -214,12 +214,15 @@ def main():
 
     print(f"  commits.json: {len(existing)} entries")
 
-    # --- Copy gallery index.html ---
+    # --- Copy gallery HTML assets ---
+    pages_dir = os.path.dirname(os.path.abspath(gallery_html))
+    gallery_basename = os.path.basename(gallery_html)  # vi-browser.html
+
+    # Deploy vi-browser.html under its own name (stable direct link) AND as index.html
+    shutil.copy2(gallery_html, os.path.join(deploy_dir, gallery_basename))
     shutil.copy2(gallery_html, os.path.join(deploy_dir, "index.html"))
 
-    # --- Copy other HTML assets from the same pages directory ---
-    pages_dir = os.path.dirname(os.path.abspath(gallery_html))
-    gallery_basename = os.path.basename(gallery_html)
+    # Copy other HTML assets from the same pages directory
     for fname in os.listdir(pages_dir):
         if fname.endswith(".html") and fname != gallery_basename:
             shutil.copy2(
