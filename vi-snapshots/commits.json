@@ -1,5 +1,15 @@
 [
   {
+    "sha": "aeb493778b2251463cd3f4007b894e2559823c42",
+    "short_sha": "aeb4937",
+    "message": "Fix vi-browser.html BASE path: strip filename not just index.html",
+    "date": "2026-06-02T11:33:43-05:00",
+    "stats": {
+      "total": 0,
+      "succeeded": 0
+    }
+  },
+  {
     "sha": "8ad4528bb13931d844809865a289aea86b7cd779",
     "short_sha": "8ad4528",
     "message": "Fix VI Browser link: point to vi-browser.html directly, also deploy under that name",

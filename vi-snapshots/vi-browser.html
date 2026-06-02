@@ -5,40 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>VI Browser — Mini System Manager</title>
   <style>
-    :root{--bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--border:#21262d;--border2:#30363d;--text:#c9d1d9;--text-hi:#f0f6fc;--muted:#8b949e;--dim:#484f58;--accent:#58a6ff;--yellow:#e3b341;--yellow2:#f0c060;--red:#f85149}
-    @media(prefers-color-scheme:light){:root{--bg:#ffffff;--bg2:#f6f8fa;--bg3:#eaeef2;--border:#d0d7de;--border2:#afb8c1;--text:#1f2328;--text-hi:#1f2328;--muted:#636e7b;--dim:#9198a1;--accent:#0969da;--yellow:#9a6700;--yellow2:#7d5200;--red:#cf222e}}
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text)}
-    .header{padding:1.5em 2em;border-bottom:1px solid var(--border)}
-    h1{color:var(--accent);margin-bottom:.3em;font-size:1.6em}
-    .subtitle{color:var(--muted);font-size:.95em}
-    .subtitle a{color:var(--accent);text-decoration:none}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0d1117;color:#c9d1d9}
+    .header{padding:1.5em 2em;border-bottom:1px solid #21262d}
+    h1{color:#58a6ff;margin-bottom:.3em;font-size:1.6em}
+    .subtitle{color:#8b949e;font-size:.95em}
+    .subtitle a{color:#58a6ff;text-decoration:none}
     .subtitle a:hover{text-decoration:underline}
-    .toolbar{padding:1em 2em;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:1em;flex-wrap:wrap}
-    .commit-select{background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:6px;padding:.5em 1em;font-size:.9em;min-width:300px;max-width:100%}
-    .toolbar-btn{color:var(--accent);text-decoration:none;font-size:.85em;padding:.5em 1em;border:1px solid var(--border2);border-radius:6px;background:var(--bg3);white-space:nowrap}
-    .toolbar-btn:hover{background:var(--border2)}
-    .commit-label{color:var(--muted);font-size:.85em}
-    .commit-meta{color:var(--muted);font-size:.8em;margin-left:auto}
+    .toolbar{padding:1em 2em;background:#161b22;border-bottom:1px solid #21262d;display:flex;align-items:center;gap:1em;flex-wrap:wrap}
+    .commit-select{background:#21262d;color:#c9d1d9;border:1px solid #30363d;border-radius:6px;padding:.5em 1em;font-size:.9em;min-width:300px;max-width:100%}
+    .toolbar-btn{color:#58a6ff;text-decoration:none;font-size:.85em;padding:.5em 1em;border:1px solid #30363d;border-radius:6px;background:#21262d;white-space:nowrap}
+    .toolbar-btn:hover{background:#30363d}
+    .commit-meta{color:#8b949e;font-size:.8em;margin-left:auto}
     .content{padding:2em;max-width:960px;margin:0 auto}
     .tree{list-style:none}
     .tree ul{list-style:none;padding-left:1.5em}
     .tree li{padding:.15em 0}
-    .folder-row{cursor:pointer;user-select:none;color:var(--text-hi);font-weight:500;font-size:.95em;display:inline-flex;align-items:center;gap:.3em}
-    .folder-row:hover{color:var(--accent)}
-    .caret{display:inline-block;width:.8em;text-align:center;font-size:.7em;color:var(--dim);transition:transform .15s}
+    .folder-row{cursor:pointer;user-select:none;color:#f0f6fc;font-weight:500;font-size:.95em;display:inline-flex;align-items:center;gap:.3em}
+    .folder-row:hover{color:#58a6ff}
+    .caret{display:inline-block;width:.8em;text-align:center;font-size:.7em;color:#484f58;transition:transform .15s}
     .caret.open{transform:rotate(90deg)}
-    .file-link{color:var(--accent);text-decoration:none;font-family:'SFMono-Regular',Consolas,monospace;font-size:.88em}
+    .file-link{color:#58a6ff;text-decoration:none;font-family:'SFMono-Regular',Consolas,monospace;font-size:.88em}
     .file-link:hover{text-decoration:underline}
     .file-row{display:inline-flex;align-items:center;gap:.4em}
-    .badge{display:inline-block;background:var(--bg3);color:var(--muted);font-size:.7em;padding:.1em .45em;border-radius:3px}
-    .ibadge{display:inline-block;background:var(--bg3);color:var(--yellow);font-size:.7em;padding:.1em .45em;border-radius:3px;text-decoration:none;border:none}
-    .ibadge:hover{background:var(--border2);color:var(--yellow2)}
+    .badge{display:inline-block;background:#21262d;color:#8b949e;font-size:.7em;padding:.1em .45em;border-radius:3px}
+    .ibadge{display:inline-block;background:#21262d;color:#e3b341;font-size:.7em;padding:.1em .45em;border-radius:3px;text-decoration:none;border:none}
+    .ibadge:hover{background:#30363d;color:#f0c060}
     .icon{font-size:.9em}
-    .section-label{color:var(--muted);font-size:.8em;margin-top:2em;margin-bottom:.5em;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);padding-bottom:.3em}
-    .loading{color:var(--muted);font-style:italic;padding:2em}
-    .error{color:var(--red);padding:2em}
-    .stats{color:var(--dim);font-size:.8em;margin-top:.5em}
+    .section-label{color:#8b949e;font-size:.8em;margin-top:2em;margin-bottom:.5em;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid #21262d;padding-bottom:.3em}
+    .loading{color:#8b949e;font-style:italic;padding:2em}
+    .error{color:#f85149;padding:2em}
+    .stats{color:#484f58;font-size:.8em;margin-top:.5em}
   </style>
 </head>
 <body>
@@ -51,7 +48,7 @@
     </p>
   </div>
   <div class="toolbar">
-    <label for="commit-sel" class="commit-label">Commit:</label>
+    <label for="commit-sel" style="color:#8b949e;font-size:.85em">Commit:</label>
     <select id="commit-sel" class="commit-select"><option>Loading…</option></select>
     <a id="diff-link" class="toolbar-btn" href="#" style="display:none">View VIDiff Report →</a>
     <span id="commit-meta" class="commit-meta"></span>
