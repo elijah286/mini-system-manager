@@ -1,5 +1,16 @@
 [
   {
+    "sha": "ec0add88581cf59c574b182d94d0d9c20422628a",
+    "short_sha": "ec0add8",
+    "message": "Add GHCR auth to CI pull steps; add packages:read permissions; fix Node.js 24 deprecation warning",
+    "date": "2026-06-03T02:48:50-05:00",
+    "stats": {
+      "total": 42,
+      "succeeded": 42
+    },
+    "changedVIs": []
+  },
+  {
     "sha": "b59a10cc652cd7814c26b7837b5cc1f626d7302f",
     "short_sha": "b59a10c",
     "message": "Switch CI workflows to pre-baked GHCR image; remove tar-cache and runtime install",
