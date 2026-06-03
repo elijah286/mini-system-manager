@@ -29,6 +29,7 @@ permissions:
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/mini-system-manager-labview
   DEFAULT_TAG: 2026
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build-and-push:

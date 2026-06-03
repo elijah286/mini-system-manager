@@ -1,4 +1,4 @@
-name: VIDiff Report - Windows Container
+name: VIDiff Report - Linux Container
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ on:
       - '**/*.vi'
       - '**/*.ctl'
       - '.github/labview/**'
-      - '.github/workflows/vidiff-windows-container.yml'
+      - '.github/workflows/vidiff-linux-container.yml'
   push:
     branches:
       - main
@@ -18,7 +18,7 @@ on:
       - '**/*.vi'
       - '**/*.ctl'
       - '.github/labview/**'
-      - '.github/workflows/vidiff-windows-container.yml'
+      - '.github/workflows/vidiff-linux-container.yml'
   workflow_dispatch:
     inputs:
       base_sha:
@@ -31,20 +31,18 @@ on:
 permissions:
   contents: read
   statuses: write
-  packages: read
 
 env:
-  LABVIEW_CONTAINER_IMAGE: ghcr.io/elijah286/mini-system-manager-labview:2026
+  LABVIEW_LINUX_IMAGE: nationalinstruments/labview:latest-linux
 
 jobs:
   run-vidiff:
-    name: Run VIDiff on changed LabVIEW files
-    runs-on: windows-2022
+    name: Run VIDiff on changed LabVIEW files (Linux)
+    runs-on: ubuntu-latest
 
     steps:
       - name: Determine base ref
         id: refs
-        shell: bash
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             echo "base_sha=${{ github.event.pull_request.base.sha }}" >> "$GITHUB_OUTPUT"
@@ -72,14 +70,12 @@ jobs:
 
       - name: Restore CI scripts from main
         if: github.event_name == 'workflow_dispatch'
-        shell: bash
         run: |
           cd pr
           git checkout origin/main -- .github/labview .github/workflows
 
       - name: Detect changed LabVIEW files
         id: changed-files
-        shell: bash
         run: |
           cd pr
           CHANGED_FILES=$(git diff --name-only --diff-filter=ACMR "${{ steps.refs.outputs.base_sha }}" "${{ steps.refs.outputs.head_sha }}" -- '*.vi' '*.ctl' || true)
@@ -93,59 +89,40 @@ jobs:
             echo "files<<EOF" >> "$GITHUB_OUTPUT"
             echo "$CHANGED_FILES" >> "$GITHUB_OUTPUT"
             echo "EOF" >> "$GITHUB_OUTPUT"
-            echo "files_csv=$(echo "$CHANGED_FILES" | tr '\n' ',' | sed 's/,$//')" >> "$GITHUB_OUTPUT"
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Ensure Docker daemon is running
+      - name: Pull LabVIEW Linux container image
+        if: steps.changed-files.outputs.has_changes == 'true'
+        run: docker pull ${{ env.LABVIEW_LINUX_IMAGE }}
+
+      - name: Write VIDiff manifest
         if: steps.changed-files.outputs.has_changes == 'true'
         run: |
-          $svc = Get-Service docker -ErrorAction SilentlyContinue
-          if ($svc -and $svc.Status -ne 'Running') {
-            Start-Service docker
-            Write-Host "Docker service started"
-          } elseif (-not $svc) {
-            Write-Host "Docker service not found - attempting dockerd start"
-            Start-Process dockerd -WindowStyle Hidden
-            Start-Sleep -Seconds 10
-          } else {
-            Write-Host "Docker already running"
-          }
-          docker info | Select-String "Server Version"
-
-      - name: Log in to GHCR
-        if: steps.changed-files.outputs.has_changes == 'true'
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Pull pre-baked LabVIEW container image from GHCR
-        if: steps.changed-files.outputs.has_changes == 'true'
-        run: docker pull ${{ env.LABVIEW_CONTAINER_IMAGE }}
+          # Write each file path on its own line so the bash script can handle
+          # filenames that contain spaces without any quoting issues.
+          printf '%s\n' "${{ steps.changed-files.outputs.files }}" \
+            | grep -v '^$' \
+            > "${{ github.workspace }}/pr/.vidiff-manifest"
 
       - name: Run VIDiff
         if: steps.changed-files.outputs.has_changes == 'true'
-        shell: pwsh
         run: |
-          $files = "${{ steps.changed-files.outputs.files_csv }}"
-          docker run --rm `
-            -v "${{ github.workspace }}\pr:C:\workspace" `
-            -v "${{ github.workspace }}\base:C:\workspace-base" `
-            ${{ env.LABVIEW_CONTAINER_IMAGE }} `
-            powershell -File "C:\workspace\.github\labview\vidiff.ps1" -WorkspaceRoot "C:\workspace" -WorkspaceBaseRoot "C:\workspace-base" -VIFilesCsv "$files"
+          docker run --rm \
+            -v "${{ github.workspace }}/pr:/workspace" \
+            -v "${{ github.workspace }}/base:/workspace-base" \
+            ${{ env.LABVIEW_LINUX_IMAGE }} \
+            bash /workspace/.github/labview/vidiff.sh
 
       - name: Upload VIDiff reports
         if: steps.changed-files.outputs.has_changes == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: vidiff-report-windows
-          path: ${{ github.workspace }}\pr\vidiff-reports\
+          name: vidiff-report-linux
+          path: ${{ github.workspace }}/pr/vidiff-reports/
 
       - name: Save metadata
         if: steps.changed-files.outputs.has_changes == 'true'
-        shell: bash
         run: |
           mkdir -p metadata
           if [ "${{ github.event_name }}" = "pull_request" ]; then
@@ -154,11 +131,11 @@ jobs:
             echo "" > metadata/pr_number
           fi
           echo "${{ steps.refs.outputs.head_sha }}" > metadata/head_sha
-          echo "windows" > metadata/platform
+          echo "linux" > metadata/platform
 
       - name: Upload metadata
         if: steps.changed-files.outputs.has_changes == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: vidiff-metadata-windows
+          name: vidiff-metadata-linux
           path: metadata/
