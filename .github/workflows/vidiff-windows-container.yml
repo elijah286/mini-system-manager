@@ -33,7 +33,7 @@ permissions:
   statuses: write
 
 env:
-  LABVIEW_CONTAINER_IMAGE: nationalinstruments/labview:latest-windows
+  LABVIEW_CONTAINER_IMAGE: ghcr.io/elijah286/mini-system-manager-labview:2026
 
 jobs:
   run-vidiff:
@@ -96,14 +96,6 @@ jobs:
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Cache LabVIEW container image
-        if: steps.changed-files.outputs.has_changes == 'true'
-        id: cache-image
-        uses: actions/cache@v4
-        with:
-          path: labview-image.tar
-          key: labview-container-${{ env.LABVIEW_CONTAINER_IMAGE }}
-
       - name: Ensure Docker daemon is running
         if: steps.changed-files.outputs.has_changes == 'true'
         run: |
@@ -120,17 +112,9 @@ jobs:
           }
           docker info | Select-String "Server Version"
 
-      - name: Load or pull LabVIEW container image
+      - name: Pull pre-baked LabVIEW container image from GHCR
         if: steps.changed-files.outputs.has_changes == 'true'
-        run: |
-          if (Test-Path "labview-image.tar") {
-            Write-Host "Loading cached image..."
-            docker load -i labview-image.tar
-          } else {
-            Write-Host "Pulling image..."
-            docker pull ${{ env.LABVIEW_CONTAINER_IMAGE }}
-            docker save -o labview-image.tar ${{ env.LABVIEW_CONTAINER_IMAGE }}
-          }
+        run: docker pull ${{ env.LABVIEW_CONTAINER_IMAGE }}
 
       - name: Run VIDiff
         if: steps.changed-files.outputs.has_changes == 'true'

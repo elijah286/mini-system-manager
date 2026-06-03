@@ -29,7 +29,7 @@ permissions:
   statuses: write
 
 env:
-  LABVIEW_CONTAINER_IMAGE: nationalinstruments/labview:latest-windows
+  LABVIEW_CONTAINER_IMAGE: ghcr.io/elijah286/mini-system-manager-labview:2026
 
 jobs:
   run-vi-analyzer-windows:
@@ -75,23 +75,8 @@ jobs:
           }
           docker info | Select-String "Server Version"
 
-      - name: Cache LabVIEW container image
-        id: cache-image
-        uses: actions/cache@v4
-        with:
-          path: labview-image.tar
-          key: labview-container-${{ env.LABVIEW_CONTAINER_IMAGE }}
-
-      - name: Load or pull LabVIEW container image
-        run: |
-          if (Test-Path "labview-image.tar") {
-            Write-Host "Loading cached image..."
-            docker load -i labview-image.tar
-          } else {
-            Write-Host "Pulling image..."
-            docker pull ${{ env.LABVIEW_CONTAINER_IMAGE }}
-            docker save -o labview-image.tar ${{ env.LABVIEW_CONTAINER_IMAGE }}
-          }
+      - name: Pull pre-baked LabVIEW container image from GHCR
+        run: docker pull ${{ env.LABVIEW_CONTAINER_IMAGE }}
 
       - name: Run VI Analyzer tests
         run: >

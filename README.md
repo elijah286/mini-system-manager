@@ -176,6 +176,22 @@ This repository now includes GitHub Actions modeled on the Windows-container wor
 - **VIDiff Report - Windows Container**: generates HTML diffs for changed `.vi` and `.ctl` files in pull requests
 - **Deploy VIDiff Reports**: publishes VIDiff HTML reports to GitHub Pages and comments on the pull request with links
 
-The workflows use the NI LabVIEW Windows container image `nationalinstruments/labview:latest-windows`. If you need to pin a different LabVIEW version, update the `LABVIEW_CONTAINER_IMAGE` environment variable in the workflow files under `.github/workflows/` and the LabVIEW executable path in `.github/labview/*.ps1`.
+The CI workflows pull a pre-baked LabVIEW image from GitHub Container Registry (GHCR): `ghcr.io/elijah286/mini-system-manager-labview:2026`.
+
+This repo keeps the image definition in source control and the built image in GHCR:
+
+- Dockerfile in repo: `.github/docker/labview-ci.Dockerfile`
+- Build/publish workflow: `.github/workflows/build-labview-image.yml`
+- Published package location: repository **Packages** tab in GitHub
+
+### Rebuilding the CI image
+
+1. Run the `Build LabVIEW CI Image` workflow from Actions.
+2. Optionally set `labview_tag` in workflow dispatch input (defaults to `2026`).
+3. Check the workflow summary for the pushed tags and digest.
+
+The build workflow runs on changes to the Dockerfile path and monthly on schedule, and always uses `windows-2022`.
+
+If you need to pin a different LabVIEW version, update `LABVIEW_CONTAINER_IMAGE` in workflow files under `.github/workflows/`, then rebuild and publish the corresponding image tag.
 
 The starter VI Analyzer configuration is in `.github/labview/via-configs/via-config-default.viancfg`. You should expect to tune that ruleset once you see the first CI results for this codebase.
