@@ -1,5 +1,16 @@
 [
   {
+    "sha": "b59a10cc652cd7814c26b7837b5cc1f626d7302f",
+    "short_sha": "b59a10c",
+    "message": "Switch CI workflows to pre-baked GHCR image; remove tar-cache and runtime install",
+    "date": "2026-06-03T01:49:10-05:00",
+    "stats": {
+      "total": 0,
+      "succeeded": 0
+    },
+    "changedVIs": []
+  },
+  {
     "sha": "57db71125be89cef644d738bbf9a3b2dafc80347",
     "short_sha": "57db711",
     "message": "VI Browser: revision label, highlight changed files, per-file diff badge",

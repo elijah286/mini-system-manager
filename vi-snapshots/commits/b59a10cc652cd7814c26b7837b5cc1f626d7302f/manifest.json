@@ -1,0 +1,294 @@
+{
+  "tree": [
+    {
+      "name": "My Computer",
+      "type": "target",
+      "children": [
+        {
+          "name": "Curriculum",
+          "type": "folder",
+          "children": [
+            {
+              "name": "Generator API",
+              "type": "folder",
+              "children": [
+                {
+                  "name": "subVIs",
+                  "type": "folder",
+                  "children": [
+                    {
+                      "name": "Demo",
+                      "type": "folder",
+                      "children": [
+                        {
+                          "name": "Demo PID Control.vi",
+                          "type": "file",
+                          "path": "Curriculum/Generator API/subVIs/Demo/Demo PID Control.vi"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Private",
+                      "type": "folder",
+                      "children": [
+                        {
+                          "name": "Default Instrument Setup.vi",
+                          "type": "file",
+                          "path": "Curriculum/Generator API/subVIs/Private/Default Instrument Setup.vi"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Public",
+                      "type": "folder",
+                      "children": [
+                        {
+                          "name": "Action-Status",
+                          "type": "folder",
+                          "children": [
+                            {
+                              "name": "Init.vi",
+                              "type": "file",
+                              "path": "Curriculum/Generator API/subVIs/Public/Action-Status/Init.vi"
+                            },
+                            {
+                              "name": "Motor Off.vi",
+                              "type": "file",
+                              "path": "Curriculum/Generator API/subVIs/Public/Action-Status/Motor Off.vi"
+                            },
+                            {
+                              "name": "Motor On.vi",
+                              "type": "file",
+                              "path": "Curriculum/Generator API/subVIs/Public/Action-Status/Motor On.vi"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Configure",
+                          "type": "folder",
+                          "children": [
+                            {
+                              "name": "Set Load.vi",
+                              "type": "file",
+                              "path": "Curriculum/Generator API/subVIs/Public/Configure/Set Load.vi"
+                            },
+                            {
+                              "name": "Set Speed.vi",
+                              "type": "file",
+                              "path": "Curriculum/Generator API/subVIs/Public/Configure/Set Speed.vi"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Data",
+                          "type": "folder",
+                          "children": [
+                            {
+                              "name": "Get KW.vi",
+                              "type": "file",
+                              "path": "Curriculum/Generator API/subVIs/Public/Data/Get KW.vi"
+                            },
+                            {
+                              "name": "Get Value.vi",
+                              "type": "file",
+                              "path": "Curriculum/Generator API/subVIs/Public/Data/Get Value.vi"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Utility",
+                          "type": "folder",
+                          "children": [
+                            {
+                              "name": "Error Query.vi",
+                              "type": "file",
+                              "path": "Curriculum/Generator API/subVIs/Public/Utility/Error Query.vi"
+                            },
+                            {
+                              "name": "Reset.vi",
+                              "type": "file",
+                              "path": "Curriculum/Generator API/subVIs/Public/Utility/Reset.vi"
+                            },
+                            {
+                              "name": "Revision Query.vi",
+                              "type": "file",
+                              "path": "Curriculum/Generator API/subVIs/Public/Utility/Revision Query.vi"
+                            },
+                            {
+                              "name": "Self-Test.vi",
+                              "type": "file",
+                              "path": "Curriculum/Generator API/subVIs/Public/Utility/Self-Test.vi"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Close.vi",
+                          "type": "file",
+                          "path": "Curriculum/Generator API/subVIs/Public/Close.vi"
+                        },
+                        {
+                          "name": "Initialize.vi",
+                          "type": "file",
+                          "path": "Curriculum/Generator API/subVIs/Public/Initialize.vi"
+                        },
+                        {
+                          "name": "VI Tree.vi",
+                          "type": "file",
+                          "path": "Curriculum/Generator API/subVIs/Public/VI Tree.vi"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Generator Driver Template 1.vi",
+                  "type": "file",
+                  "path": "Curriculum/Generator API/Generator Driver Template 1.vi"
+                },
+                {
+                  "name": "Generator Driver Template 2.vi",
+                  "type": "file",
+                  "path": "Curriculum/Generator API/Generator Driver Template 2.vi"
+                },
+                {
+                  "name": "Generator Driver Template 3.vi",
+                  "type": "file",
+                  "path": "Curriculum/Generator API/Generator Driver Template 3.vi"
+                },
+                {
+                  "name": "Generator Driver Template 4.vi",
+                  "type": "file",
+                  "path": "Curriculum/Generator API/Generator Driver Template 4.vi"
+                },
+                {
+                  "name": "Generator Driver Template 5.vi",
+                  "type": "file",
+                  "path": "Curriculum/Generator API/Generator Driver Template 5.vi"
+                }
+              ]
+            },
+            {
+              "name": "Generator Lessons",
+              "type": "folder",
+              "children": [
+                {
+                  "name": "subVIs",
+                  "type": "folder",
+                  "children": [
+                    {
+                      "name": "Command with Return Value.vi",
+                      "type": "file",
+                      "path": "Curriculum/Generator Lessons/subVIs/Command with Return Value.vi"
+                    },
+                    {
+                      "name": "Confirm USB Devices and IO.vi",
+                      "type": "file",
+                      "path": "Curriculum/Generator Lessons/subVIs/Confirm USB Devices and IO.vi"
+                    },
+                    {
+                      "name": "Get All Values.vi",
+                      "type": "file",
+                      "path": "Curriculum/Generator Lessons/subVIs/Get All Values.vi"
+                    },
+                    {
+                      "name": "USB Device Filter.vi",
+                      "type": "file",
+                      "path": "Curriculum/Generator Lessons/subVIs/USB Device Filter.vi"
+                    },
+                    {
+                      "name": "balance grid.vi",
+                      "type": "file",
+                      "path": "Curriculum/Generator Lessons/subVIs/balance grid.vi"
+                    }
+                  ]
+                },
+                {
+                  "name": "Generator Lesson 1.vi",
+                  "type": "file",
+                  "path": "Curriculum/Generator Lessons/Generator Lesson 1.vi"
+                },
+                {
+                  "name": "Generator Lesson 2.vi",
+                  "type": "file",
+                  "path": "Curriculum/Generator Lessons/Generator Lesson 2.vi"
+                },
+                {
+                  "name": "Generator Lesson 3.vi",
+                  "type": "file",
+                  "path": "Curriculum/Generator Lessons/Generator Lesson 3.vi"
+                },
+                {
+                  "name": "Generator Lesson 4.vi",
+                  "type": "file",
+                  "path": "Curriculum/Generator Lessons/Generator Lesson 4.vi"
+                },
+                {
+                  "name": "Generator Lesson 5.vi",
+                  "type": "file",
+                  "path": "Curriculum/Generator Lessons/Generator Lesson 5.vi"
+                },
+                {
+                  "name": "Generator Lesson 6.vi",
+                  "type": "file",
+                  "path": "Curriculum/Generator Lessons/Generator Lesson 6.vi"
+                },
+                {
+                  "name": "Generator Lesson 7.vi",
+                  "type": "file",
+                  "path": "Curriculum/Generator Lessons/Generator Lesson 7.vi"
+                }
+              ]
+            },
+            {
+              "name": "Main Power Grid",
+              "type": "folder",
+              "children": [
+                {
+                  "name": "Main Power Grid.vi",
+                  "type": "file",
+                  "path": "Curriculum/Main Power Grid/Main Power Grid.vi"
+                }
+              ]
+            },
+            {
+              "name": "Solar Lessons",
+              "type": "folder",
+              "children": [
+                {
+                  "name": "Solar Example.vi",
+                  "type": "file",
+                  "path": "Curriculum/Solar Lessons/Solar Example.vi"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Controller Commands.ctl",
+          "type": "file"
+        },
+        {
+          "name": "Curriculum Launcher.vi",
+          "type": "file"
+        },
+        {
+          "name": "Find Curriculum.vi",
+          "type": "file"
+        },
+        {
+          "name": "Graph Popup.vi",
+          "type": "file"
+        },
+        {
+          "name": "main.vi",
+          "type": "file"
+        },
+        {
+          "name": "Status String Update.vi",
+          "type": "file"
+        }
+      ]
+    }
+  ],
+  "nonProjectFiles": []
+}
