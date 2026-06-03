@@ -1,5 +1,5 @@
 {
-  "generatedAt": "26858460348",
+  "generatedAt": "26860496486",
   "tree": [
     ".nojekyll",
     "dashboard-data.json",
@@ -1859,6 +1859,13 @@
       }
     },
     "8ad4528bb13931d844809865a289aea86b7cd779": {
+      "mc": {
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26813179609",
+        "createdAt": "2026-06-02T10:13:01Z",
+        "title": "Fix VI Browser link: point to vi-browser.html directly, also deploy u\u2026"
+      },
       "via": {
         "status": "completed",
         "conclusion": "cancelled",
@@ -1870,13 +1877,6 @@
         "status": "completed",
         "conclusion": "success",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26813179553",
-        "createdAt": "2026-06-02T10:13:01Z",
-        "title": "Fix VI Browser link: point to vi-browser.html directly, also deploy u\u2026"
-      },
-      "mc": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26813179609",
         "createdAt": "2026-06-02T10:13:01Z",
         "title": "Fix VI Browser link: point to vi-browser.html directly, also deploy u\u2026"
       }
