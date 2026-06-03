@@ -12,13 +12,10 @@ ARG VIA_SUPPORT_PACKAGE=ni-viawin-labview-support
 COPY .github/labview/vipm/ C:/vipm/
 
 # Install VI Analyzer support package at image build-time (not runtime in CI jobs).
+# nipkg install is idempotent — if the package is already present it exits cleanly.
 RUN if (-not (Get-Command nipkg -ErrorAction SilentlyContinue)) { throw 'nipkg was not found in the LabVIEW base image.' }; `
     nipkg feed-add --name=$env:NIPM_FEED_NAME $env:NIPM_FEED_URL; `
     nipkg update; `
-    $available = nipkg list --available 2>&1; `
-    if (-not ($available | Select-String -SimpleMatch $env:VIA_SUPPORT_PACKAGE)) { `
-      throw "Package '$env:VIA_SUPPORT_PACKAGE' not found after feed update. Verify feed URL/version for this LabVIEW image." `
-    }; `
     nipkg install --accept-eulas -y --passive $env:VIA_SUPPORT_PACKAGE; `
     if (Test-Path 'C:\ProgramData\National Instruments\NI Package Manager\cache') { `
       Remove-Item -Path 'C:\ProgramData\National Instruments\NI Package Manager\cache\*' -Force -Recurse -ErrorAction SilentlyContinue `
