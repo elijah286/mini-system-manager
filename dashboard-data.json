@@ -1,5 +1,5 @@
 {
-  "generatedAt": "27286385011",
+  "generatedAt": "27291238010",
   "tree": [
     ".nojekyll",
     "dashboard-data.json",
@@ -2427,7 +2427,7 @@
       "sha": "e778d68ee2b8cb4cdc8f97ca618fd57205d3c7b2",
       "date": "2026-06-02T16:40:58Z",
       "message": "Deploy vi-browser.html + vi-interactive.html via fast dashboard workflow",
-      "ciOnly": false
+      "ciOnly": true
     },
     {
       "sha": "aeb493778b2251463cd3f4007b894e2559823c42",
@@ -2469,7 +2469,7 @@
       "sha": "0faf3879605cde0b5d3f84e9a18c48619b7105b2",
       "date": "2026-06-01T16:38:16Z",
       "message": "Fix dashboard report links: normalize SHAs to 7 chars to match report directories",
-      "ciOnly": false
+      "ciOnly": true
     },
     {
       "sha": "2006d0449b590e7878214b0e3e01180fdfe68e38",
@@ -2493,7 +2493,7 @@
       "sha": "84631942a5ece3321b56c216b6a7c907f21217a1",
       "date": "2026-06-01T09:16:00Z",
       "message": "Use readable revision labels instead of full commit hashes on dashboard",
-      "ciOnly": false
+      "ciOnly": true
     },
     {
       "sha": "737e317dd4588a38e4b7bb43e957e658bc8949ac",
