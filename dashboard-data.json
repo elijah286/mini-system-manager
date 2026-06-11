@@ -1,5 +1,5 @@
 {
-  "generatedAt": "27330580697",
+  "generatedAt": "27335935002",
   "tree": [
     ".nojekyll",
     "dashboard-data.json",
@@ -1860,26 +1860,26 @@
   ],
   "runsBySha": {
     "f6dfc1da612795ff861687b27e5820e0fd0baa2a": {
-      "via": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26871175911",
-        "createdAt": "2026-06-03T07:49:23Z",
-        "title": "Revert accidental commit of in-progress Linux container workflows"
-      },
       "mc": {
         "status": "completed",
         "conclusion": "success",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26871175918",
         "createdAt": "2026-06-03T07:49:23Z",
         "title": "Revert accidental commit of in-progress Linux container workflows"
+      },
+      "via": {
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26871175911",
+        "createdAt": "2026-06-03T07:49:23Z",
+        "title": "Revert accidental commit of in-progress Linux container workflows"
       }
     },
     "ec0add88581cf59c574b182d94d0d9c20422628a": {
-      "via": {
+      "mc": {
         "status": "completed",
-        "conclusion": "cancelled",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26871153263",
+        "conclusion": "success",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26871153248",
         "createdAt": "2026-06-03T07:48:55Z",
         "title": "Add GHCR auth to CI pull steps; add packages:read permissions; fix No\u2026"
       },
@@ -1890,10 +1890,10 @@
         "createdAt": "2026-06-03T07:48:55Z",
         "title": "Add GHCR auth to CI pull steps; add packages:read permissions; fix No\u2026"
       },
-      "mc": {
+      "via": {
         "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26871153248",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26871153263",
         "createdAt": "2026-06-03T07:48:55Z",
         "title": "Add GHCR auth to CI pull steps; add packages:read permissions; fix No\u2026"
       }
@@ -1922,33 +1922,33 @@
         "createdAt": "2026-06-03T07:03:57Z",
         "title": "Switch CI workflows to pre-baked GHCR image; remove tar-cache and run\u2026"
       },
-      "vd": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26869165891",
-        "createdAt": "2026-06-03T07:03:57Z",
-        "title": "Switch CI workflows to pre-baked GHCR image; remove tar-cache and run\u2026"
-      },
       "via": {
         "status": "completed",
         "conclusion": "cancelled",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26869165929",
         "createdAt": "2026-06-03T07:03:57Z",
         "title": "Switch CI workflows to pre-baked GHCR image; remove tar-cache and run\u2026"
+      },
+      "vd": {
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26869165891",
+        "createdAt": "2026-06-03T07:03:57Z",
+        "title": "Switch CI workflows to pre-baked GHCR image; remove tar-cache and run\u2026"
       }
     },
     "c55d1de717c71d3f611df7bf9cbb6df99f4b36dd": {
-      "via": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26868542243",
-        "createdAt": "2026-06-03T06:49:01Z",
-        "title": "Add pre-baked LabVIEW CI Dockerfile and GHCR build workflow"
-      },
       "mc": {
         "status": "completed",
         "conclusion": "cancelled",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26868542225",
+        "createdAt": "2026-06-03T06:49:01Z",
+        "title": "Add pre-baked LabVIEW CI Dockerfile and GHCR build workflow"
+      },
+      "via": {
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26868542243",
         "createdAt": "2026-06-03T06:49:01Z",
         "title": "Add pre-baked LabVIEW CI Dockerfile and GHCR build workflow"
       }
@@ -1961,17 +1961,17 @@
         "createdAt": "2026-06-02T17:08:35Z",
         "title": "VI Browser: revision label, highlight changed files, per-file diff badge"
       },
-      "mc": {
-        "status": "completed",
-        "conclusion": "cancelled",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26835641399",
-        "createdAt": "2026-06-02T17:08:35Z",
-        "title": "VI Browser: revision label, highlight changed files, per-file diff badge"
-      },
       "vd": {
         "status": "completed",
         "conclusion": "success",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26835641202",
+        "createdAt": "2026-06-02T17:08:35Z",
+        "title": "VI Browser: revision label, highlight changed files, per-file diff badge"
+      },
+      "mc": {
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26835641399",
         "createdAt": "2026-06-02T17:08:35Z",
         "title": "VI Browser: revision label, highlight changed files, per-file diff badge"
       }
@@ -2025,17 +2025,17 @@
       }
     },
     "8ad4528bb13931d844809865a289aea86b7cd779": {
-      "via": {
-        "status": "completed",
-        "conclusion": "cancelled",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26813179555",
-        "createdAt": "2026-06-02T10:13:01Z",
-        "title": "Fix VI Browser link: point to vi-browser.html directly, also deploy u\u2026"
-      },
       "vd": {
         "status": "completed",
         "conclusion": "success",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26813179553",
+        "createdAt": "2026-06-02T10:13:01Z",
+        "title": "Fix VI Browser link: point to vi-browser.html directly, also deploy u\u2026"
+      },
+      "via": {
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26813179555",
         "createdAt": "2026-06-02T10:13:01Z",
         "title": "Fix VI Browser link: point to vi-browser.html directly, also deploy u\u2026"
       },
@@ -2071,13 +2071,6 @@
       }
     },
     "b33292157dbaff8cceb65efd57a6dd684356461c": {
-      "mc": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26776141547",
-        "createdAt": "2026-06-01T19:11:27Z",
-        "title": "Add interactive VI viewer with case structure navigation"
-      },
       "via": {
         "status": "completed",
         "conclusion": "cancelled",
@@ -2089,6 +2082,13 @@
         "status": "completed",
         "conclusion": "success",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26776141656",
+        "createdAt": "2026-06-01T19:11:27Z",
+        "title": "Add interactive VI viewer with case structure navigation"
+      },
+      "mc": {
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26776141547",
         "createdAt": "2026-06-01T19:11:27Z",
         "title": "Add interactive VI viewer with case structure navigation"
       }
@@ -2126,33 +2126,33 @@
       }
     },
     "0faf3879605cde0b5d3f84e9a18c48619b7105b2": {
-      "mc": {
-        "status": "completed",
-        "conclusion": "cancelled",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768332472",
-        "createdAt": "2026-06-01T16:38:22Z",
-        "title": "Fix dashboard report links: normalize SHAs to 7 chars to match report\u2026"
-      },
       "via": {
         "status": "completed",
         "conclusion": "cancelled",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768332250",
         "createdAt": "2026-06-01T16:38:22Z",
         "title": "Fix dashboard report links: normalize SHAs to 7 chars to match report\u2026"
+      },
+      "mc": {
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768332472",
+        "createdAt": "2026-06-01T16:38:22Z",
+        "title": "Fix dashboard report links: normalize SHAs to 7 chars to match report\u2026"
       }
     },
     "2006d0449b590e7878214b0e3e01180fdfe68e38": {
-      "mc": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768081116",
-        "createdAt": "2026-06-01T16:33:22Z",
-        "title": "Dashboard: system theme, filter CI-only rows, fix links to reports"
-      },
       "via": {
         "status": "completed",
         "conclusion": "cancelled",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768080857",
+        "createdAt": "2026-06-01T16:33:22Z",
+        "title": "Dashboard: system theme, filter CI-only rows, fix links to reports"
+      },
+      "mc": {
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26768081116",
         "createdAt": "2026-06-01T16:33:22Z",
         "title": "Dashboard: system theme, filter CI-only rows, fix links to reports"
       }
@@ -2190,17 +2190,17 @@
       }
     },
     "84631942a5ece3321b56c216b6a7c907f21217a1": {
-      "mc": {
-        "status": "completed",
-        "conclusion": "cancelled",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26746061588",
-        "createdAt": "2026-06-01T09:16:05Z",
-        "title": "Use readable revision labels instead of full commit hashes on dashboard"
-      },
       "via": {
         "status": "completed",
         "conclusion": "cancelled",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26746061616",
+        "createdAt": "2026-06-01T09:16:05Z",
+        "title": "Use readable revision labels instead of full commit hashes on dashboard"
+      },
+      "mc": {
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26746061588",
         "createdAt": "2026-06-01T09:16:05Z",
         "title": "Use readable revision labels instead of full commit hashes on dashboard"
       }
@@ -2222,17 +2222,17 @@
       }
     },
     "cefa707d19b67dd5e0e6b1330705a5026497f18a": {
-      "mc": {
-        "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26745499751",
-        "createdAt": "2026-06-01T09:04:00Z",
-        "title": "Serve dashboard data from workflow to avoid browser API rate limits"
-      },
       "via": {
         "status": "completed",
         "conclusion": "cancelled",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26745499762",
+        "createdAt": "2026-06-01T09:04:00Z",
+        "title": "Serve dashboard data from workflow to avoid browser API rate limits"
+      },
+      "mc": {
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26745499751",
         "createdAt": "2026-06-01T09:04:00Z",
         "title": "Serve dashboard data from workflow to avoid browser API rate limits"
       }
@@ -2286,17 +2286,17 @@
       }
     },
     "10934f83431d6781a4cef8db4cb0e4fc8dacb3ae": {
-      "mc": {
-        "status": "completed",
-        "conclusion": "cancelled",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26744346907",
-        "createdAt": "2026-06-01T08:39:51Z",
-        "title": "Reduce dashboard GitHub API usage to prevent 403 rate limits"
-      },
       "via": {
         "status": "completed",
         "conclusion": "cancelled",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26744346937",
+        "createdAt": "2026-06-01T08:39:51Z",
+        "title": "Reduce dashboard GitHub API usage to prevent 403 rate limits"
+      },
+      "mc": {
+        "status": "completed",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26744346907",
         "createdAt": "2026-06-01T08:39:51Z",
         "title": "Reduce dashboard GitHub API usage to prevent 403 rate limits"
       }
@@ -2318,10 +2318,10 @@
       }
     },
     "634f1536c66280b4bb6d1cd4b80f255151e32637": {
-      "via": {
+      "mc": {
         "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26743488944",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26743488996",
         "createdAt": "2026-06-01T08:20:34Z",
         "title": "Merge branch 'main' of https://github.com/elijah286/mini-system-manager"
       },
@@ -2332,19 +2332,19 @@
         "createdAt": "2026-06-01T08:20:34Z",
         "title": "Merge branch 'main' of https://github.com/elijah286/mini-system-manager"
       },
-      "mc": {
+      "via": {
         "status": "completed",
-        "conclusion": "cancelled",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26743488996",
+        "conclusion": "success",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26743488944",
         "createdAt": "2026-06-01T08:20:34Z",
         "title": "Merge branch 'main' of https://github.com/elijah286/mini-system-manager"
       }
     },
     "738dd3ec98c44e3d48b3051866309c50686549d1": {
-      "mc": {
+      "via": {
         "status": "completed",
-        "conclusion": "cancelled",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26722745067",
+        "conclusion": "success",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26722745082",
         "createdAt": "2026-05-31T19:50:23Z",
         "title": "Add per-commit VI Browser with lvproj tree, commit selector, and VIDi\u2026"
       },
@@ -2355,19 +2355,19 @@
         "createdAt": "2026-05-31T19:50:23Z",
         "title": "Add per-commit VI Browser with lvproj tree, commit selector, and VIDi\u2026"
       },
-      "via": {
+      "mc": {
         "status": "completed",
-        "conclusion": "success",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26722745082",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26722745067",
         "createdAt": "2026-05-31T19:50:23Z",
         "title": "Add per-commit VI Browser with lvproj tree, commit selector, and VIDi\u2026"
       }
     },
     "bb77e9cffb74be6639bfcd448f7a8de2dd3737b1": {
-      "vd": {
+      "mc": {
         "status": "completed",
-        "conclusion": "failure",
-        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26721700588",
+        "conclusion": "cancelled",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26721700586",
         "createdAt": "2026-05-31T19:04:33Z",
         "title": "Add PrintToSingleFileHtml operation VIs from NI labview-for-container\u2026"
       },
@@ -2375,6 +2375,13 @@
         "status": "completed",
         "conclusion": "success",
         "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26721700571",
+        "createdAt": "2026-05-31T19:04:33Z",
+        "title": "Add PrintToSingleFileHtml operation VIs from NI labview-for-container\u2026"
+      },
+      "vd": {
+        "status": "completed",
+        "conclusion": "failure",
+        "url": "https://github.com/elijah286/mini-system-manager/actions/runs/26721700588",
         "createdAt": "2026-05-31T19:04:33Z",
         "title": "Add PrintToSingleFileHtml operation VIs from NI labview-for-container\u2026"
       }
