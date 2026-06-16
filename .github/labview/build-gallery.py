@@ -1,267 +1,166 @@
 #!/usr/bin/env python3
-"""Build VI Browser gallery data: parse lvproj, create per-commit manifest, update commits.json."""
+"""
+build-gallery.py — Build a per-commit manifest.json and update commits.json for
+the content-addressed VI Browser gallery.
 
+Snapshots are stored once per unique VI *content*, keyed by the file's git blob
+SHA, under:
+
+    vi-snapshots/by-blob/<ab>/<blobsha>.html
+
+A commit's manifest.json maps every VI in that commit to its by-blob HTML file,
+so unchanged VIs are reused across commits with no re-rendering and no
+duplication.
+
+Usage:
+    python3 build-gallery.py \
+        --vimap        path/to/vimap.tsv      # lines: "<blobsha>\\t<vi_rel_path>"
+        --commit-sha   abc123... \
+        --commit-msg   "commit message" \
+        --author       "Author Name" \
+        --date         2026-06-06T12:00:00Z \
+        --output-dir   path/to/vi-snapshots/<commit-sha> \
+        --commits-file path/to/vi-snapshots/commits.json \
+        --by-blob-prefix by-blob
+
+Outputs:
+    <output-dir>/manifest.json   — VI list for this commit (html -> by-blob path)
+    <commits-file>               — rolling list of commits that have snapshots
+"""
+
+import argparse
 import json
-import os
-import shutil
 import sys
-import urllib.parse
-import urllib.request
-import xml.etree.ElementTree as ET
-from datetime import datetime
+from datetime import datetime, timezone
+from pathlib import Path
 
 
-def parse_lvproj(proj_path, workspace_root, exported_map):
-    """Parse .lvproj XML and build a project tree with snapshot links."""
-    tree_root = ET.parse(proj_path).getroot()
-    my_computer = tree_root.find("Item")  # "My Computer" node
-    if my_computer is None:
-        return [], set()
-
-    project_files = set()
-    children = []
-    for item in my_computer.findall("Item"):
-        node = _process_item(item, workspace_root, exported_map, project_files)
-        if node:
-            children.append(node)
-
-    tree = [{"name": my_computer.get("Name", "My Computer"), "type": "target", "children": children}]
-    return tree, project_files
+def _group_for(vi_rel: str) -> str:
+    """
+    Group a VI by its top-level folder so the browser shows a sensible tree
+    (e.g. "Contestant", "Controller"). VIs at the repo root are grouped under
+    "Project".
+    """
+    parts = vi_rel.replace("\\", "/").split("/")
+    if len(parts) > 1 and parts[0]:
+        return parts[0]
+    return "Project"
 
 
-def _process_item(item, workspace_root, exported_map, project_files):
-    item_type = item.get("Type", "")
-    name = item.get("Name", "")
+def read_vimap(vimap_path: Path) -> list[tuple[str, str]]:
+    """
+    Read a TSV worklist of "<blob_sha>\\t<vi_rel_path>" lines.
+    Returns a list of (blob_sha, vi_rel) tuples, sorted by vi_rel.
+    """
+    entries: list[tuple[str, str]] = []
+    if not vimap_path.exists():
+        return entries
+    # utf-8-sig tolerates a BOM (PowerShell may add one) as well as plain UTF-8.
+    for raw in vimap_path.read_text(encoding="utf-8-sig").splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        parts = line.split("\t")
+        if len(parts) != 2:
+            print(f"  WARNING: skipping malformed vimap line: {raw!r}", file=sys.stderr)
+            continue
+        blob, vi_rel = parts[0].strip(), parts[1].strip().replace("\\", "/")
+        if not blob or not vi_rel:
+            continue
+        entries.append((blob, vi_rel))
+    entries.sort(key=lambda e: e[1].lower())
+    return entries
 
-    if item_type in ("Dependencies", "Build"):
-        return None
 
-    if item_type == "VI":
-        node = {"name": name, "type": "file"}
-        # Match by filename at workspace root (forward-slash normalised)
-        if name in exported_map:
-            node["path"] = name
-            node["html"] = exported_map[name]
-            project_files.add(name)
-        return node
-
-    if item_type == "Folder":
-        is_disk = any(
-            p.get("Name") == "NI.DISK" and p.text == "true"
-            for p in item.findall("Property")
+def build_manifest(
+    vimap: list[tuple[str, str]],
+    commit_sha: str,
+    by_blob_prefix: str,
+) -> list[dict]:
+    entries: list[dict] = []
+    for blob, vi_rel in vimap:
+        html = f"{by_blob_prefix}/{blob[:2]}/{blob}.html"
+        entries.append(
+            {
+                "html": html,
+                "vi_name": Path(vi_rel).stem,
+                "group": _group_for(vi_rel),
+                "vi_rel": vi_rel,
+                "blob": blob,
+                "commit_sha": commit_sha,
+            }
         )
-        if is_disk:
-            folder_path = os.path.join(workspace_root, name)
-            return _build_disk_folder(folder_path, name, workspace_root, exported_map, project_files)
-        else:
-            children = []
-            for child in item.findall("Item"):
-                c = _process_item(child, workspace_root, exported_map, project_files)
-                if c:
-                    children.append(c)
-            return {"name": name, "type": "folder", "children": children}
-
-    return None
+    return entries
 
 
-def _build_disk_folder(folder_path, folder_name, workspace_root, exported_map, project_files):
-    node = {"name": folder_name, "type": "folder", "children": []}
-    if not os.path.isdir(folder_path):
-        return node
+def update_commits_json(
+    commits_file: Path,
+    commit_sha: str,
+    commit_msg: str,
+    author: str,
+    date: str,
+    vi_count: int,
+) -> list[dict]:
+    existing: list[dict] = []
+    if commits_file.exists():
+        try:
+            existing = json.loads(commits_file.read_text(encoding="utf-8-sig"))
+        except Exception:
+            existing = []
 
-    # Subdirectories first
-    for entry in sorted(os.listdir(folder_path)):
-        full = os.path.join(folder_path, entry)
-        if os.path.isdir(full):
-            child = _build_disk_folder(full, entry, workspace_root, exported_map, project_files)
-            if child["children"]:
-                node["children"].append(child)
-
-    # Then files
-    for entry in sorted(os.listdir(folder_path)):
-        full = os.path.join(folder_path, entry)
-        if os.path.isfile(full) and entry.lower().endswith((".vi", ".ctl")):
-            rel = os.path.relpath(full, workspace_root).replace("\\", "/")
-            file_node = {"name": entry, "type": "file", "path": rel}
-            if rel in exported_map:
-                file_node["html"] = exported_map[rel]
-            project_files.add(rel)
-            node["children"].append(file_node)
-
-    return node
-
-
-def fetch_existing_commits(pages_url):
-    """Fetch existing commits.json from GitHub Pages."""
-    try:
-        url = pages_url.rstrip("/") + "/vi-snapshots/commits.json"
-        req = urllib.request.Request(url, headers={"User-Agent": "GitHub-Actions"})
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            return json.loads(resp.read().decode("utf-8"))
-    except Exception as e:
-        print(f"  Could not fetch existing commits.json: {e}")
-        return []
-
-
-def fetch_changed_vis(commit_sha, token, repo):
-    """Return basenames of .vi/.ctl files changed in this commit via GitHub API."""
-    if not token or not repo:
-        return []
-    try:
-        url = f"https://api.github.com/repos/{repo}/commits/{commit_sha}"
-        req = urllib.request.Request(url, headers={
-            "Authorization": f"Bearer {token}",
-            "Accept": "application/vnd.github+json",
-            "User-Agent": "GitHub-Actions",
-            "X-GitHub-Api-Version": "2022-11-28",
-        })
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-        return [
-            os.path.basename(f.get("filename", ""))
-            for f in data.get("files", [])
-            if f.get("filename", "").lower().endswith((".vi", ".ctl"))
-        ]
-    except Exception as e:
-        print(f"  Could not fetch changed files: {e}")
-        return []
-
-
-def main():
-    workspace = sys.argv[1]          # e.g. D:\a\mini-system-manager\mini-system-manager
-    snapshot_dir = sys.argv[2]        # e.g. D:\a\...\vi-snapshots
-    deploy_dir = sys.argv[3]          # e.g. D:\a\...\vi-snapshots-deploy
-    commit_sha = sys.argv[4]          # full SHA
-    pages_url = sys.argv[5]           # e.g. https://elijah286.github.io/mini-system-manager
-    gallery_html = sys.argv[6]        # path to vi-browser.html template
-
-    # Read from env to avoid shell escaping issues
-    commit_msg = os.environ.get("COMMIT_MSG", "unknown")
-    commit_date = os.environ.get("COMMIT_DATE", "")
-    github_token = os.environ.get("GITHUB_TOKEN", "")
-    github_repo = os.environ.get("GITHUB_REPOSITORY", "")
-
-    short_sha = commit_sha[:7]
-    commit_dir = os.path.join(deploy_dir, "commits", commit_sha)
-    os.makedirs(commit_dir, exist_ok=True)
-
-    print(f"Building gallery for commit {short_sha}")
-
-    # --- Read flat manifest from export step ---
-    manifest_path = os.path.join(snapshot_dir, "manifest.json")
-    exported = []
-    if os.path.isfile(manifest_path):
-        with open(manifest_path, encoding="utf-8-sig") as f:
-            data = json.load(f)
-        exported = data if isinstance(data, list) else [data]
-
-    # Build path -> html map (normalise to OS path separators for matching)
-    exported_map = {}
-    for item in exported:
-        # Paths from PowerShell use backslash; normalise for local OS
-        p = item["path"].replace("\\", "/")
-        h = item["html"].replace("\\", "/")
-        exported_map[p] = h
-
-    print(f"  {len(exported_map)} exported snapshots")
-
-    # --- Move snapshot HTML files to commit directory ---
-    if os.path.isdir(snapshot_dir):
-        for root, dirs, files in os.walk(snapshot_dir):
-            for fname in files:
-                if fname == "manifest.json":
-                    continue
-                src = os.path.join(root, fname)
-                rel = os.path.relpath(src, snapshot_dir)
-                dst = os.path.join(commit_dir, rel)
-                os.makedirs(os.path.dirname(dst), exist_ok=True)
-                shutil.move(src, dst)
-
-    # --- Parse .lvproj ---
-    proj_files = [f for f in os.listdir(workspace) if f.endswith(".lvproj")]
-    tree = []
-    project_files = set()
-
-    if proj_files:
-        proj_path = os.path.join(workspace, proj_files[0])
-        print(f"  Parsing project: {proj_files[0]}")
-        tree, project_files = parse_lvproj(proj_path, workspace, exported_map)
-    else:
-        print("  No .lvproj found — using flat file list")
-
-    # --- Identify non-project files ---
-    non_project = []
-    for item in exported:
-        p = item["path"].replace("\\", "/")
-        if p not in project_files:
-            non_project.append({
-                "name": os.path.basename(p),
-                "type": "file",
-                "path": p,
-                "html": item["html"].replace("\\", "/"),
-            })
-
-    print(f"  Project files: {len(project_files)}, non-project: {len(non_project)}")
-
-    # --- Write per-commit manifest ---
-    commit_manifest = {
-        "tree": tree,
-        "nonProjectFiles": non_project,
-    }
-    manifest_out = os.path.join(commit_dir, "manifest.json")
-    with open(manifest_out, "w", encoding="utf-8") as f:
-        json.dump(commit_manifest, f, indent=2, ensure_ascii=False)
-
-    # --- Update commits.json ---
-    print("  Fetching existing commits.json...")
-    existing = fetch_existing_commits(pages_url)
-
-    changed_vis = fetch_changed_vis(commit_sha, github_token, github_repo)
-    print(f"  Changed VIs: {len(changed_vis)}")
+    # Drop any prior entry for this SHA so re-runs update in place.
+    existing = [c for c in existing if c.get("sha") != commit_sha]
 
     new_entry = {
         "sha": commit_sha,
-        "short_sha": short_sha,
-        "message": commit_msg[:120],
-        "date": commit_date,
-        "stats": {
-            "total": len(exported_map),
-            "succeeded": len(exported_map),
-        },
-        "changedVIs": changed_vis,
+        "short": commit_sha[:7],
+        "message": (commit_msg or "").splitlines()[0][:120] if commit_msg else "",
+        "author": author or "",
+        "date": date or datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "vi_count": vi_count,
     }
-
-    # Remove duplicate if re-running same commit
-    existing = [c for c in existing if c.get("sha") != commit_sha]
     existing.insert(0, new_entry)
 
-    # Keep last 50 commits
-    existing = existing[:50]
+    # Newest first by date; keep the most recent 200.
+    existing.sort(key=lambda c: c.get("date", ""), reverse=True)
+    return existing[:200]
 
-    commits_out = os.path.join(deploy_dir, "commits.json")
-    with open(commits_out, "w", encoding="utf-8") as f:
-        json.dump(existing, f, indent=2, ensure_ascii=False)
 
-    print(f"  commits.json: {len(existing)} entries")
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Build VI Browser gallery manifest (content-addressed).")
+    parser.add_argument("--vimap", required=True, help='TSV file: "<blob_sha>\\t<vi_rel_path>" per line')
+    parser.add_argument("--commit-sha", required=True)
+    parser.add_argument("--commit-msg", default="")
+    parser.add_argument("--author", default="")
+    parser.add_argument("--date", default="", help="ISO-8601 commit date (default: now)")
+    parser.add_argument("--output-dir", required=True, help="Dir to write this commit's manifest.json")
+    parser.add_argument("--commits-file", required=True, help="Path to rolling commits.json")
+    parser.add_argument("--by-blob-prefix", default="by-blob", help="Path prefix (relative to vi-snapshots/) for snapshot HTML")
+    args = parser.parse_args()
 
-    # --- Copy gallery HTML assets ---
-    pages_dir = os.path.dirname(os.path.abspath(gallery_html))
-    gallery_basename = os.path.basename(gallery_html)  # vi-browser.html
+    vimap = read_vimap(Path(args.vimap))
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Deploy vi-browser.html under its own name (stable direct link) AND as index.html
-    shutil.copy2(gallery_html, os.path.join(deploy_dir, gallery_basename))
-    shutil.copy2(gallery_html, os.path.join(deploy_dir, "index.html"))
+    print(f"Building manifest for commit {args.commit_sha[:7]} ({len(vimap)} VIs)...")
+    manifest = build_manifest(vimap, args.commit_sha, args.by_blob_prefix.strip("/"))
 
-    # Copy other HTML assets from the same pages directory
-    for fname in os.listdir(pages_dir):
-        if fname.endswith(".html") and fname != gallery_basename:
-            shutil.copy2(
-                os.path.join(pages_dir, fname),
-                os.path.join(deploy_dir, fname),
-            )
-            print(f"  Copied pages asset: {fname}")
+    manifest_file = output_dir / "manifest.json"
+    manifest_file.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"  manifest.json -> {manifest_file}")
 
-    print("Gallery build complete.")
+    commits_file = Path(args.commits_file)
+    commits = update_commits_json(
+        commits_file,
+        args.commit_sha,
+        args.commit_msg,
+        args.author,
+        args.date,
+        len(manifest),
+    )
+    commits_file.parent.mkdir(parents=True, exist_ok=True)
+    commits_file.write_text(json.dumps(commits, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"  commits.json  -> {commits_file} ({len(commits)} entries)")
 
 
 if __name__ == "__main__":
