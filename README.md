@@ -1,11 +1,5 @@
 # Mini System Manager (Revidyne)
 
-[![Mass Compile](https://github.com/elijah286/mini-system-manager/actions/workflows/masscompile-windows-container.yml/badge.svg)](https://elijah286.github.io/mini-system-manager/)
-[![VI Analyzer](https://github.com/elijah286/mini-system-manager/actions/workflows/run-vi-analyzer-windows-container.yml/badge.svg)](https://elijah286.github.io/mini-system-manager/)
-[![VIDiff](https://github.com/elijah286/mini-system-manager/actions/workflows/vidiff-windows-container.yml/badge.svg)](https://elijah286.github.io/mini-system-manager/)
-
-[![Reports Dashboard](https://img.shields.io/badge/Reports-Dashboard-blue?logo=github)](https://elijah286.github.io/mini-system-manager/)
-
 **Repository:** `github.com/elijah286/mini-system-manager`  
 **Purpose:** A simple, readable LabVIEW-based “mini system manager” for connecting to **Revidyne** educational hardware systems (available via **revidyne.com**).
 
@@ -73,7 +67,6 @@ This application uses a classic **Queued Message Handler (QMH)** style:
 ## Screenshot: Main Block Diagram (QMH)
 
 <img width="1489" height="777" alt="Screenshot 2026-02-09 at 5 09 49 PM" src="https://github.com/user-attachments/assets/5bf8a3d0-2be4-4805-aef1-b7e424dd08a4" />
-
 
 ## VI File Browser
 
