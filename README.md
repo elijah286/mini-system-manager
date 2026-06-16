@@ -195,3 +195,10 @@ The build workflow runs on changes to the Dockerfile path and monthly on schedul
 If you need to pin a different LabVIEW version, update `LABVIEW_CONTAINER_IMAGE` in workflow files under `.github/workflows/`, then rebuild and publish the corresponding image tag.
 
 The starter VI Analyzer configuration is in `.github/labview/via-configs/via-config-default.viancfg`. You should expect to tune that ruleset once you see the first CI results for this codebase.
+
+<!-- labview-ci:dashboard -->
+## LabVIEW CI
+
+[![LabVIEW CI dashboard](https://img.shields.io/badge/LabVIEW%20CI-dashboard-2ea44f)](https://elijah286.github.io/mini-system-manager/)
+
+LabVIEW CI runs on every pull request. See the [**CI dashboard**](https://elijah286.github.io/mini-system-manager/) for build status, VI Analyzer results, VI diffs, and mass-compile reports.
