@@ -1,92 +1,165 @@
+<#
+.SYNOPSIS
+    Exports every VI and CTL in the workspace to a standalone HTML snapshot
+    (front panel + block diagram) using the PrintToSingleFileHtml LabVIEWCLI
+    custom operation.
+
+.PARAMETER WorkspaceRoot
+    Root directory to scan for VIs (container path). Default: C:\workspace
+
+.PARAMETER OutputDir
+    Where to write exported HTML files. Default: C:\workspace\ci-out\vi-snapshots
+
+.PARAMETER LabVIEWPath
+    Path to LabVIEW.exe inside the container.
+
+.NOTES
+    PrintToSingleFileHtml VIs must be present at:
+        <WorkspaceRoot>\.github\labview\PrintToSingleFileHtml\
+    Copy them from:
+        https://github.com/ni/labview-for-containers/.../helper-scripts/vidiff/PrintToSingleFileHtml/
+#>
 param(
-    [string]$WorkspaceRoot = "C:\workspace"
+    [string]$WorkspaceRoot = 'C:\workspace',
+    [string]$OutputDir     = 'C:\workspace\ci-out\vi-snapshots',
+    [string]$LabVIEWPath   = ''
 )
 
-$LabVIEWPath = "C:\Program Files\National Instruments\LabVIEW 2026\LabVIEW.exe"
-$AdditionalOpDir = $PSScriptRoot
-$OutputDir = Join-Path $WorkspaceRoot "vi-snapshots"
+$ErrorActionPreference = 'Stop'
+$ProgressPreference    = 'SilentlyContinue'
 
-if (-not (Test-Path -Path $OutputDir)) {
-    New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
+$ResolvedLabVIEWPath = $null
+$CliExe              = $null
+# AdditionalOperationDirectory is searched recursively for the operation class,
+# so point it at .github\labview (the parent of the PrintToSingleFileHtml folder).
+$PrintToHtmlOp = Join-Path $WorkspaceRoot '.github\labview'
+
+function Resolve-LabVIEWPath([string]$PreferredPath) {
+    if ($PreferredPath -and (Test-Path $PreferredPath)) {
+        return $PreferredPath
+    }
+    $candidates = @(
+        Get-ChildItem 'C:\Program Files\National Instruments' -Directory -Filter 'LabVIEW *' -ErrorAction SilentlyContinue |
+            Sort-Object Name -Descending |
+            ForEach-Object { Join-Path $_.FullName 'LabVIEW.exe' } |
+            Where-Object { Test-Path $_ }
+    )
+    if ($candidates -and $candidates.Count -gt 0) {
+        return $candidates[0]
+    }
+    throw 'Could not locate LabVIEW.exe. Pass -LabVIEWPath explicitly.'
 }
 
-# ── Diagnostic: verify PrintToSingleFileHtml operation is available ──
-Write-Host "=== CLI Operations Diagnostic ===" -ForegroundColor Cyan
-$ptsfDir = Join-Path $PSScriptRoot "PrintToSingleFileHtml"
-if (Test-Path $ptsfDir) {
-    Write-Host "PrintToSingleFileHtml operation directory found at: $ptsfDir" -ForegroundColor Green
-    Get-ChildItem -Path $ptsfDir | ForEach-Object { Write-Host "  $($_.Name)" }
-} else {
-    Write-Host "ERROR: PrintToSingleFileHtml operation directory NOT found at: $ptsfDir" -ForegroundColor Red
-    Write-Host "The PrintToSingleFileHtml VIs must be placed alongside this script."
+function Resolve-LabVIEWCLI([string]$ResolvedLVPath) {
+    $lvDir = Split-Path $ResolvedLVPath -Parent
+    $near  = Join-Path $lvDir 'LabVIEWCLI.exe'
+    if (Test-Path $near) {
+        return $near
+    }
+
+    $sharedCli = 'C:\Program Files\National Instruments\Shared\LabVIEW CLI\LabVIEWCLI.exe'
+    if (Test-Path $sharedCli) {
+        return $sharedCli
+    }
+
+    $found = Get-ChildItem 'C:\Program Files\National Instruments' -Recurse -Filter 'LabVIEWCLI.exe' -ErrorAction SilentlyContinue |
+        Select-Object -First 1 -ExpandProperty FullName
+    if ($found) {
+        return $found
+    }
+
+    throw 'Could not locate LabVIEWCLI.exe.'
+}
+
+$ResolvedLabVIEWPath = Resolve-LabVIEWPath -PreferredPath $LabVIEWPath
+$CliExe              = Resolve-LabVIEWCLI -ResolvedLVPath $ResolvedLabVIEWPath
+
+# Verify the custom operation VIs are present
+$PrintToHtmlClass = Join-Path $PrintToHtmlOp 'PrintToSingleFileHtml'
+if (-not (Test-Path $PrintToHtmlClass)) {
+    Write-Error "PrintToSingleFileHtml operation directory not found: $PrintToHtmlClass`nCopy the VIs from https://github.com/ni/labview-for-containers/tree/main/examples/cicd-examples/helper-scripts/vidiff/PrintToSingleFileHtml/"
     exit 1
 }
 
-Write-Host "`nUsing AdditionalOperationDirectory: $AdditionalOpDir" -ForegroundColor Cyan
+New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
+
+# Exclude patterns
+$ExcludeDirs = @('.github', 'ci-out', 'build', '.git')
+
+function Should-Skip([string]$Path) {
+    foreach ($ex in $ExcludeDirs) {
+        if ($Path -like "*\$ex\*" -or $Path -like "*\$ex") { return $true }
+    }
+    return $false
+}
+
+function Test-IsLabVIEWFile([string]$Path) {
+    try {
+        $bytes = [System.IO.File]::ReadAllBytes($Path)
+        if ($bytes.Length -lt 4) { return $false }
+        $magic = [System.Text.Encoding]::ASCII.GetString($bytes[0..3])
+        return ($magic -eq 'RSRC' -or $magic -eq 'LVIN' -or $magic -eq 'LVCC')
+    } catch { return $false }
+}
+
+# Find all .vi and .ctl files
+$allFiles = Get-ChildItem -Path $WorkspaceRoot -Recurse -Include '*.vi','*.ctl' |
+    Where-Object { -not (Should-Skip $_.FullName) }
+
+Write-Host "=== VI Snapshot Export ==="
+Write-Host "  Found $($allFiles.Count) VI/CTL files"
+Write-Host "  Output: $OutputDir"
+Write-Host "  LabVIEW: $ResolvedLabVIEWPath"
+Write-Host "  LabVIEWCLI: $CliExe"
 Write-Host ""
 
-# Find all .vi and .ctl files, excluding CI/build artifacts
-$viFiles = Get-ChildItem -Path $WorkspaceRoot -Recurse -Include "*.vi","*.ctl" |
-    Where-Object {
-        $_.FullName -notlike "*\.github\*" -and
-        $_.FullName -notlike "*vi-snapshots*" -and
-        $_.FullName -notlike "*vidiff-reports*" -and
-        $_.FullName -notlike "*masscompile-results*"
+$Exported = 0; $Skipped = 0; $Errors = 0
+
+foreach ($vi in $allFiles) {
+    $RelPath  = $vi.FullName.Substring($WorkspaceRoot.Length).TrimStart('\')
+    $SafeName = ($RelPath -replace '[/\\]','-').TrimStart('-')
+
+    if (-not (Test-IsLabVIEWFile $vi.FullName)) {
+        Write-Host "  SKIP (not LV binary): $RelPath"
+        $Skipped++
+        continue
     }
 
-Write-Host "Found $($viFiles.Count) VI/CTL files to snapshot." -ForegroundColor Cyan
+    $HtmlOut  = Join-Path $OutputDir ($SafeName + '.html')
+    $HtmlDir  = Split-Path $HtmlOut
+    New-Item -ItemType Directory -Force -Path $HtmlDir | Out-Null
 
-$succeeded = 0
-$failed = 0
-$manifest = @()
-
-foreach ($vi in $viFiles) {
-    $relativePath = $vi.FullName.Substring($WorkspaceRoot.Length + 1)
-    # Preserve directory structure in output
-    $relativeDir = [System.IO.Path]::GetDirectoryName($relativePath)
-    $outputSubDir = Join-Path $OutputDir $relativeDir
-    if ($relativeDir -and -not (Test-Path -Path $outputSubDir)) {
-        New-Item -ItemType Directory -Path $outputSubDir -Force | Out-Null
-    }
-
-    $outputFile = Join-Path $OutputDir "$relativePath.html"
-
-    Write-Host "Snapshotting: $relativePath" -ForegroundColor White
-
-    & LabVIEWCLI `
-        -OperationName PrintToSingleFileHtml `
-        -LabVIEWPath "$LabVIEWPath" `
-        -AdditionalOperationDirectory "$AdditionalOpDir" `
-        -LogToConsole TRUE `
-        -VI "$($vi.FullName)" `
-        -OutputPath "$outputFile" `
-        -o -c `
-        -Headless
-
-    if ($LASTEXITCODE -ne 0 -or -not (Test-Path -Path $outputFile)) {
-        Write-Host "  FAILED (exit code $LASTEXITCODE)" -ForegroundColor Red
-        $failed++
-    } else {
-        Write-Host "  OK" -ForegroundColor Green
-        $succeeded++
-        $manifest += @{
-            path = $relativePath
-            html = "$relativePath.html"
-        }
+    try {
+        # -Headless is REQUIRED for LabVIEW 2026+ inside Windows containers, otherwise
+        # LabVIEWCLI cannot establish a VI Server connection (error -350000).
+        & $CliExe `
+            -OperationName                PrintToSingleFileHtml `
+            -LabVIEWPath                  $ResolvedLabVIEWPath `
+            -AdditionalOperationDirectory $PrintToHtmlOp `
+            -LogToConsole                 TRUE `
+            -VI                           $vi.FullName `
+            -OutputPath                   $HtmlOut `
+            -o -c `
+            -Headless
+        if ($LASTEXITCODE -ne 0) { throw "Exit code $LASTEXITCODE" }
+        Write-Host "  OK: $RelPath -> $SafeName.html"
+        $Exported++
+    } catch {
+        Write-Warning "  ERROR: $RelPath - $_"
+        $Errors++
     }
 }
-
-# Write manifest JSON for the gallery page generator (UTF-8 without BOM)
-if ($manifest.Count -eq 0) {
-    $jsonText = "[]"
-} else {
-    $jsonText = $manifest | ConvertTo-Json -Depth 3
-}
-[System.IO.File]::WriteAllText((Join-Path $OutputDir "manifest.json"), $jsonText, [System.Text.UTF8Encoding]::new($false))
 
 Write-Host ""
-Write-Host "Snapshot summary: $($viFiles.Count) total, $succeeded succeeded, $failed failed." -ForegroundColor Cyan
+Write-Host "=== Export complete: $Exported exported, $Skipped skipped, $Errors errors ==="
 
-if ($failed -gt 0) {
-    Write-Host "Some snapshots failed. See above for details." -ForegroundColor Yellow
+if ($Exported -eq 0) {
+    Write-Error 'No VI snapshots were exported.'
+    exit 1
 }
+
+if ($Errors -gt 0) {
+    Write-Warning 'Some snapshots failed to export, but at least one snapshot was generated.'
+}
+
+exit 0

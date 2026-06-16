@@ -1,147 +1,83 @@
-name: Deploy Dashboard Page
+name: CI Dashboard — GitHub Pages
+
+# Thin caller: the dashboard build logic lives in the shared composite action
+# actions/dashboard (bundled generator + tooling pages), so this repo eats its
+# own dogfood and there is ONE source of truth for the dashboard. This file owns
+# only the triggers + the Pages deploy.
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - '.github/pages/index.html'
       - '.github/pages/vi-browser.html'
       - '.github/pages/vi-interactive.html'
       - '.github/workflows/dashboard-pages.yml'
-  schedule:
-    - cron: '*/15 * * * *'
+      # Rebuild when the shared dashboard action (generator or its bundled pages)
+      # changes, so this repo's own dashboard always reflects the latest tooling.
+      - 'actions/dashboard/**'
+  # Rebuild whenever ANY CI activity reports a commit status. The dashboard's
+  # badges are sourced from each commit's statuses, so reacting to the `status`
+  # event keeps it current for every workflow that posts one — present or future —
+  # with no per-workflow enumeration and no polling. The dashboard only *reads*
+  # statuses (it never posts one), so this can never self-trigger a loop.
+  status:
+  # Also rebuild after workflows that publish page artifacts (snapshots, diff
+  # reports) without necessarily posting a commit status.
+  workflow_run:
+    workflows:
+      - "Mass Compile — Windows Container"
+      - "Mass Compile Backfill — Windows Container"
+      - "Run VI Analyzer — Windows Container"
+      - "Run VI Analyzer — Linux Container"
+      - "VIDiff Report — Windows Container"
+      - "VIDiff Report — Linux Container"
+      - "VIDiff Deploy — Pages + PR Comment"
+      - "VIDiff Backfill — Windows Container"
+      - "VIDiff Backfill — Linux Container"
+      - "VI Snapshots and VI Browser"
+    types: [completed]
   workflow_dispatch:
+
+# A single push fans out into many status events (each check reports pending then
+# success/failure), so collapse overlapping triggers into one latest-wins rebuild
+# instead of running a separate deploy for every individual status update.
+concurrency:
+  group: dashboard-pages
+  cancel-in-progress: true
+
+env:
+  # Repo-agnostic: derive the Pages site from the repo (owner.github.io/repo).
+  # Override with an Actions variable PAGES_URL for custom domains.
+  PAGES_URL: ${{ vars.PAGES_URL || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
 
 permissions:
   contents: write
   pages: write
+  actions: read
 
 jobs:
-  deploy-dashboard:
+  build-dashboard:
     runs-on: ubuntu-latest
-    concurrency:
-      group: dashboard-pages-deploy
-      cancel-in-progress: false
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Prepare dashboard content
-        run: |
-          mkdir -p pages-content/vi-snapshots
-          cp .github/pages/index.html pages-content/index.html
-          cp .github/pages/vi-browser.html pages-content/vi-snapshots/vi-browser.html
-          cp .github/pages/vi-interactive.html pages-content/vi-snapshots/vi-interactive.html
+      # Build the dashboard from the shared composite action. It reads commit
+      # statuses + Pages content, stages the tooling pages it bundles, writes
+      # the VI Browser's files.json, and emits ci-out/dashboard.
+      - name: Build CI dashboard
+        uses: ./actions/dashboard
+        with:
+          repo: ${{ github.repository }}
+          pages-url: ${{ env.PAGES_URL }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build dashboard data
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-        run: |
-          python3 - <<'PY'
-          import json
-          import os
-          import urllib.request
-
-          repo = os.environ["GITHUB_REPOSITORY"]
-          token = os.environ["GITHUB_TOKEN"]
-
-          headers = {
-            "Authorization": f"Bearer {token}",
-            "Accept": "application/vnd.github+json",
-            "X-GitHub-Api-Version": "2022-11-28"
-          }
-
-          def api_get(path):
-            req = urllib.request.Request(
-              f"https://api.github.com/repos/{repo}/{path}",
-              headers=headers,
-            )
-            with urllib.request.urlopen(req) as resp:
-              return json.load(resp)
-
-          try:
-            tree_data = api_get("git/trees/gh-pages?recursive=1")
-            tree_paths = [n.get("path") for n in tree_data.get("tree", []) if isinstance(n, dict) and n.get("path")]
-          except Exception:
-            tree_paths = []
-
-          try:
-            runs_data = api_get("actions/runs?per_page=100&branch=main&event=push")
-            runs = runs_data.get("workflow_runs", [])
-          except Exception:
-            runs = []
-
-          try:
-            commits_data = api_get("commits?sha=main&per_page=60")
-            recent_commits = []
-            for c in commits_data:
-              if not (isinstance(c, dict) and c.get("sha") and isinstance(c.get("commit"), dict)):
-                continue
-
-              sha = c.get("sha")
-              details = {}
-              try:
-                details = api_get(f"commits/{sha}")
-              except Exception:
-                details = {}
-
-              files = []
-              if isinstance(details, dict):
-                files = [f.get("filename") for f in details.get("files", []) if isinstance(f, dict) and f.get("filename")]
-
-              ci_only = bool(files) and all(str(path).startswith(".github/") for path in files)
-
-              recent_commits.append({
-                "sha": sha,
-                "date": (c.get("commit", {}).get("author") or {}).get("date") or (c.get("commit", {}).get("committer") or {}).get("date"),
-                "message": (c.get("commit", {}) or {}).get("message", ""),
-                "ciOnly": ci_only,
-              })
-          except Exception:
-            recent_commits = []
-
-          workflow_to_key = {
-            "MassCompile - Windows Container": "mc",
-            "Run VI Analyzer - Windows Container": "via",
-            "VIDiff Report - Windows Container": "vd",
-          }
-
-          by_sha = {}
-          for run in runs:
-            key = workflow_to_key.get(run.get("name"))
-            sha = run.get("head_sha")
-            if not key or not sha:
-              continue
-
-            by_sha.setdefault(sha, {})
-            prev = by_sha[sha].get(key)
-            created_at = run.get("created_at")
-            if not prev or (created_at and created_at > prev.get("createdAt", "")):
-              by_sha[sha][key] = {
-                "status": run.get("status"),
-                "conclusion": run.get("conclusion"),
-                "url": run.get("html_url"),
-                "createdAt": created_at,
-                "title": run.get("display_title"),
-              }
-
-          out = {
-            "generatedAt": os.environ.get("GITHUB_RUN_ID"),
-            "tree": tree_paths,
-            "runsBySha": by_sha,
-            "recentCommits": recent_commits,
-          }
-
-          with open("pages-content/dashboard-data.json", "w", encoding="utf-8") as f:
-            json.dump(out, f, indent=2)
-          PY
-
-      - name: Deploy dashboard to GitHub Pages root
+      - name: Deploy dashboard to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./pages-content
+          publish_dir: ci-out/dashboard
+          destination_dir: .
           keep_files: true

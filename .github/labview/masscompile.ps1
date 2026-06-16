@@ -1,129 +1,213 @@
+<#
+.SYNOPSIS
+    Runs LabVIEW Mass Compile on the workspace, then generates an HTML report.
+
+.PARAMETER WorkspaceRoot
+    Absolute path inside the container to the project root.
+    Default: C:\workspace (GitHub Actions volume mount point)
+
+.PARAMETER ReportDir
+    Directory to write masscompile.log and index.html into.
+
+.PARAMETER LabVIEWPath
+    Path to LabVIEW.exe inside the container.
+#>
 param(
-    [string]$WorkspaceRoot = "C:\workspace"
+    [string]$WorkspaceRoot = 'C:\workspace',
+    [string]$ReportDir     = 'C:\report',
+    [string]$LabVIEWPath   = 'C:\Program Files\National Instruments\LabVIEW 2024\LabVIEW.exe'
 )
 
-$LabVIEWPath = "C:\Program Files\National Instruments\LabVIEW 2026\LabVIEW.exe"
-$MassCompileDir = $WorkspaceRoot
-$ResultsDir = Join-Path $WorkspaceRoot "masscompile-results"
-$LogPath = Join-Path $ResultsDir "masscompile-log.txt"
-$ReportPath = Join-Path $ResultsDir "masscompile-report.html"
+$ErrorActionPreference = 'Stop'
+$ProgressPreference    = 'SilentlyContinue'
 
-if (-not (Test-Path -Path $ResultsDir)) {
-    New-Item -ItemType Directory -Path $ResultsDir -Force | Out-Null
+function Resolve-LabVIEWPath([string]$PreferredPath) {
+  if ($PreferredPath -and (Test-Path $PreferredPath)) {
+    return $PreferredPath
+  }
+
+  $candidates = @(Get-ChildItem 'C:\Program Files\National Instruments' -Directory -Filter 'LabVIEW *' -ErrorAction SilentlyContinue |
+    Sort-Object Name -Descending |
+    ForEach-Object { Join-Path $_.FullName 'LabVIEW.exe' } |
+    Where-Object { Test-Path $_ })
+
+  if ($candidates.Count -gt 0) {
+    return $candidates[0]
+  }
+
+  throw "LabVIEW.exe not found. Checked preferred path '$PreferredPath' and C:\Program Files\National Instruments\LabVIEW *"
 }
 
-# Count VIs in workspace (excluding .github)
-$viFiles = Get-ChildItem -Path $WorkspaceRoot -Recurse -Include "*.vi","*.ctl" |
-    Where-Object { $_.FullName -notlike "*\.github\*" -and $_.FullName -notlike "*masscompile-results*" }
-$totalVIs = $viFiles.Count
+function Resolve-LabVIEWCLI([string]$LabVIEWExePath) {
+  $cliCmd = Get-Command LabVIEWCLI.exe -ErrorAction SilentlyContinue
+  if ($null -eq $cliCmd) {
+    $cliCmd = Get-Command LabVIEWCLI -ErrorAction SilentlyContinue
+  }
+  if ($null -ne $cliCmd -and $cliCmd.Source) {
+    return $cliCmd.Source
+  }
 
-Write-Host "Running LabVIEWCLI MassCompile:" -ForegroundColor Cyan
-Write-Host "  DirectoryToCompile: $MassCompileDir"
-Write-Host "  Total VIs/CTLs found: $totalVIs"
+  $candidate = Join-Path (Split-Path $LabVIEWExePath) 'LabVIEWCLI.exe'
+  if (Test-Path $candidate) {
+    return $candidate
+  }
+
+  throw "LabVIEWCLI not found on PATH and not found beside LabVIEW.exe ('$candidate')."
+}
+
+$LabVIEWPath = Resolve-LabVIEWPath $LabVIEWPath
+$CliExe  = Resolve-LabVIEWCLI $LabVIEWPath
+$LogFile = Join-Path $ReportDir 'masscompile.log'
+$HtmlOut = Join-Path $ReportDir 'index.html'
+
+New-Item -ItemType Directory -Force -Path $ReportDir | Out-Null
+
+Write-Host "=== Mass Compile ==="
+Write-Host "  Workspace : $WorkspaceRoot"
+Write-Host "  LabVIEW   : $LabVIEWPath"
+Write-Host "  CLI       : $CliExe"
 Write-Host ""
 
-$output = & LabVIEWCLI `
-    -LogToConsole TRUE `
-    -OperationName MassCompile `
-    -DirectoryToCompile "$MassCompileDir" `
-    -LabVIEWPath "$LabVIEWPath" `
-    -Headless *>&1
+$Start = Get-Date
 
-$exitCode = $LASTEXITCODE
+# Run MassCompile and tee output to log.
+# NOTE: -Headless is REQUIRED for LabVIEW 2026+ inside Windows containers, otherwise
+# LabVIEWCLI cannot establish a VI Server connection (error -350000).
+# LabVIEWCLI prints its operation output to stderr; relax ErrorActionPreference so
+# that merging it with 2>&1 does not raise a terminating NativeCommandError. We
+# judge success by the real $LASTEXITCODE instead.
+$prevEAP = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
+& $CliExe `
+    -LogToConsole       TRUE `
+    -OperationName      MassCompile `
+    -DirectoryToCompile $WorkspaceRoot `
+    -LabVIEWPath        $LabVIEWPath `
+    -Headless `
+    2>&1 | Tee-Object -FilePath $LogFile
 
-# Save raw log
-$output | Out-File -FilePath $LogPath -Encoding UTF8
-$output | ForEach-Object { Write-Host $_ }
+$ExitCode = $LASTEXITCODE
+$Duration = [math]::Round(((Get-Date) - $Start).TotalSeconds, 1)
 
-# Parse output for bad VIs
-$outputText = $output -join "`n"
-$badVILines = $output | Where-Object { $_ -match "### Bad VI:" }
-$searchFailLines = $output | Where-Object { $_ -match "Search failed to find" }
-$badCount = ($badVILines | Measure-Object).Count
-$searchFailCount = ($searchFailLines | Measure-Object).Count
-$goodCount = $totalVIs - $badCount
+# Keep going even if report parsing hits an unexpected condition — we always want
+# to emit an index.html so the dashboard never links to a 404.
+$ErrorActionPreference = 'Continue'
 
-# Generate HTML report
-$badVIRows = ""
-foreach ($line in $badVILines) {
-    $viName = ""
-    $viPath = ""
-    if ($line -match '### Bad VI:\s+"([^"]+)"') { $viName = $matches[1] }
-    if ($line -match 'Path="([^"]+)"') { $viPath = $matches[1] }
-    $badVIRows += "<tr><td>$viName</td><td>$viPath</td></tr>`n"
+# ── Compute per-VI compile success ───────────────────────────────────────────
+# LabVIEW Mass Compile processes every VI individually: VIs that do not depend on
+# libraries missing from the CI image (NI-DAQmx / OpenG / G-Image / G-Audio) still
+# compile cleanly, while only the ones that do are flagged "### Bad VI/subVI ...
+# Path=...". So instead of a binary pass/fail, report the percentage of project VIs
+# that compiled.
+#   Denominator: every .vi under the workspace except the CI tooling in .github.
+#   Failures:    unique project VI paths flagged bad in the log. The log is UTF-16
+#                and LabVIEW hard-wraps long lines, so a captured Path may contain
+#                embedded newlines — strip them before de-duping.
+$LogText = Get-Content $LogFile -Raw -ErrorAction SilentlyContinue
+if ([string]::IsNullOrEmpty($LogText)) { $LogText = '(no output captured)' }
+
+$AllVIs = @(Get-ChildItem -LiteralPath $WorkspaceRoot -Recurse -File -Filter '*.vi' -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -notmatch '(?i)\\\.github\\' })
+$TotalVIs = $AllVIs.Count
+
+$wsPrefix = ($WorkspaceRoot.TrimEnd('\') + '\').ToLowerInvariant()
+$BadSet = New-Object 'System.Collections.Generic.HashSet[string]'
+foreach ($m in [regex]::Matches($LogText, 'Path="([^"]+)"')) {
+    $p = ($m.Groups[1].Value -replace '[\r\n]', '').ToLowerInvariant()
+    if ($p.EndsWith('.vi') -and $p.StartsWith($wsPrefix) -and ($p -notmatch '\\\.github\\')) {
+        [void]$BadSet.Add($p)
+    }
+}
+$BadVIs  = $BadSet.Count
+$OkVIs   = [math]::Max(0, $TotalVIs - $BadVIs)
+$Percent = if ($TotalVIs -gt 0) { [int][math]::Round($OkVIs / $TotalVIs * 100) } else { 0 }
+
+# Classify the run. LabVIEW Mass Compile returns exit code 3 when it finished but
+# flagged some bad VIs (the ones depending on libraries absent from the CI image) —
+# that is a PARTIAL compile, not a failure. Any OTHER non-zero code (or zero project
+# VIs discovered) means LabVIEW could not complete the compile at all: a true, red
+# failure. A clean exit with nothing bad is a full pass.
+$RealError = ($ExitCode -ne 0 -and $ExitCode -ne 3)
+if ($RealError -or $TotalVIs -le 0) {
+    $StatusWord = 'failed'
+} elseif ($ExitCode -eq 0 -and $BadVIs -eq 0) {
+    $StatusWord = 'passed'
+} elseif ($OkVIs -le 0) {
+    $StatusWord = 'failed'
+} else {
+    $StatusWord = 'partial'
+}
+# A true failure means nothing reliably compiled — zero the figures so the summary
+# and badge read 0% (red), not an inflated count from a run that never completed.
+if ($StatusWord -eq 'failed') { $OkVIs = 0; $Percent = 0 }
+$StatusLabel = if ($StatusWord -eq 'failed') { 'compile failed' } else { "$Percent% compiled" }
+# Yellow for a partial (some VIs failed); red reserved for a true failure; green at 100%.
+$StatusColor = if ($StatusWord -eq 'passed') { '#2ea043' } elseif ($StatusWord -eq 'failed') { '#da3633' } else { '#bb8009' }
+
+Write-Host ""
+Write-Host "=== Result: $StatusLabel ($OkVIs/$TotalVIs project VIs, $BadVIs bad; exit=$ExitCode duration=${Duration}s) ==="
+
+# Machine-readable summary: the dashboard's Mass Compile column reads this to show
+# the percentage badge, and the workflow reads it for the commit-status description.
+$Summary = [ordered]@{
+    total    = $TotalVIs
+    ok       = $OkVIs
+    bad      = $BadVIs
+    percent  = $Percent
+    status   = $StatusWord
+    exit     = $ExitCode
+    duration = $Duration
+}
+[System.IO.File]::WriteAllText((Join-Path $ReportDir 'summary.json'), ($Summary | ConvertTo-Json -Compress), [System.Text.UTF8Encoding]::new($false))
+
+# ── Generate HTML report ─────────────────────────────────────────────────────
+function Encode-Html([string]$s) {
+    $s -replace '&','&amp;' -replace '<','&lt;' -replace '>','&gt;'
 }
 
-$searchFailRows = ""
-foreach ($line in $searchFailLines) {
-    $missing = ""
-    $caller = ""
-    if ($line -match 'Search failed to find "([^"]+)"') { $missing = $matches[1] }
-    if ($line -match 'Caller:\s+"([^"]+)"') { $caller = $matches[1] }
-    $searchFailRows += "<tr><td>$missing</td><td>$caller</td></tr>`n"
+if ([string]::IsNullOrEmpty($LogText)) {
+  $LogText = '(no output captured)'
 }
+$LogHtml  = Encode-Html $LogText
+$ReportTs = (Get-Date).ToUniversalTime().ToString('yyyy-MM-dd HH:mm:ss UTC')
 
-$timestamp = Get-Date -Format "dddd, MMMM dd, yyyy h:mm:ss tt"
-$statusColor = if ($badCount -eq 0) { "green" } else { "red" }
-$statusText = if ($badCount -eq 0) { "PASSED" } else { "FAILED" }
-
-$html = @"
-<html>
-<head><title>Mass Compile Results</title></head>
+$Html = @"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Mass Compile — mini-system-manager</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;padding:20px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#e6edf3}
+    .card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:20px;margin-bottom:16px}
+    h1{margin:0 0 12px;font-size:1.3em}
+    .badge{display:inline-block;padding:3px 10px;border-radius:4px;font-weight:700;font-size:.85em;color:#fff;background:$StatusColor}
+    .meta{margin-top:10px;font-size:.82em;color:#8b949e;display:flex;flex-wrap:wrap;gap:16px}
+    pre{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:14px;font-size:.75em;white-space:pre-wrap;word-break:break-all;overflow-y:auto;max-height:65vh;margin:0}
+  </style>
+</head>
 <body>
-<h1>Mass Compile Results</h1>
-$timestamp
-<br><br>
-<h2>Results</h2>
-<table border=1>
-<tr><td>Total VIs</td><td>$totalVIs</td></tr>
-<tr><td>Compiled Successfully</td><td>$goodCount</td></tr>
-<tr><td>Failed to Compile</td><td>$badCount</td></tr>
-<tr><td>Missing Dependencies</td><td>$searchFailCount</td></tr>
-</table>
-<br>
-<h2 style="color: $statusColor">Status: $statusText</h2>
-"@
-
-if ($badCount -gt 0) {
-    $html += @"
-<h2>Failed VIs</h2>
-<table border=1>
-<tr><th>VI Name</th><th>Path</th></tr>
-$badVIRows</table>
-<br>
-"@
-}
-
-if ($searchFailCount -gt 0) {
-    $html += @"
-<h2>Missing Dependencies</h2>
-<table border=1>
-<tr><th>Missing File</th><th>Caller</th></tr>
-$searchFailRows</table>
-<br>
-"@
-}
-
-$html += @"
-<h2>Full Log</h2>
-<pre>$($outputText -replace '<','&lt;' -replace '>','&gt;')</pre>
+  <div class="card">
+    <h1>Mass Compile — mini-system-manager</h1>
+    <span class="badge">$StatusLabel</span>
+    <div class="meta">
+      <span>Date: $ReportTs</span>
+      <span>Duration: ${Duration}s</span>
+      <span>Project VIs: $TotalVIs</span>
+      <span>Compiled OK: $OkVIs</span>
+      <span>Bad: $BadVIs</span>
+    </div>
+  </div>
+  <pre>$LogHtml</pre>
 </body>
 </html>
 "@
 
-$html | Out-File -FilePath $ReportPath -Encoding UTF8
+[System.IO.File]::WriteAllText($HtmlOut, $Html, [System.Text.UTF8Encoding]::new($false))
+Write-Host "HTML report -> $HtmlOut"
 
-Write-Host ""
-Write-Host "HTML report generated at: $ReportPath" -ForegroundColor Green
-Write-Host "Results: $goodCount compiled, $badCount failed, $searchFailCount missing deps" -ForegroundColor Cyan
-
-# Exit code 3 = some VIs failed (informational, report was generated)
-if ($exitCode -eq 3) {
-    Write-Host "MassCompile completed with failures (exit code 3). See report." -ForegroundColor Yellow
-    exit 0
-} elseif ($exitCode -ne 0) {
-    Write-Host "MassCompile returned unexpected exit code $exitCode." -ForegroundColor Red
-    exit $exitCode
-}
-
-Write-Host "MassCompile completed successfully." -ForegroundColor Green
+# Partial/passed are a successful CI outcome (the report shows the %); only a true
+# failure fails the job and turns the commit status red.
+if ($StatusWord -eq 'failed') { exit 1 } else { exit 0 }

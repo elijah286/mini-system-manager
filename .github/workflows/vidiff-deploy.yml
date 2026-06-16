@@ -1,12 +1,14 @@
-name: Deploy VIDiff Reports
+name: VIDiff Deploy — Pages + PR Comment
 
 on:
   workflow_run:
     workflows:
-      - VIDiff Report - Windows Container
-      - VIDiff Report - Linux Container
-    types:
-      - completed
+      - "VIDiff Report — Windows Container"
+      - "VIDiff Report — Linux Container"
+    types: [completed]
+
+env:
+  PAGES_URL: ${{ vars.PAGES_URL || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
 
 permissions:
   contents: write
@@ -17,180 +19,147 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'success'
-    concurrency:
-      group: pages-deploy
-      cancel-in-progress: false
+    # Run whether the VIDiff workflow passed or failed — we still want the report
+    if: always()
 
     steps:
-      - name: Download VIDiff report artifacts
-        uses: actions/download-artifact@v4
+      - name: Download VIDiff artifact
+        uses: actions/github-script@v7
+        id: artifact
         with:
-          run-id: ${{ github.event.workflow_run.id }}
-          pattern: vidiff-report-*
-          path: reports
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          merge-multiple: true
+          script: |
+            const run_id = context.payload.workflow_run.id;
+            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              run_id,
+            });
+            // Accept both windows and linux artifact names
+            const art = artifacts.data.artifacts.find(a =>
+              a.name.startsWith('vidiff-windows-') || a.name.startsWith('vidiff-linux-')
+            );
+            if (!art) {
+              core.warning('No VIDiff artifact found — skipping deploy.');
+              return null;
+            }
+            const dl = await github.rest.actions.downloadArtifact({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              artifact_id: art.id,
+              archive_format: 'zip',
+            });
+            const fs = require('fs');
+            fs.writeFileSync('/tmp/vidiff-artifact.zip', Buffer.from(dl.data));
+            return art.name;
 
-      - name: Download VIDiff metadata artifact
-        uses: actions/download-artifact@v4
-        with:
-          run-id: ${{ github.event.workflow_run.id }}
-          pattern: vidiff-metadata-*
-          path: metadata
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          merge-multiple: true
+      - name: Extract artifact
+        if: steps.artifact.outputs.result != 'null'
+        run: |
+          mkdir -p /tmp/vidiff-report
+          unzip -q /tmp/vidiff-artifact.zip -d /tmp/vidiff-report
 
       - name: Read metadata
+        if: steps.artifact.outputs.result != 'null'
         id: meta
         run: |
-          if [ ! -f metadata/platform ]; then
-            echo "No VIDiff metadata found. Skipping deployment."
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
+          META=$(cat /tmp/vidiff-report/vidiff-meta.json 2>/dev/null || echo '{}')
+          echo "head_sha=$(echo $META | python3 -c "import sys,json; print(json.load(sys.stdin).get('head_sha',''))")" >> "$GITHUB_OUTPUT"
+          echo "pr_number=$(echo $META | python3 -c "import sys,json; print(json.load(sys.stdin).get('pr_number',''))")" >> "$GITHUB_OUTPUT"
+          echo "platform=$(echo $META | python3 -c "import sys,json; print(json.load(sys.stdin).get('platform','windows'))")" >> "$GITHUB_OUTPUT"
+          echo "outcome=$(echo $META | python3 -c "import sys,json; print(json.load(sys.stdin).get('outcome','unknown'))")" >> "$GITHUB_OUTPUT"
 
-          PR_NUMBER=$(tr -d '[:space:]' < metadata/pr_number)
-          PLATFORM=$(tr -d '[:space:]' < metadata/platform)
-
-          if [ -f metadata/head_sha ]; then
-            HEAD_SHA=$(tr -d '[:space:]' < metadata/head_sha)
-          else
-            HEAD_SHA="${{ github.event.workflow_run.head_sha }}"
-          fi
-
-          SHORT_SHA=$(echo "${HEAD_SHA}" | cut -c1-7)
-
-          if [ -n "$PR_NUMBER" ]; then
-            echo "pr_number=${PR_NUMBER}" >> "$GITHUB_OUTPUT"
-            echo "label=pr-${PR_NUMBER}" >> "$GITHUB_OUTPUT"
-            echo "is_pr=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "pr_number=" >> "$GITHUB_OUTPUT"
-            echo "label=push-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
-            echo "is_pr=false" >> "$GITHUB_OUTPUT"
-          fi
-
-          echo "head_sha=${HEAD_SHA}" >> "$GITHUB_OUTPUT"
-          echo "platform=${PLATFORM}" >> "$GITHUB_OUTPUT"
-          echo "skip=false" >> "$GITHUB_OUTPUT"
-
-      - name: Prepare GitHub Pages content
-        if: steps.meta.outputs.skip == 'false'
-        run: |
-          LABEL="${{ steps.meta.outputs.label }}"
-          PLATFORM="${{ steps.meta.outputs.platform }}"
-          DEPLOY_DIR="pages-content/${LABEL}/${PLATFORM}"
-
-          mkdir -p "$DEPLOY_DIR"
-
-          if [ -d reports ] && find reports -name '*.html' -print -quit | grep -q .; then
-            cp -r reports/* "$DEPLOY_DIR/"
-          else
-            echo "No HTML reports found in artifacts."
-            exit 0
-          fi
-
-          {
-            echo '<!DOCTYPE html>'
-            echo '<html><head><meta charset="utf-8"><title>VIDiff Reports</title></head><body>'
-            echo "<h1>VIDiff Reports - ${LABEL} (${PLATFORM})</h1>"
-            echo '<ul>'
-            for file in "$DEPLOY_DIR"/*.html; do
-              name=$(basename "$file")
-              [ "$name" = 'index.html' ] && continue
-              encoded=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" "$name")
-              display=${name%.html}
-              echo "<li><a href=\"${encoded}\">${display}</a></li>"
-            done
-            echo '</ul></body></html>'
-          } > "$DEPLOY_DIR/index.html"
-
-      - name: Deploy to GitHub Pages
-        if: steps.meta.outputs.skip == 'false'
+      - name: Deploy VIDiff report to GitHub Pages
+        if: steps.artifact.outputs.result != 'null'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./pages-content
-          destination_dir: vidiff
+          publish_dir: /tmp/vidiff-report
+          # push-SHORT_SHA/windows or pr-NUMBER/linux
+          destination_dir: >-
+            vidiff/${{
+              steps.meta.outputs.pr_number != '' &&
+              format('pr-{0}', steps.meta.outputs.pr_number) ||
+              format('push-{0}', steps.meta.outputs.head_sha)
+            }}/${{ steps.meta.outputs.platform }}
           keep_files: true
 
-      - name: Comment on PR with report links
-        if: steps.meta.outputs.skip == 'false' && steps.meta.outputs.is_pr == 'true'
+      - name: Build report URL
+        if: steps.artifact.outputs.result != 'null'
+        id: url
+        run: |
+          SHA="${{ steps.meta.outputs.head_sha }}"
+          PR="${{ steps.meta.outputs.pr_number }}"
+          PLATFORM="${{ steps.meta.outputs.platform }}"
+          if [ -n "$PR" ]; then
+            # PR head snapshots aren't published to the VI Browser, so link the
+            # standalone diff report table for PRs.
+            echo "url=${{ env.PAGES_URL }}/vidiff/pr-${PR}/${PLATFORM}/vidiff/index.html" >> "$GITHUB_OUTPUT"
+          else
+            # For pushes (what the dashboard shows), open the unified VI Browser
+            # filtered to this commit's changed VIs; each links to its diff report.
+            echo "url=${{ env.PAGES_URL }}/vi-snapshots/index.html?sha=${SHA}&changed=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Post commit status
+        if: steps.artifact.outputs.result != 'null'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SHA="${{ steps.meta.outputs.head_sha }}"
+          STATE="${{ steps.meta.outputs.outcome == 'success' && 'success' || 'failure' }}"
+          PLATFORM="${{ steps.meta.outputs.platform }}"
+          curl -s -X POST \
+            -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/statuses/${SHA}" \
+            -d "{\"state\":\"$STATE\",\"target_url\":\"${{ steps.url.outputs.url }}\",\"description\":\"VIDiff ($PLATFORM) $STATE\",\"context\":\"CI / VIDiff (${PLATFORM})\"}"
+
+      # ── Post PR comment with diff table ────────────────────────────────────
+      - name: Post PR comment
+        if: >
+          steps.artifact.outputs.result != 'null' &&
+          steps.meta.outputs.pr_number != ''
         uses: actions/github-script@v7
         with:
           script: |
-            const fs = require('fs');
-            const path = require('path');
-            const prNumber = parseInt('${{ steps.meta.outputs.pr_number }}', 10);
-            const platform = '${{ steps.meta.outputs.platform }}';
-            const repo = context.repo;
-            const label = `pr-${prNumber}`;
-            const baseUrl = `https://${repo.owner}.github.io/${repo.repo}/vidiff/${label}/${platform}`;
-            const deployDir = `pages-content/${label}/${platform}`;
+            const prNumber  = parseInt('${{ steps.meta.outputs.pr_number }}');
+            const reportUrl = '${{ steps.url.outputs.url }}';
+            const platform  = '${{ steps.meta.outputs.platform }}';
+            const outcome   = '${{ steps.meta.outputs.outcome }}';
+            const status    = outcome === 'success' ? '✅ Passed' : '❌ Failed';
 
-            if (!fs.existsSync(deployDir)) {
-              return;
-            }
+            const body = [
+              `## VIDiff Report (${platform})`,
+              '',
+              `| Status | Report |`,
+              `|--------|--------|`,
+              `| ${status} | [View diff report](${reportUrl}) |`,
+              '',
+              `_Generated by the VIDiff workflow on ${new Date().toUTCString()}_`,
+            ].join('\n');
 
-            const reports = fs.readdirSync(deployDir)
-              .filter(file => file.endsWith('.html') && file !== 'index.html')
-              .sort();
-
-            if (reports.length === 0) {
-              return;
-            }
-
-            let body = `<!-- vidiff-${platform} -->\n### VIDiff Reports (${platform})\n\n| VI | Report |\n|---|---|\n`;
-            for (const report of reports) {
-              const displayName = report.replace(/\.html$/, '');
-              body += `| ${displayName} | [View Report](${baseUrl}/${encodeURIComponent(report)}) |\n`;
-            }
-            body += `\n[All Reports](${baseUrl}/index.html)`;
-
+            // Find and update existing comment, or create new one
             const { data: comments } = await github.rest.issues.listComments({
-              ...repo,
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
               issue_number: prNumber,
             });
-
-            const marker = `<!-- vidiff-${platform} -->`;
-            const existing = comments.find(comment => comment.body.includes(marker));
-
+            const existing = comments.find(c =>
+              c.user.login === 'github-actions[bot]' &&
+              c.body.startsWith(`## VIDiff Report (${platform})`)
+            );
             if (existing) {
               await github.rest.issues.updateComment({
-                ...repo,
+                owner:      context.repo.owner,
+                repo:       context.repo.repo,
                 comment_id: existing.id,
                 body,
               });
             } else {
               await github.rest.issues.createComment({
-                ...repo,
+                owner:        context.repo.owner,
+                repo:         context.repo.repo,
                 issue_number: prNumber,
                 body,
               });
             }
-
-      - name: Add commit status with report link
-        if: steps.meta.outputs.skip == 'false'
-        run: |
-          LABEL="${{ steps.meta.outputs.label }}"
-          PLATFORM="${{ steps.meta.outputs.platform }}"
-          HEAD_SHA="${{ steps.meta.outputs.head_sha }}"
-          BASE_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/vidiff/${LABEL}/${PLATFORM}"
-          DEPLOY_DIR="pages-content/${LABEL}/${PLATFORM}"
-
-          # If there's exactly one report, link directly to it instead of the index
-          REPORTS=($(find "$DEPLOY_DIR" -maxdepth 1 -name '*.html' ! -name 'index.html' 2>/dev/null))
-          if [ ${#REPORTS[@]} -eq 1 ]; then
-            FILENAME=$(basename "${REPORTS[0]}")
-            ENCODED=$(python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" "$FILENAME")
-            REPORT_URL="${BASE_URL}/${ENCODED}"
-          else
-            REPORT_URL="${BASE_URL}/"
-          fi
-
-          curl -s -X POST \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/${{ github.repository }}/statuses/${HEAD_SHA}" \
-            -d "{\"state\":\"success\",\"target_url\":\"${REPORT_URL}\",\"description\":\"View VIDiff report\",\"context\":\"VIDiff Report\"}"
