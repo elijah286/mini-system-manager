@@ -5,7 +5,7 @@ installedVersion: 1.9.4
 installedAt: 2026-06-16T20:03:08Z
 source:
   repo: elijah286/LabVIEW-CI-with-Containers
-  ref: main
+  ref: v1.9.4
 config:
   labviewVersion: "2026"
   branch: main
@@ -17,3 +17,4 @@ activities:
   - vidiff
   - snapshots
   - custom-image
+
