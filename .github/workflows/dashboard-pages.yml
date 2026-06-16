@@ -6,6 +6,13 @@
 name: CI Dashboard — GitHub Pages
 
 on:
+  # Build on the install merge + whenever the config changes, so the dashboard
+  # publishes itself the first time without waiting for the hourly schedule.
+  push:
+    branches: [main]
+    paths:
+      - '.github/labview-ci.yml'
+      - '.github/workflows/dashboard-pages.yml'
   status:
   workflow_run:
     workflows:
