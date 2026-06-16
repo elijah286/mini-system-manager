@@ -1,95 +1,10 @@
 [
   {
-    "sha": "ec0add88581cf59c574b182d94d0d9c20422628a",
-    "short_sha": "ec0add8",
-    "message": "Add GHCR auth to CI pull steps; add packages:read permissions; fix Node.js 24 deprecation warning",
-    "date": "2026-06-03T02:48:50-05:00",
-    "stats": {
-      "total": 42,
-      "succeeded": 42
-    },
-    "changedVIs": []
-  },
-  {
-    "sha": "b59a10cc652cd7814c26b7837b5cc1f626d7302f",
-    "short_sha": "b59a10c",
-    "message": "Switch CI workflows to pre-baked GHCR image; remove tar-cache and runtime install",
-    "date": "2026-06-03T01:49:10-05:00",
-    "stats": {
-      "total": 0,
-      "succeeded": 0
-    },
-    "changedVIs": []
-  },
-  {
-    "sha": "57db71125be89cef644d738bbf9a3b2dafc80347",
-    "short_sha": "57db711",
-    "message": "VI Browser: revision label, highlight changed files, per-file diff badge",
-    "date": "2026-06-02T12:08:29-05:00",
-    "stats": {
-      "total": 42,
-      "succeeded": 42
-    },
-    "changedVIs": []
-  },
-  {
-    "sha": "a89d3d15db6f0c72b72b7e32fcbc551277d827f9",
-    "short_sha": "a89d3d1",
-    "message": "Honor system dark/light mode in VI Browser and Interactive Viewer",
-    "date": "2026-06-02T11:48:47-05:00",
-    "stats": {
-      "total": 42,
-      "succeeded": 42
-    }
-  },
-  {
-    "sha": "aeb493778b2251463cd3f4007b894e2559823c42",
-    "short_sha": "aeb4937",
-    "message": "Fix vi-browser.html BASE path: strip filename not just index.html",
-    "date": "2026-06-02T11:33:43-05:00",
-    "stats": {
-      "total": 0,
-      "succeeded": 0
-    }
-  },
-  {
-    "sha": "8ad4528bb13931d844809865a289aea86b7cd779",
-    "short_sha": "8ad4528",
-    "message": "Fix VI Browser link: point to vi-browser.html directly, also deploy under that name",
-    "date": "2026-06-02T05:12:57-05:00",
-    "stats": {
-      "total": 42,
-      "succeeded": 42
-    }
-  },
-  {
-    "sha": "b33292157dbaff8cceb65efd57a6dd684356461c",
-    "short_sha": "b332921",
-    "message": "Add interactive VI viewer with case structure navigation",
-    "date": "2026-06-01T14:11:22-05:00",
-    "stats": {
-      "total": 42,
-      "succeeded": 42
-    }
-  },
-  {
-    "sha": "634f1536c66280b4bb6d1cd4b80f255151e32637",
-    "short_sha": "634f153",
-    "message": "Merge branch 'main' of https://github.com/elijah286/mini-system-manager",
-    "date": "2026-06-01T01:20:24-07:00",
-    "stats": {
-      "total": 42,
-      "succeeded": 42
-    }
-  },
-  {
-    "sha": "738dd3ec98c44e3d48b3051866309c50686549d1",
-    "short_sha": "738dd3e",
-    "message": "Add per-commit VI Browser with lvproj tree, commit selector, and VIDiff links",
-    "date": "2026-05-31T14:50:15-05:00",
-    "stats": {
-      "total": 42,
-      "succeeded": 42
-    }
+    "sha": "70144cd4b66f98efe21616913eed53c8c46e16a4",
+    "short": "70144cd",
+    "message": "Merge pull request #1 from elijah286/ci/install-labview-ci",
+    "author": "Elijah Kerry",
+    "date": "2026-06-16T09:44:38-05:00",
+    "vi_count": 42
   }
 ]
