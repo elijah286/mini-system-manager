@@ -206,14 +206,19 @@
       delete o[c+'|'+sha]; qSave(o);
       var td = document.querySelector('td.cidash-queued-cell[data-qcap="'+c+'"][data-qsha="'+sha+'"]');
       if(td){
-        var parent = (entry && entry.parent) || '';
-        var short = (entry && entry.short) || sha.slice(0,7);
-        var label = (RT[c] && RT[c].label) || c;
         td.classList.remove('cidash-queued-cell');
         td.removeAttribute('data-qcap'); td.removeAttribute('data-qsha');
-        td.innerHTML = '<a href="#" class="cidash-run" data-cap="'+esc(c)+'" data-sha="'+esc(sha)+'" '
-          + 'data-parent="'+esc(parent)+'" data-short="'+esc(short)+'" '
-          + 'title="Run '+esc(label)+' for commit '+esc(short)+'">\u25B7</a>';
+        if(entry && entry.orig){
+          // Result cell (re-run overlay) — restore its original status badge.
+          td.innerHTML = entry.orig;
+        } else {
+          var parent = (entry && entry.parent) || '';
+          var short = (entry && entry.short) || sha.slice(0,7);
+          var label = (RT[c] && RT[c].label) || c;
+          td.innerHTML = '<a href="#" class="cidash-run" data-cap="'+esc(c)+'" data-sha="'+esc(sha)+'" '
+            + 'data-parent="'+esc(parent)+'" data-short="'+esc(short)+'" '
+            + 'title="Run '+esc(label)+' for commit '+esc(short)+'">\u25B7</a>';
+        }
       }
       qRenumber();
     }
@@ -298,7 +303,19 @@
         var a = document.querySelector('a.cidash-run[data-cap="'+c+'"][data-sha="'+sha+'"]');
         if(painted){ live++; }
         else if(a){ qPaint(a.closest('td'), c, sha); live++; }
-        else { delete o[key]; changed = true; }   // real status took over — done
+        else {
+          // The cell may already hold a RESULT (re-run from the report, not an
+          // empty cell). Overlay "Queued" on it until a NEWER result lands. A
+          // server-side running spinner has no data-cap, so it falls through to
+          // the delete branch below (the server has taken over).
+          var rc = document.querySelector('td.cidash-cap-cell[data-cap="'+c+'"][data-sha="'+sha+'"]');
+          if(rc){
+            var rts = Date.parse(rc.getAttribute('data-ts')||'') || 0;
+            if(rts && rts > (e.ts||0)){ delete o[key]; changed = true; }   // re-run finished
+            else { if(!e.orig){ e.orig = rc.innerHTML; changed = true; } qPaint(rc, c, sha); live++; }
+          }
+          else { delete o[key]; changed = true; }   // real status / spinner took over
+        }
       });
       if(changed) qSave(o);
       if(live > 0) qArmReload();
@@ -541,7 +558,7 @@
   })();
   </script>
   <h1>CI Dashboard — mini-system-manager</h1>
-  <div class="sub">Last updated: 2026-06-16 19:57 UTC &nbsp;|&nbsp; Auto-refreshes every 15 min</div>
+  <div class="sub">Last updated: 2026-06-16 20:02 UTC &nbsp;|&nbsp; Auto-refreshes every 15 min</div>
   <div class="nav">
     <a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/">VI Browser</a>
     <a href="https://github.com/elijah286/mini-system-manager">GitHub</a>
