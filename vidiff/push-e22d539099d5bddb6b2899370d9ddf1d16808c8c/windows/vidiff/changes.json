@@ -1,0 +1,10 @@
+{
+  "platform": "windows",
+  "files": [
+    {"file": "Curriculum Launcher.vi", "type": "modified", "report": "Curriculum_Launcher.vi/index.html"},
+    {"file": "Curriculum/Generator Lessons/Generator Lesson 2.vi", "type": "modified", "report": "Curriculum-Generator_Lessons-Generator_Lesson_2.vi/index.html"},
+    {"file": "Curriculum/Generator Lessons/Generator Lesson 6.vi", "type": "modified", "report": "Curriculum-Generator_Lessons-Generator_Lesson_6.vi/index.html"},
+    {"file": "Find Curriculum.vi", "type": "modified", "report": "Find_Curriculum.vi/index.html"},
+    {"file": "main.vi", "type": "modified", "report": "main.vi/index.html"}
+  ]
+}
