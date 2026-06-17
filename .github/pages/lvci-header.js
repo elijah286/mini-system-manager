@@ -125,21 +125,29 @@
     '.lvci-btn[disabled]{opacity:.55;cursor:default}',
     '.lvci-btn .lvci-spin{width:11px;height:11px;border:2px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;display:inline-block;animation:lvci-spin .7s linear infinite}',
     '@keyframes lvci-spin{to{transform:rotate(360deg)}}',
-    // Version badge
-    '.lvci-ver{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#8b949e;text-decoration:none;',
-      'border:1px solid #30363d;border-radius:999px;padding:4px 10px;white-space:nowrap}',
-    '.lvci-ver:hover{color:#e6edf3;border-color:#8b949e;text-decoration:none}',
-    '@media(prefers-color-scheme:light){.lvci-ver{color:#57606a;border-color:#d0d7de}.lvci-ver:hover{color:#1f2328;border-color:#57606a}}',
-    '.lvci-ver .lvci-dot{width:7px;height:7px;border-radius:50%;background:#d29922;box-shadow:0 0 0 0 rgba(210,153,34,.5);animation:lvci-pulse 1.8s infinite;display:none}',
-    '.lvci-ver.behind .lvci-dot{display:inline-block}',
-    '@keyframes lvci-pulse{0%{box-shadow:0 0 0 0 rgba(210,153,34,.5)}70%{box-shadow:0 0 0 6px rgba(210,153,34,0)}100%{box-shadow:0 0 0 0 rgba(210,153,34,0)}}',
-    // Version badge → "N running" while CI is in flight (blue spinner replaces the version)
-    '.lvci-ver .lvci-run{width:9px;height:9px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;display:none;animation:lvci-spin .7s linear infinite}',
-    '.lvci-ver.working .lvci-run{display:inline-block}',
-    '.lvci-ver.working .lvci-dot{display:none}',
-    '.lvci-ver.working{color:#1f6feb;border-color:#1f6feb}',
-    '.lvci-ver.working:hover{color:#388bfd;border-color:#388bfd}',
-    '@media(prefers-color-scheme:light){.lvci-ver.working{color:#0969da;border-color:#0969da}.lvci-ver.working:hover{color:#0969da;border-color:#0969da}}',
+    // Live CI activity chip — shown in the actions cluster ONLY while one or more
+    // workflow runs are in flight; idle leaves the bar clean. It is its own
+    // surface (no longer fused onto the version), so activity and version never
+    // compete for one pill.
+    '.lvci-run-chip{display:none;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#1f6feb;text-decoration:none;',
+      'border:1px solid #1f6feb;border-radius:999px;padding:4px 11px;white-space:nowrap}',
+    '.lvci-run-chip.show{display:inline-flex}',
+    '.lvci-run-chip:hover{background:rgba(31,111,235,.12);text-decoration:none}',
+    '.lvci-run-chip .lvci-run-spin{width:9px;height:9px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:lvci-spin .7s linear infinite}',
+    '@media(prefers-color-scheme:light){.lvci-run-chip{color:#0969da;border-color:#0969da}.lvci-run-chip:hover{background:rgba(9,105,218,.08)}}',
+    // Update-available cue: a single amber dot on the menu trigger (the More
+    // button on desktop, the hamburger on mobile). The version + update action
+    // live inside that menu, so this dot is the at-a-glance "you can update" hint.
+    '.lvci-mdot{display:none;position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:#d29922;',
+      'box-shadow:0 0 0 0 rgba(210,153,34,.5);animation:lvci-pulse 1.8s infinite}',
+    '.has-update .lvci-mdot{display:block}',
+    '@keyframes lvci-pulse{0%{box-shadow:0 0 0 0 rgba(210,153,34,.5)}70%{box-shadow:0 0 0 5px rgba(210,153,34,0)}100%{box-shadow:0 0 0 0 rgba(210,153,34,0)}}',
+    // Version / update entry inside the menu(s): shows the installed version and
+    // opens What's New; turns amber + reads "Update available" when behind.
+    '.lvci-ddver .lvci-ddver-label{flex:0 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
+    '.lvci-ddver .lvci-ddver-tag{margin-left:auto;padding-left:10px;font-size:11px;font-weight:600;color:#8b949e;white-space:nowrap;font-variant-numeric:tabular-nums}',
+    '.lvci-ddver.behind .lvci-ddver-tag,.lvci-ddver.behind .lvci-ic{color:#d29922}',
+    '@media(prefers-color-scheme:light){.lvci-ddver .lvci-ddver-tag{color:#57606a}.lvci-ddver.behind .lvci-ddver-tag,.lvci-ddver.behind .lvci-ic{color:#bf8700}}',
     // Revision picker (per-revision reports: switch which revision you're viewing)
     '.lvci-rev{display:inline-flex;align-items:center;gap:7px;flex:0 1 auto;min-width:0}',
     '.lvci-rev .lvci-revlbl{font-size:11px;font-weight:600;color:#8b949e;white-space:nowrap;text-transform:uppercase;letter-spacing:.04em}',
@@ -148,20 +156,39 @@
     '.lvci-rev select:hover{border-color:#8b949e}',
     '@media(prefers-color-scheme:light){.lvci-rev .lvci-revlbl{color:#57606a}.lvci-rev select{color:#1f2328;background:#fff;border-color:#d0d7de;color-scheme:light}}',
     // Hamburger (mobile)
-    '.lvci-burger{display:none;align-items:center;justify-content:center;width:38px;height:34px;border:1px solid #30363d;border-radius:7px;background:transparent;color:inherit;cursor:pointer;flex:0 0 auto}',
+    '.lvci-burger{position:relative;display:none;align-items:center;justify-content:center;width:38px;height:34px;border:1px solid #30363d;border-radius:7px;background:transparent;color:inherit;cursor:pointer;flex:0 0 auto}',
     '@media(prefers-color-scheme:light){.lvci-burger{border-color:#d0d7de}}',
     '.lvci-burger svg{width:18px;height:18px;display:block}',
-    // Secondary actions dropdown (Configure, Update, About)
+    // Inline glyph wrapper — sizes the SVG and lets it inherit color (currentColor)
+    '.lvci-ic{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}',
+    '.lvci-ic svg{width:100%;height:100%;display:block}',
+    '.lvci-btn .lvci-ic{width:15px;height:15px}',
+    // ── Secondary actions: "More" button → popover (Configure / Update / About / theme)
     '.lvci-dropdown{position:relative;display:inline-flex;align-items:center}',
-    '.lvci-more{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid #30363d;background:transparent;color:inherit;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600}',
-    '.lvci-more:hover{background:rgba(177,186,196,.12)}',
-    '@media(prefers-color-scheme:light){.lvci-more{border-color:#d0d7de}.lvci-more:hover{background:rgba(80,90,100,.08)}}',
-    '.lvci-dropdown-menu{display:none;position:absolute;top:100%;right:0;z-index:200;background:rgba(22,27,34,.98);border:1px solid #30363d;border-radius:8px;margin-top:6px;min-width:180px;padding:6px 0}',
-    '.lvci-dropdown-menu.open{display:block}',
-    '.lvci-dropdown-menu a,.lvci-dropdown-menu button{display:flex;width:100%;align-items:center;gap:8px;padding:8px 12px;background:transparent;border:0;color:#e6edf3;text-decoration:none;font-size:13px;cursor:pointer;text-align:left}',
-    '.lvci-dropdown-menu a:hover,.lvci-dropdown-menu button:hover{background:rgba(177,186,196,.12)}',
-    '.lvci-dropdown-menu .lvci-sep{height:1px;background:#30363d;margin:6px 0}',
-    '@media(prefers-color-scheme:light){.lvci-dropdown-menu{background:#fff;border-color:#d0d7de}.lvci-dropdown-menu a,.lvci-dropdown-menu button{color:#1f2328}.lvci-dropdown-menu a:hover,.lvci-dropdown-menu button:hover{background:rgba(80,90,100,.08)}}',
+    '.lvci-more{position:relative;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid #30363d;background:transparent;color:#8b949e;border-radius:7px;cursor:pointer}',
+    '.lvci-more svg{width:18px;height:18px;display:block}',
+    '.lvci-more:hover{background:rgba(177,186,196,.12);color:#e6edf3}',
+    '.lvci-more.open{background:rgba(177,186,196,.16);color:#e6edf3;border-color:#8b949e}',
+    '@media(prefers-color-scheme:light){.lvci-more{border-color:#d0d7de;color:#57606a}.lvci-more:hover,.lvci-more.open{background:rgba(80,90,100,.08);color:#1f2328}}',
+    '.lvci-dropdown-menu{display:none;position:absolute;top:100%;right:0;z-index:200;background:rgba(22,27,34,.98);border:1px solid #30363d;border-radius:10px;margin-top:8px;min-width:214px;padding:6px;',
+      'box-shadow:0 8px 28px rgba(1,4,9,.5);-webkit-backdrop-filter:saturate(160%) blur(8px);backdrop-filter:saturate(160%) blur(8px)}',
+    '.lvci-dropdown-menu.open{display:block;animation:lvci-pop .12s ease-out}',
+    '@keyframes lvci-pop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}',
+    '.lvci-dropdown-menu>a,.lvci-dropdown-menu>button{display:flex;width:100%;align-items:center;gap:10px;padding:9px 10px;background:transparent;border:0;border-radius:7px;color:#e6edf3;text-decoration:none;font-size:13px;font-weight:500;cursor:pointer;text-align:left}',
+    '.lvci-dropdown-menu>a:hover,.lvci-dropdown-menu>button:hover{background:rgba(177,186,196,.12)}',
+    '.lvci-dropdown-menu .lvci-ic{width:17px;height:17px;color:#8b949e}',
+    '.lvci-dropdown-menu .lvci-sep{height:1px;background:#30363d;margin:5px 4px}',
+    '@media(prefers-color-scheme:light){.lvci-dropdown-menu{background:rgba(255,255,255,.98);border-color:#d0d7de;box-shadow:0 8px 28px rgba(140,149,159,.32)}.lvci-dropdown-menu>a,.lvci-dropdown-menu>button{color:#1f2328}.lvci-dropdown-menu>a:hover,.lvci-dropdown-menu>button:hover{background:rgba(80,90,100,.08)}.lvci-dropdown-menu .lvci-ic{color:#57606a}.lvci-dropdown-menu .lvci-sep{background:#d0d7de}}',
+    // Appearance (theme) segmented control — lives in the popover and mobile menu
+    '.lvci-theme{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 8px 8px 10px}',
+    '.lvci-theme-lbl{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#8b949e}',
+    '.lvci-seg{display:inline-flex;border:1px solid #30363d;border-radius:8px;overflow:hidden;background:rgba(177,186,196,.06)}',
+    '.lvci-seg-btn{display:inline-flex;align-items:center;justify-content:center;width:33px;height:27px;border:0;background:transparent;color:#8b949e;cursor:pointer;padding:0}',
+    '.lvci-seg-btn+.lvci-seg-btn{border-left:1px solid #30363d}',
+    '.lvci-seg-btn svg{width:15px;height:15px;display:block}',
+    '.lvci-seg-btn:hover{color:#e6edf3;background:rgba(177,186,196,.12)}',
+    '.lvci-seg-btn.on{background:#1f6feb;color:#fff}',
+    '@media(prefers-color-scheme:light){.lvci-theme-lbl{color:#57606a}.lvci-seg{border-color:#d0d7de;background:rgba(80,90,100,.04)}.lvci-seg-btn{color:#57606a}.lvci-seg-btn+.lvci-seg-btn{border-left-color:#d0d7de}.lvci-seg-btn:hover{color:#1f2328;background:rgba(80,90,100,.08)}.lvci-seg-btn.on{background:#0969da;color:#fff}}',
     '@media(max-width:820px){.lvci-dropdown,.lvci-more{display:none}}',
     // Status line (re-run feedback) sits just under the bar, full width
     '.lvci-status{display:none;align-items:center;gap:8px;font-size:12.5px;padding:7px 16px;border-bottom:1px solid #30363d;',
@@ -176,6 +203,16 @@
     '.lvci-tok code{background:#0d1117;padding:1px 5px;border-radius:4px}',
     '.lvci-tok input{padding:7px 9px;border-radius:7px;border:1px solid #30363d;background:#0d1117;color:#e6edf3;font-family:ui-monospace,Menlo,monospace}',
     '@media(prefers-color-scheme:light){.lvci-tok{background:#fff;border-color:#d0d7de;color:#1f2328}.lvci-tok code{background:#eef2f6}.lvci-tok input{background:#fff;border-color:#d0d7de;color:#1f2328}}',
+    // Rebuild banner (dashboard) — shown while the workflow that regenerates this
+    // page (or the Pages publish that follows) is in flight; links to that run.
+    '.lvci-rebuild{display:none;align-items:flex-start;gap:10px;padding:10px 16px;border-bottom:1px solid #30363d;background:rgba(31,111,235,.12);color:#e6edf3;font-size:12.5px;line-height:1.5}',
+    '.lvci-rebuild.show{display:flex}',
+    '.lvci-rebuild .lvci-rb-spin{flex:0 0 auto;width:14px;height:14px;margin-top:3px;border:2px solid rgba(31,111,235,.35);border-top-color:#1f6feb;border-radius:50%;animation:lvci-spin .7s linear infinite}',
+    '.lvci-rebuild .lvci-rb-txt{min-width:0}',
+    '.lvci-rebuild .lvci-rb-sub{color:#8b949e}',
+    '.lvci-rebuild a{color:#58a6ff;text-decoration:none;font-weight:600;white-space:nowrap}',
+    '.lvci-rebuild a:hover{text-decoration:underline}',
+    '@media(prefers-color-scheme:light){.lvci-rebuild{background:rgba(9,105,218,.09);border-bottom-color:#d0d7de;color:#1f2328}.lvci-rebuild .lvci-rb-sub{color:#57606a}.lvci-rebuild a{color:#0969da}}',
     // ── Mobile menu ───────────────────────────────────────────────────────
     '.lvci-menu{display:none}',
     '@media(max-width:820px){',
@@ -187,13 +224,96 @@
       '.lvci-menu a,.lvci-menu button.lvci-m{display:flex;width:100%;align-items:center;gap:9px;text-align:left;',
         'color:#e6edf3;background:transparent;border:0;font-size:15px;font-weight:500;padding:11px 12px;border-radius:8px;text-decoration:none;cursor:pointer}',
       '.lvci-menu a:hover,.lvci-menu button.lvci-m:hover{background:rgba(177,186,196,.12)}',
+      '.lvci-menu .lvci-ic{width:19px;height:19px;color:#8b949e}',
+      '.lvci-menu .lvci-theme{padding:9px 12px}',
       '.lvci-menu .lvci-rev{display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:8px 12px 4px}',
       '.lvci-menu .lvci-rev select{max-width:none;width:100%;font-size:15px;padding:10px}',
       '.lvci-menu .lvci-sep{height:1px;background:#30363d;margin:6px 4px}',
       '@media(prefers-color-scheme:light){.lvci-menu.open{background:#fff;border-bottom-color:#d0d7de}.lvci-menu a,.lvci-menu button.lvci-m{color:#1f2328}.lvci-menu .lvci-sep{background:#d0d7de}}',
     '}',
     // Give the page a little breathing room below the sticky bar on small screens
-    '@media(max-width:820px){body{overflow-x:hidden}}'
+    '@media(max-width:820px){body{overflow-x:hidden}}',
+    // ── Manual appearance override (Appearance control in the menu) ───────────
+    // "System" keeps the prefers-color-scheme rules above. Forcing light/dark
+    // sets data-lvci-theme on <html>; these rules re-assert the matching tokens
+    // and header surfaces at higher specificity, so the choice wins over the OS
+    // setting for both the shared header AND the CSS variables every CI page uses.
+    ':root[data-lvci-theme=light]{--bg:#ffffff;--surface:#f6f8fa;--border:#d0d7de;--fg:#1f2328;--fg-muted:#57606a;--link:#0969da;--hover:#f3f4f6;--row-border:#eaeef2;--accent:#1f883d;--accent-fg:#fff;--chip:#eaeef2;--code:#f6f8fa;--warn:#9a6700}',
+    ':root[data-lvci-theme=dark]{--bg:#0d1117;--surface:#161b22;--border:#30363d;--fg:#e6edf3;--fg-muted:#8b949e;--link:#58a6ff;--hover:#1c2128;--row-border:#21262d;--accent:#238636;--accent-fg:#fff;--chip:#21262d;--code:#010409;--warn:#9a6700}',
+    // Forced LIGHT — header surfaces
+    ':root[data-lvci-theme=light] .lvci-hdr{background:rgba(255,255,255,.86);border-bottom-color:#d0d7de;color:#1f2328}',
+    ':root[data-lvci-theme=light] .lvci-brand .lvci-kicker,:root[data-lvci-theme=light] .lvci-brand .lvci-sub{color:#57606a}',
+    ':root[data-lvci-theme=light] .lvci-brand .lvci-sub{border-color:#d0d7de}',
+    ':root[data-lvci-theme=light] .lvci-nav a:hover,:root[data-lvci-theme=light] .lvci-nav a.on{color:#1f2328;background:rgba(80,90,100,.10)}',
+    ':root[data-lvci-theme=light] .lvci-btn{border-color:#d0d7de}',
+    ':root[data-lvci-theme=light] .lvci-btn:hover{background:rgba(80,90,100,.08)}',
+    ':root[data-lvci-theme=light] .lvci-run-chip{color:#0969da;border-color:#0969da}',
+    ':root[data-lvci-theme=light] .lvci-run-chip:hover{background:rgba(9,105,218,.08)}',
+    ':root[data-lvci-theme=light] .lvci-ddver .lvci-ddver-tag{color:#57606a}',
+    ':root[data-lvci-theme=light] .lvci-ddver.behind .lvci-ddver-tag,:root[data-lvci-theme=light] .lvci-ddver.behind .lvci-ic{color:#bf8700}',
+    ':root[data-lvci-theme=light] .lvci-burger{border-color:#d0d7de}',
+    ':root[data-lvci-theme=light] .lvci-more{border-color:#d0d7de;color:#57606a}',
+    ':root[data-lvci-theme=light] .lvci-more:hover,:root[data-lvci-theme=light] .lvci-more.open{background:rgba(80,90,100,.08);color:#1f2328}',
+    ':root[data-lvci-theme=light] .lvci-dropdown-menu{background:rgba(255,255,255,.98);border-color:#d0d7de;box-shadow:0 8px 28px rgba(140,149,159,.32)}',
+    ':root[data-lvci-theme=light] .lvci-dropdown-menu>a,:root[data-lvci-theme=light] .lvci-dropdown-menu>button{color:#1f2328}',
+    ':root[data-lvci-theme=light] .lvci-dropdown-menu>a:hover,:root[data-lvci-theme=light] .lvci-dropdown-menu>button:hover{background:rgba(80,90,100,.08)}',
+    ':root[data-lvci-theme=light] .lvci-dropdown-menu .lvci-ic{color:#57606a}',
+    ':root[data-lvci-theme=light] .lvci-dropdown-menu .lvci-sep,:root[data-lvci-theme=light] .lvci-menu .lvci-sep{background:#d0d7de}',
+    ':root[data-lvci-theme=light] .lvci-theme-lbl{color:#57606a}',
+    ':root[data-lvci-theme=light] .lvci-seg{border-color:#d0d7de;background:rgba(80,90,100,.04)}',
+    ':root[data-lvci-theme=light] .lvci-seg-btn{color:#57606a}',
+    ':root[data-lvci-theme=light] .lvci-seg-btn+.lvci-seg-btn{border-left-color:#d0d7de}',
+    ':root[data-lvci-theme=light] .lvci-seg-btn:hover{color:#1f2328;background:rgba(80,90,100,.08)}',
+    ':root[data-lvci-theme=light] .lvci-seg-btn.on{background:#0969da;color:#fff}',
+    ':root[data-lvci-theme=light] .lvci-menu .lvci-ic{color:#57606a}',
+    ':root[data-lvci-theme=light] .lvci-rev .lvci-revlbl{color:#57606a}',
+    ':root[data-lvci-theme=light] .lvci-rev select{color:#1f2328;background:#fff;border-color:#d0d7de;color-scheme:light}',
+    ':root[data-lvci-theme=light] .lvci-status{background:#f6f8fa;border-bottom-color:#d0d7de;color:#57606a}',
+    ':root[data-lvci-theme=light] .lvci-tok{background:#fff;border-color:#d0d7de;color:#1f2328}',
+    ':root[data-lvci-theme=light] .lvci-tok code{background:#eef2f6}',
+    ':root[data-lvci-theme=light] .lvci-tok input{background:#fff;border-color:#d0d7de;color:#1f2328}',
+    ':root[data-lvci-theme=light] .lvci-menu.open{background:#fff;border-bottom-color:#d0d7de}',
+    ':root[data-lvci-theme=light] .lvci-menu a,:root[data-lvci-theme=light] .lvci-menu button.lvci-m{color:#1f2328}',
+    ':root[data-lvci-theme=light] .lvci-rebuild{background:rgba(9,105,218,.09);border-bottom-color:#d0d7de;color:#1f2328}',
+    ':root[data-lvci-theme=light] .lvci-rebuild .lvci-rb-sub{color:#57606a}',
+    ':root[data-lvci-theme=light] .lvci-rebuild a{color:#0969da}',
+    // Forced DARK — counteract an OS light preference
+    ':root[data-lvci-theme=dark] .lvci-hdr{background:rgba(22,27,34,.86);border-bottom-color:#30363d;color:#e6edf3}',
+    ':root[data-lvci-theme=dark] .lvci-brand .lvci-kicker,:root[data-lvci-theme=dark] .lvci-brand .lvci-sub{color:#8b949e}',
+    ':root[data-lvci-theme=dark] .lvci-brand .lvci-sub{border-color:#30363d}',
+    ':root[data-lvci-theme=dark] .lvci-nav a:hover,:root[data-lvci-theme=dark] .lvci-nav a.on{color:#e6edf3;background:rgba(177,186,196,.16)}',
+    ':root[data-lvci-theme=dark] .lvci-btn{border-color:#30363d}',
+    ':root[data-lvci-theme=dark] .lvci-btn:hover{background:rgba(177,186,196,.12)}',
+    ':root[data-lvci-theme=dark] .lvci-run-chip{color:#1f6feb;border-color:#1f6feb}',
+    ':root[data-lvci-theme=dark] .lvci-run-chip:hover{background:rgba(31,111,235,.12)}',
+    ':root[data-lvci-theme=dark] .lvci-ddver .lvci-ddver-tag{color:#8b949e}',
+    ':root[data-lvci-theme=dark] .lvci-ddver.behind .lvci-ddver-tag,:root[data-lvci-theme=dark] .lvci-ddver.behind .lvci-ic{color:#d29922}',
+    ':root[data-lvci-theme=dark] .lvci-burger{border-color:#30363d}',
+    ':root[data-lvci-theme=dark] .lvci-more{border-color:#30363d;color:#8b949e}',
+    ':root[data-lvci-theme=dark] .lvci-more:hover,:root[data-lvci-theme=dark] .lvci-more.open{background:rgba(177,186,196,.12);color:#e6edf3}',
+    ':root[data-lvci-theme=dark] .lvci-dropdown-menu{background:rgba(22,27,34,.98);border-color:#30363d;box-shadow:0 8px 28px rgba(1,4,9,.5)}',
+    ':root[data-lvci-theme=dark] .lvci-dropdown-menu>a,:root[data-lvci-theme=dark] .lvci-dropdown-menu>button{color:#e6edf3}',
+    ':root[data-lvci-theme=dark] .lvci-dropdown-menu>a:hover,:root[data-lvci-theme=dark] .lvci-dropdown-menu>button:hover{background:rgba(177,186,196,.12)}',
+    ':root[data-lvci-theme=dark] .lvci-dropdown-menu .lvci-ic{color:#8b949e}',
+    ':root[data-lvci-theme=dark] .lvci-dropdown-menu .lvci-sep,:root[data-lvci-theme=dark] .lvci-menu .lvci-sep{background:#30363d}',
+    ':root[data-lvci-theme=dark] .lvci-theme-lbl{color:#8b949e}',
+    ':root[data-lvci-theme=dark] .lvci-seg{border-color:#30363d;background:rgba(177,186,196,.06)}',
+    ':root[data-lvci-theme=dark] .lvci-seg-btn{color:#8b949e}',
+    ':root[data-lvci-theme=dark] .lvci-seg-btn+.lvci-seg-btn{border-left-color:#30363d}',
+    ':root[data-lvci-theme=dark] .lvci-seg-btn:hover{color:#e6edf3;background:rgba(177,186,196,.12)}',
+    ':root[data-lvci-theme=dark] .lvci-seg-btn.on{background:#1f6feb;color:#fff}',
+    ':root[data-lvci-theme=dark] .lvci-menu .lvci-ic{color:#8b949e}',
+    ':root[data-lvci-theme=dark] .lvci-rev .lvci-revlbl{color:#8b949e}',
+    ':root[data-lvci-theme=dark] .lvci-rev select{color:#e6edf3;background:rgba(177,186,196,.10);border-color:#30363d;color-scheme:dark}',
+    ':root[data-lvci-theme=dark] .lvci-status{background:rgba(22,27,34,.96);border-bottom-color:#30363d;color:#8b949e}',
+    ':root[data-lvci-theme=dark] .lvci-tok{background:#161b22;border-color:#30363d;color:#e6edf3}',
+    ':root[data-lvci-theme=dark] .lvci-tok code{background:#0d1117}',
+    ':root[data-lvci-theme=dark] .lvci-tok input{background:#0d1117;border-color:#30363d;color:#e6edf3}',
+    ':root[data-lvci-theme=dark] .lvci-menu.open{background:rgba(22,27,34,.98);border-bottom-color:#30363d}',
+    ':root[data-lvci-theme=dark] .lvci-rebuild{background:rgba(31,111,235,.12);border-bottom-color:#30363d;color:#e6edf3}',
+    ':root[data-lvci-theme=dark] .lvci-rebuild .lvci-rb-sub{color:#8b949e}',
+    ':root[data-lvci-theme=dark] .lvci-rebuild a{color:#58a6ff}',
+    ':root[data-lvci-theme=dark] .lvci-menu a,:root[data-lvci-theme=dark] .lvci-menu button.lvci-m{color:#e6edf3}'
   ].join('\n');
 
   // ── Inline brand mark (a flow/analysis glyph) ─────────────────────────────
@@ -206,8 +326,20 @@
       '<path d="M8 8.6v3.2a1.6 1.6 0 0 0 1.6 1.6h4.8A1.6 1.6 0 0 0 16 11.8V8.6" stroke="#8b949e" stroke-width="1.5" stroke-linecap="round"/>' +
       '<path d="M12 13.4v1.1" stroke="#8b949e" stroke-width="1.5" stroke-linecap="round"/>' +
     '</svg>';
+  // Crisp, stroke-based glyphs (Lucide-style). Sized via CSS; inherit color via
+  // currentColor so they adapt to dark/light and hover states automatically.
   var ICON = {
-    burger: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+    burger: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="12" cy="19" r="1.3"/></svg>',
+    integrate: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>',
+    configure: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1.5" y1="14" x2="6.5" y2="14"/><line x1="9.5" y1="8" x2="14.5" y2="8"/><line x1="17.5" y1="16" x2="22.5" y2="16"/></svg>',
+    update: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+    about: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><line x1="12" y1="16" x2="12" y2="11.5"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+    news: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M11.5 3l1.8 5.2 5.2 1.8-5.2 1.8L11.5 17l-1.8-5.2L4.5 10l5.2-1.8z"/><path d="M18 14l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg>',
+    history: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>',
+    sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 1.8v2.4M12 19.8v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M1.8 12h2.4M19.8 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>',
+    moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>',
+    system: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="19" height="13" rx="2"/><line x1="8.5" y1="20.5" x2="15.5" y2="20.5"/><line x1="12" y1="16.5" x2="12" y2="20.5"/></svg>'
   };
 
   function esc(s) {
@@ -215,6 +347,59 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
+
+  // Leading glyph for an action: a sized SVG wrapper (a.svg) or, as a fallback,
+  // an escaped text/emoji glyph (a.icon). SVG strings are our own trusted markup.
+  function iconHtml(a) {
+    if (a.svg) return '<span class="lvci-ic">' + a.svg + '</span>';
+    return a.icon ? esc(a.icon) + ' ' : '';
+  }
+
+  // ── Appearance: dark / light / system ─────────────────────────────────────
+  // Persisted per browser. "system" (the default) follows prefers-color-scheme;
+  // light/dark set data-lvci-theme on <html> so our overrides win over the OS
+  // setting for the shared header AND every CI page's standard CSS tokens.
+  var THEME_KEY = 'lvci-theme';
+  function getTheme() {
+    try { var t = localStorage.getItem(THEME_KEY); return (t === 'light' || t === 'dark') ? t : 'system'; }
+    catch (e) { return 'system'; }
+  }
+  function applyTheme(t) {
+    var r = document.documentElement;
+    if (t === 'light' || t === 'dark') { r.setAttribute('data-lvci-theme', t); r.style.colorScheme = t; }
+    else { r.removeAttribute('data-lvci-theme'); r.style.colorScheme = 'light dark'; }
+  }
+  function markThemeControls(t) {
+    var btns = document.querySelectorAll('.lvci-seg-btn');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('on', btns[i].getAttribute('data-theme') === t);
+  }
+  function setTheme(t) {
+    try { localStorage.setItem(THEME_KEY, t); } catch (e) {}
+    applyTheme(t);
+    markThemeControls(t);
+  }
+  // A compact segmented control (Light / Dark / System) for the menus.
+  function themeControl() {
+    var wrap = document.createElement('div'); wrap.className = 'lvci-theme';
+    var lbl = document.createElement('span'); lbl.className = 'lvci-theme-lbl'; lbl.textContent = 'Appearance';
+    var seg = document.createElement('div'); seg.className = 'lvci-seg';
+    seg.setAttribute('role', 'group'); seg.setAttribute('aria-label', 'Appearance');
+    var cur = getTheme();
+    [['light', ICON.sun, 'Light'], ['dark', ICON.moon, 'Dark'], ['system', ICON.system, 'System']].forEach(function (o) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'lvci-seg-btn' + (o[0] === cur ? ' on' : '');
+      b.setAttribute('data-theme', o[0]);
+      b.title = o[2]; b.setAttribute('aria-label', o[2] + ' appearance');
+      b.innerHTML = o[1];
+      b.addEventListener('click', function (e) { e.stopPropagation(); setTheme(o[0]); });
+      seg.appendChild(b);
+    });
+    wrap.appendChild(lbl); wrap.appendChild(seg);
+    return wrap;
+  }
+  // Honour the saved choice as early as the script runs (minimises any flash).
+  applyTheme(getTheme());
 
   // ── Primary navigation (the durable site sections). Data-driven so future
   //    capabilities — Builds, Documentation, Unit Tests — are a one-line add. ─
@@ -290,7 +475,7 @@
     }
     var A = {
       'dashboard': [
-        { label: 'Apply to New Repo', icon: '\u2795', kind: 'integrate', primary: true }
+        { label: 'Apply to New Repo', svg: ICON.integrate, kind: 'integrate', primary: true }
       ],
       'worker-manifest': [],
       'vi-browser': [],
@@ -305,14 +490,13 @@
   function buildSecondaryActions() {
     var A = {
       'dashboard': [
-        { label: 'Configure Workers', icon: '\u2699', kind: 'configure' },
-        { label: 'Update now', icon: '\u21b2', href: base + '/whats-new.html' },
-        { label: 'About', icon: '?', href: base + '/faq.html' }
+        { label: 'Populate history', svg: ICON.history, kind: 'runhistory' },
+        { label: 'Configure Workers', svg: ICON.configure, kind: 'configure' },
+        { label: 'About', svg: ICON.about, href: base + '/faq.html' }
       ],
       'worker-manifest': [],
       'vi-browser': [
-        { label: 'Update now', icon: '\u21b2', href: base + '/whats-new.html' },
-        { label: 'About', icon: '?', href: base + '/faq.html' }
+        { label: 'About', svg: ICON.about, href: base + '/faq.html' }
       ],
       'report-viewer': [],
       'configure': [],
@@ -333,6 +517,16 @@
     var t = map[kind]; if (!t) return;
     if (typeof window.lvciOpen === 'function') { window.lvciOpen(t.src, t.title); return; }
     window.location.href = base + '/' + t.src;
+  }
+
+  // ── Populate history: open the dashboard's "Populate dashboard history" dialog
+  //    (queue CI for existing revisions). The dialog itself lives in the dashboard
+  //    generator, which exposes window.lvciRunHistory; this menu item is only
+  //    offered on the dashboard context, where that hook is present. The guard
+  //    keeps it inert anywhere the hook is absent (e.g. an older dashboard). ────
+  function runHistory() {
+    if (typeof window.lvciRunHistory === 'function') window.lvciRunHistory();
+    else window.location.href = base + '/';   // fall back to the dashboard
   }
 
   // ── Regenerate this revision's report: dispatch a fresh run for THIS commit,
@@ -434,11 +628,12 @@
     }
     el.className = mobile ? 'lvci-m' : ('lvci-btn' + (a.primary ? ' primary' : (a.accent ? ' accent' : '')));
     if (a.kind === 'rerun' && !mobile) el.id = 'lvci-rerun';
-    el.innerHTML = (a.icon ? esc(a.icon) + ' ' : '') + esc(a.label);
+    el.innerHTML = iconHtml(a) + esc(a.label);
     if (!a.href) {
       el.addEventListener('click', function () {
         if (a.kind === 'configure' || a.kind === 'integrate') openPage(a.kind);
         else if (a.kind === 'rerun') rerun();
+        else if (a.kind === 'runhistory') runHistory();
       });
     }
     return el;
@@ -535,6 +730,21 @@
     }).catch(function () {});
   }
 
+  // ── Version / update menu entry ───────────────────────────────────────────
+  // A single home for the installed version + the update affordance (it replaces
+  // the old always-on version pill). Used in the More popover and the mobile
+  // menu; renderBadge() fills its label/tag/icon and toggles the amber "behind"
+  // state. Always links to What's New (release notes / the update flow).
+  function makeVerItem() {
+    var a = document.createElement('a');
+    a.className = 'lvci-ddver';
+    a.href = base + '/whats-new.html';
+    a.innerHTML = '<span class="lvci-ic">' + ICON.news + '</span>'
+      + '<span class="lvci-ddver-label">What\u2019s new</span>'
+      + '<span class="lvci-ddver-tag"></span>';
+    return a;
+  }
+
   // ── Build the header DOM ──────────────────────────────────────────────────
   function build() {
     var style = document.createElement('style');
@@ -588,59 +798,80 @@
     // Actions
     var actions = document.createElement('div');
     actions.className = 'lvci-actions';
+    // Live CI activity chip (transient) leads the cluster so the stable
+    // [primary action][More] pairing keeps its position when nothing is running.
+    var runChip = document.createElement('a');
+    runChip.className = 'lvci-run-chip';
+    runChip.id = 'lvci-runchip';
+    if (repo) { runChip.href = 'https://github.com/' + repo + '/actions'; runChip.target = '_blank'; runChip.rel = 'noopener'; }
+    runChip.innerHTML = '<span class="lvci-run-spin" aria-hidden="true"></span><span id="lvci-runchip-txt">running</span>';
+    actions.appendChild(runChip);
     buildActions().forEach(function (a) { actions.appendChild(actionEl(a, false)); });
-    // Secondary actions dropdown (Configure, Update, About)
+    // "More" popover — always present so the Appearance control is available
+    // site-wide; it also hosts any context-specific secondary actions
+    // (Configure Workers / Update / About on the dashboard and VI Browser).
     var secActions = buildSecondaryActions();
-    if (secActions.length) {
+    {
       var dropdown = document.createElement('div');
       dropdown.className = 'lvci-dropdown';
       var moreBtn = document.createElement('button');
       moreBtn.className = 'lvci-more';
+      moreBtn.id = 'lvci-more';
       moreBtn.setAttribute('aria-label', 'More options');
-      moreBtn.innerHTML = '\u22ee';
+      moreBtn.setAttribute('aria-haspopup', 'true');
+      moreBtn.setAttribute('aria-expanded', 'false');
+      moreBtn.innerHTML = ICON.more + '<span class="lvci-mdot" aria-hidden="true"></span>';
       dropdown.appendChild(moreBtn);
       var ddMenu = document.createElement('div');
       ddMenu.className = 'lvci-dropdown-menu';
+      var closeDD = function () { ddMenu.classList.remove('open'); moreBtn.classList.remove('open'); moreBtn.setAttribute('aria-expanded', 'false'); };
       secActions.forEach(function (a) {
         var el;
         if (a.href) {
           el = document.createElement('a');
           el.href = a.href;
           if (a.newTab) { el.target = '_blank'; el.rel = 'noopener'; }
+          el.addEventListener('click', closeDD);
         } else {
           el = document.createElement('button');
           el.type = 'button';
-        }
-        el.innerHTML = (a.icon ? esc(a.icon) + ' ' : '') + esc(a.label);
-        if (!a.href) {
           el.addEventListener('click', function () {
-            if (a.kind === 'configure') { openPage('configure'); ddMenu.classList.remove('open'); }
+            if (a.kind === 'configure' || a.kind === 'integrate') openPage(a.kind);
+            else if (a.kind === 'runhistory') runHistory();
+            closeDD();
           });
         }
+        el.innerHTML = iconHtml(a) + esc(a.label);
         ddMenu.appendChild(el);
       });
+      // Version / update entry — the single home for the installed version and
+      // the update affordance (replaces the standalone badge); links to What's New.
+      if (ddMenu.children.length) { var vsep = document.createElement('div'); vsep.className = 'lvci-sep'; ddMenu.appendChild(vsep); }
+      var ddVer = makeVerItem(); ddVer.addEventListener('click', closeDD); ddMenu.appendChild(ddVer); verEls.push(ddVer);
+      // Appearance (theme) control — divided below.
+      var dsep = document.createElement('div'); dsep.className = 'lvci-sep'; ddMenu.appendChild(dsep);
+      ddMenu.appendChild(themeControl());
       dropdown.appendChild(ddMenu);
       moreBtn.addEventListener('click', function (e) {
         e.stopPropagation();
-        ddMenu.classList.toggle('open');
+        var open = ddMenu.classList.toggle('open');
+        moreBtn.classList.toggle('open', open);
+        moreBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
       });
-      document.addEventListener('click', function () { ddMenu.classList.remove('open'); });
+      // Clicks inside the popover (e.g. the Appearance buttons) keep it open.
+      ddMenu.addEventListener('click', function (e) { e.stopPropagation(); });
+      document.addEventListener('click', closeDD);
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDD(); });
       actions.appendChild(dropdown);
     }
-    // Version badge (always present)
-    var ver = document.createElement('a');
-    ver.className = 'lvci-ver';
-    ver.id = 'lvci-ver';
-    ver.href = base + '/whats-new.html';
-    ver.innerHTML = '<span class="lvci-dot"></span><span class="lvci-run"></span><span id="lvci-ver-txt">LabVIEW CI</span>';
-    actions.appendChild(ver);
     hdr.appendChild(actions);
 
     // Hamburger
     var burger = document.createElement('button');
     burger.className = 'lvci-burger';
+    burger.id = 'lvci-burger';
     burger.setAttribute('aria-label', 'Menu');
-    burger.innerHTML = ICON.burger;
+    burger.innerHTML = ICON.burger + '<span class="lvci-mdot" aria-hidden="true"></span>';
     hdr.appendChild(burger);
 
     // Mobile menu
@@ -663,9 +894,12 @@
       var sep = document.createElement('div'); sep.className = 'lvci-sep'; menu.appendChild(sep);
       secActs.forEach(function (a) { menu.appendChild(actionEl(a, true)); });
     }
-    var sep2 = document.createElement('div'); sep2.className = 'lvci-sep'; menu.appendChild(sep2);
-    var wn = document.createElement('a'); wn.href = base + '/whats-new.html'; wn.id = 'lvci-ver-m';
-    wn.textContent = "What\u2019s new"; menu.appendChild(wn);
+    // Version / update entry (mobile) — same single home as the dropdown.
+    var sepV = document.createElement('div'); sepV.className = 'lvci-sep'; menu.appendChild(sepV);
+    var mVer = makeVerItem(); menu.appendChild(mVer); verEls.push(mVer);
+    // Appearance (theme) control in the mobile menu
+    var sepT = document.createElement('div'); sepT.className = 'lvci-sep'; menu.appendChild(sepT);
+    menu.appendChild(themeControl());
     burger.addEventListener('click', function () { menu.classList.toggle('open'); });
 
     // Populate the revision picker(s) once mounted (async; filters to revisions
@@ -680,6 +914,23 @@
     // Status + token panel (used by re-run)
     var status = document.createElement('div'); status.id = 'lvci-status'; status.className = 'lvci-status';
     var tokp = document.createElement('div'); tokp.id = 'lvci-tok'; tokp.className = 'lvci-tok';
+
+    // Rebuild banner (dashboard only) — hidden until the activity poll detects
+    // the page-rebuild/publish run, then shown with a live link to it.
+    var rebuild = null;
+    if (REBUILD_ON) {
+      rebuild = document.createElement('div');
+      rebuild.id = 'lvci-rebuild';
+      rebuild.className = 'lvci-rebuild';
+      rebuild.setAttribute('role', 'status');
+      rebuild.setAttribute('aria-live', 'polite');
+      rebuild.innerHTML =
+        '<span class="lvci-rb-spin" aria-hidden="true"></span>' +
+        '<span class="lvci-rb-txt"><strong>Updating this dashboard\u2026 </strong>' +
+        '<span class="lvci-rb-sub">A new version is being compiled by </span>' +
+        '<a target="_blank" rel="noopener" href="https://github.com/' + repo + '/actions">the build workflow \u2197</a>' +
+        '<span class="lvci-rb-sub">. This page refreshes automatically when it\u2019s done.</span></span>';
+    }
 
     // ── Mount at the very top of <body> ──────────────────────────────────────
     // Some pages use <body> ITSELF as a full-height flex/grid layout container
@@ -714,52 +965,28 @@
     document.body.insertBefore(status, tokp);
     document.body.insertBefore(menu, status);
     document.body.insertBefore(hdr, menu);
+    if (rebuild) document.body.insertBefore(rebuild, menu);   // directly under the bar
+
+    renderBadge();   // initial paint (idle, or the persisted "Updating" flag)
   }
 
   // ── Badge state ───────────────────────────────────────────────────────────
-  // The single version badge paints one of (priority high→low):
-  //   1. "Updating to vX…"  — a tooling update was just dispatched (localStorage)
-  //   2. "N running"        — CI workflow runs are in flight (live Actions poll)
-  //   3. "vX" + amber dot   — an update is available (consumer behind source)
-  //   4. "vX"               — idle, up to date
-  // Both loaders feed shared state and re-render, so the periodic activity poll
-  // and the version/update check never fight over the element.
+  // Header status surfaces (all fed by the same poll + version check, so they
+  // never fight over one element):
+  //   - run chip   : a transient "N running" pill in the bar, only while CI runs
+  //   - menu entry : the installed version + What's New / Update affordance
+  //                  (amber "Update available" when behind; "Updating to vX..."
+  //                  while a dispatched update is in flight)
+  //   - menu dot   : one amber dot on the More button / hamburger whenever an
+  //                  update is available or in progress
   var verState = { v: '', behind: false, to: '' };
   var runState = { active: 0, names: [] };
-  function renderBadge() {
-    var badge = document.getElementById('lvci-ver'), txt = document.getElementById('lvci-ver-txt');
-    if (!badge || !txt) return;
-    badge.classList.remove('behind', 'working');
-    badge.removeAttribute('target'); badge.removeAttribute('rel');
-    var upd = updGet();
-    // 1) tooling update in flight (explicit user action — highest priority)
-    if (upd && (!verState.v || cmpVer(verState.v, upd.v) < 0)) {
-      txt.textContent = 'Updating to v' + upd.v + '\u2026';
-      badge.classList.add('behind');
-      badge.title = 'An update to v' + upd.v + ' is in progress (merge the update PR to finish).';
-      badge.href = base + '/whats-new.html';
-      return;
-    }
-    // 2) CI activity in flight — replace the version with a live "N running"
-    if (runState.active > 0) {
-      badge.classList.add('working');
-      txt.textContent = (runState.active === 1 ? '1 running' : runState.active + ' running');
-      badge.title = 'CI in progress: ' + (runState.names.join(', ') || 'workflow run')
-        + '\nThe dashboard updates when it finishes.';
-      badge.href = 'https://github.com/' + repo + '/actions';
-      badge.target = '_blank'; badge.rel = 'noopener';
-      return;
-    }
-    // 3) idle: show version, flag if an update is available
-    txt.textContent = verState.v ? 'v' + verState.v : 'LabVIEW CI';
-    badge.href = base + '/whats-new.html';
-    if (verState.behind) {
-      badge.classList.add('behind');
-      badge.title = 'Update available: v' + verState.v + ' \u2192 v' + verState.to;
-    } else {
-      badge.title = verState.v ? 'LabVIEW CI v' + verState.v : 'LabVIEW CI';
-    }
-  }
+  var verEls = [];
+  // Page-rebuild banner: only the dashboard shows it (there "this page is being
+  // regenerated" is literally true). buildWas remembers the prior poll so we can
+  // auto-refresh exactly once when an in-flight rebuild finishes.
+  var REBUILD_ON = (ctx === 'dashboard');
+  var buildWas = false;
 
   // ── Version badge: read same-origin catalog.json for the installed version,
   //    and (on consumer repos) compare to the source repo to flag an update. ─
@@ -788,6 +1015,53 @@
     var pa = String(a).split('.').map(Number), pb = String(b).split('.').map(Number);
     for (var i = 0; i < 3; i++) { var d = (pa[i] || 0) - (pb[i] || 0); if (d) return d > 0 ? 1 : -1; }
     return 0;
+  }
+
+  // ── Page-rebuild banner (dashboard) ──────────────────────────────
+  // While the workflow that regenerates THIS dashboard (dashboard-pages.yml) —
+  // or the GitHub Pages publish that follows it — is in flight, the page on
+  // screen is stale. Surface a banner naming + linking the run, and refresh once
+  // it finishes so the freshly built version appears without a manual reload.
+  function isDashGen(w) { return (w.path || '').toLowerCase().indexOf('dashboard-pages.yml') >= 0; }
+  function isPagesPub(w) { return (w.name || '').toLowerCase() === 'pages build and deployment'; }
+  function pickRebuild(runs) {
+    var gen = null, pub = null;
+    for (var i = 0; i < runs.length; i++) {
+      if (isDashGen(runs[i])) { if (!gen) gen = runs[i]; }
+      else if (isPagesPub(runs[i])) { if (!pub) pub = runs[i]; }
+    }
+    return gen || pub;                          // prefer the generator over the bare publish
+  }
+  function renderRebuild(run) {
+    var card = document.getElementById('lvci-rebuild');
+    if (!card) return;
+    if (!run) { card.classList.remove('show'); return; }
+    var a = card.querySelector('a');
+    if (a) {
+      a.href = run.html_url || ('https://github.com/' + repo + '/actions');
+      a.textContent = (run.name || 'the build workflow') + ' \u2197';
+    }
+    card.classList.add('show');
+  }
+  var RELOAD_KEY = 'lvci_rebuild_reload';
+  function anyModalOpen() {
+    var ids = ['lvci-modal', 'cidash-run-modal', 'cidash-q-modal'];
+    for (var i = 0; i < ids.length; i++) {
+      var m = document.getElementById(ids[i]);
+      if (m && m.style && m.style.display && m.style.display !== 'none') return true;
+    }
+    return false;
+  }
+  function autoRefresh() {
+    // Don't reload out from under an open dialog; throttle so back-to-back
+    // builds can't spin the page (at most one auto-reload per 12 s).
+    if (anyModalOpen()) return;
+    var last = 0;
+    try { last = parseInt(sessionStorage.getItem(RELOAD_KEY) || '0', 10) || 0; } catch (e) {}
+    if (Date.now() - last < 12000) return;
+    try { sessionStorage.setItem(RELOAD_KEY, String(Date.now())); } catch (e) {}
+    // brief settle for the Pages CDN edge to serve the new deploy
+    setTimeout(function () { if (!anyModalOpen()) location.reload(); }, 4000);
   }
 
   // ── CI activity: poll the Actions API for in-flight runs. While any are
@@ -824,6 +1098,12 @@
           if (runState.names.indexOf(n) < 0) runState.names.push(n);
         });
         renderBadge();
+        if (REBUILD_ON) {
+          var rb = pickRebuild(act);
+          renderRebuild(rb);
+          if (buildWas && !rb) autoRefresh();   // a rebuild we were showing just finished
+          buildWas = !!rb;
+        }
       }).catch(function () { /* network blip: keep prior badge state */ });
   }
   function startActivity() {
@@ -846,9 +1126,65 @@
     return null;
   }
   function updClear() { try { localStorage.removeItem(UPD_KEY); } catch (e) {} }
+  // Paint all three surfaces from the current verState/runState (+ the optimistic
+  // update flag). Safe to call repeatedly; each surface no-ops when not on the page.
+  function renderBadge() {
+    var upd = updGet();
+    var updating = !!(upd && (!verState.v || cmpVer(verState.v, upd.v) < 0));
+    var behind = !updating && verState.behind;
+    var hasUpdate = updating || behind;
+
+    // 1) Live CI activity chip — present only while runs are in flight.
+    var chip = document.getElementById('lvci-runchip');
+    var chipTxt = document.getElementById('lvci-runchip-txt');
+    if (chip && chipTxt) {
+      if (runState.active > 0) {
+        chipTxt.textContent = (runState.active === 1 ? '1 running' : runState.active + ' running');
+        chip.title = 'CI in progress: ' + (runState.names.join(', ') || 'workflow run')
+          + '\nThe dashboard updates when it finishes.';
+        chip.classList.add('show');
+      } else {
+        chip.classList.remove('show');
+      }
+    }
+
+    // 2) Update-available dot on the menu trigger(s).
+    ['lvci-more', 'lvci-burger'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.classList.toggle('has-update', hasUpdate);
+    });
+
+    // 3) Version / update entry inside the menu(s).
+    verEls.forEach(function (a) {
+      var ic = a.querySelector('.lvci-ic'),
+          lbl = a.querySelector('.lvci-ddver-label'),
+          tag = a.querySelector('.lvci-ddver-tag');
+      a.classList.toggle('behind', hasUpdate);
+      if (updating) {
+        if (ic) ic.innerHTML = ICON.update;
+        if (lbl) lbl.textContent = 'Updating to v' + upd.v + '\u2026';
+        if (tag) tag.textContent = verState.v ? ('v' + verState.v + ' \u2192 v' + upd.v) : ('v' + upd.v);
+        a.title = 'An update to v' + upd.v + ' is in progress (merge the update PR to finish).';
+      } else if (behind) {
+        if (ic) ic.innerHTML = ICON.update;
+        if (lbl) lbl.textContent = 'Update available';
+        if (tag) tag.textContent = 'v' + verState.v + ' \u2192 v' + verState.to;
+        a.title = 'Update available: v' + verState.v + ' \u2192 v' + verState.to;
+      } else {
+        if (ic) ic.innerHTML = ICON.news;
+        if (lbl) lbl.textContent = 'What\u2019s new';
+        if (tag) tag.textContent = verState.v ? ('v' + verState.v) : '';
+        a.title = verState.v ? ('LabVIEW CI v' + verState.v) : 'LabVIEW CI';
+      }
+    });
+  }
+
+  // The What's New dialog dispatches the update then calls window.lvciMarkUpdating
+  // (directly when standalone, or via window.parent from the dashboard modal), so
+  // the menu version entry flips to "Updating to vX..." immediately and persists.
   window.lvciMarkUpdating = function (v) {
     if (!v) return;
-    try { localStorage.setItem(UPD_KEY, JSON.stringify({ v: v, ts: Date.now(), repo: C.repo })); } catch (e) {}
+    try { localStorage.setItem(UPD_KEY, JSON.stringify({ v: v, ts: Date.now(), repo: repo })); } catch (e) {}
     renderBadge();
   };
 
