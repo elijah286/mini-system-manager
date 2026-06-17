@@ -89,10 +89,18 @@
       'background:rgba(22,27,34,.86);-webkit-backdrop-filter:saturate(160%) blur(10px);backdrop-filter:saturate(160%) blur(10px);',
       'border-bottom:1px solid #30363d;color:#e6edf3}',
     '@media(prefers-color-scheme:light){.lvci-hdr{background:rgba(255,255,255,.86);border-bottom-color:#d0d7de;color:#1f2328}}',
-    // Brand
-    '.lvci-brand{display:inline-flex;align-items:center;gap:9px;font-weight:700;font-size:15px;color:inherit;text-decoration:none;white-space:nowrap;flex:0 0 auto}',
+    // Brand — shows the repository this dashboard belongs to (always visible),
+    // with a small product kicker above it. The repo name truncates with an
+    // ellipsis so the brand always fits, down to a narrow phone. Falls back to
+    // the product name when the repo can't be derived (e.g. a preview build).
+    '.lvci-brand{display:inline-flex;align-items:center;gap:10px;color:inherit;text-decoration:none;white-space:nowrap;flex:0 1 auto;min-width:0}',
     '.lvci-brand:hover{text-decoration:none}',
-    '.lvci-brand svg{display:block;width:22px;height:22px;flex:0 0 auto}',
+    '.lvci-brand:hover .lvci-name{text-decoration:underline}',
+    '.lvci-brand svg{display:block;width:24px;height:24px;flex:0 0 auto}',
+    '.lvci-brand .lvci-repo{display:flex;flex-direction:column;justify-content:center;min-width:0;overflow:hidden}',
+    '.lvci-brand .lvci-kicker{font-weight:600;font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:#8b949e;line-height:1.3}',
+    '.lvci-brand .lvci-name{font-weight:700;font-size:15px;line-height:1.2;color:inherit;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}',
+    '@media(prefers-color-scheme:light){.lvci-brand .lvci-kicker{color:#57606a}}',
     '.lvci-brand .lvci-sub{font-weight:500;font-size:11px;color:#8b949e;border:1px solid #30363d;border-radius:999px;padding:1px 7px;margin-left:2px}',
     '@media(prefers-color-scheme:light){.lvci-brand .lvci-sub{color:#57606a;border-color:#d0d7de}}',
     // Primary nav
@@ -125,6 +133,13 @@
     '.lvci-ver .lvci-dot{width:7px;height:7px;border-radius:50%;background:#d29922;box-shadow:0 0 0 0 rgba(210,153,34,.5);animation:lvci-pulse 1.8s infinite;display:none}',
     '.lvci-ver.behind .lvci-dot{display:inline-block}',
     '@keyframes lvci-pulse{0%{box-shadow:0 0 0 0 rgba(210,153,34,.5)}70%{box-shadow:0 0 0 6px rgba(210,153,34,0)}100%{box-shadow:0 0 0 0 rgba(210,153,34,0)}}',
+    // Version badge → "N running" while CI is in flight (blue spinner replaces the version)
+    '.lvci-ver .lvci-run{width:9px;height:9px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;display:none;animation:lvci-spin .7s linear infinite}',
+    '.lvci-ver.working .lvci-run{display:inline-block}',
+    '.lvci-ver.working .lvci-dot{display:none}',
+    '.lvci-ver.working{color:#1f6feb;border-color:#1f6feb}',
+    '.lvci-ver.working:hover{color:#388bfd;border-color:#388bfd}',
+    '@media(prefers-color-scheme:light){.lvci-ver.working{color:#0969da;border-color:#0969da}.lvci-ver.working:hover{color:#0969da;border-color:#0969da}}',
     // Revision picker (per-revision reports: switch which revision you're viewing)
     '.lvci-rev{display:inline-flex;align-items:center;gap:7px;flex:0 1 auto;min-width:0}',
     '.lvci-rev .lvci-revlbl{font-size:11px;font-weight:600;color:#8b949e;white-space:nowrap;text-transform:uppercase;letter-spacing:.04em}',
@@ -136,6 +151,18 @@
     '.lvci-burger{display:none;align-items:center;justify-content:center;width:38px;height:34px;border:1px solid #30363d;border-radius:7px;background:transparent;color:inherit;cursor:pointer;flex:0 0 auto}',
     '@media(prefers-color-scheme:light){.lvci-burger{border-color:#d0d7de}}',
     '.lvci-burger svg{width:18px;height:18px;display:block}',
+    // Secondary actions dropdown (Configure, Update, About)
+    '.lvci-dropdown{position:relative;display:inline-flex;align-items:center}',
+    '.lvci-more{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid #30363d;background:transparent;color:inherit;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600}',
+    '.lvci-more:hover{background:rgba(177,186,196,.12)}',
+    '@media(prefers-color-scheme:light){.lvci-more{border-color:#d0d7de}.lvci-more:hover{background:rgba(80,90,100,.08)}}',
+    '.lvci-dropdown-menu{display:none;position:absolute;top:100%;right:0;z-index:200;background:rgba(22,27,34,.98);border:1px solid #30363d;border-radius:8px;margin-top:6px;min-width:180px;padding:6px 0}',
+    '.lvci-dropdown-menu.open{display:block}',
+    '.lvci-dropdown-menu a,.lvci-dropdown-menu button{display:flex;width:100%;align-items:center;gap:8px;padding:8px 12px;background:transparent;border:0;color:#e6edf3;text-decoration:none;font-size:13px;cursor:pointer;text-align:left}',
+    '.lvci-dropdown-menu a:hover,.lvci-dropdown-menu button:hover{background:rgba(177,186,196,.12)}',
+    '.lvci-dropdown-menu .lvci-sep{height:1px;background:#30363d;margin:6px 0}',
+    '@media(prefers-color-scheme:light){.lvci-dropdown-menu{background:#fff;border-color:#d0d7de}.lvci-dropdown-menu a,.lvci-dropdown-menu button{color:#1f2328}.lvci-dropdown-menu a:hover,.lvci-dropdown-menu button:hover{background:rgba(80,90,100,.08)}}',
+    '@media(max-width:820px){.lvci-dropdown,.lvci-more{display:none}}',
     // Status line (re-run feedback) sits just under the bar, full width
     '.lvci-status{display:none;align-items:center;gap:8px;font-size:12.5px;padding:7px 16px;border-bottom:1px solid #30363d;',
       'background:rgba(22,27,34,.96);color:#8b949e}',
@@ -209,7 +236,8 @@
     'report-viewer': 'dashboard',
     'configure': 'dashboard',
     'integrate': 'dashboard',
-    'whats-new': 'dashboard'
+    'whats-new': 'dashboard',
+    'faq': 'dashboard'
   };
 
   // ── Per-revision DOCUMENT types ───────────────────────────────────────────
@@ -224,13 +252,13 @@
   var DOCTYPES = {
     'vi-analyzer-report': {
       prefix: 'vi-analyzer', cap: 'vi-analyzer', label: 'VI Analyzer',
-      regenLabel: 'Re-run analysis', rawLabel: 'Native report',
+      regenLabel: 'Re-run analysis', rawLabel: 'Native report', rawName: 'raw.html',
       workflow: { windows: 'run-vi-analyzer-windows-container.yml',
                   linux:   'run-vi-analyzer-linux-container.yml' }
     },
     'masscompile-report': {
       prefix: 'masscompile', cap: 'masscompile', label: 'Mass Compile',
-      regenLabel: 'Regenerate report', rawLabel: 'Raw log',
+      regenLabel: 'Regenerate report', rawLabel: 'Raw log', rawName: 'masscompile.log',
       workflow: { windows: 'masscompile-windows-container.yml',
                   linux:   'masscompile-linux-container.yml' }
     }
@@ -247,15 +275,21 @@
     // driven by the DOCTYPES entry: Regenerate (dispatch this revision's run),
     // the native artifact (raw report / raw log), and the commit on GitHub.
     if (DOC) {
+      // The native artifact (raw report / log) sits beside the report's own
+      // index.html. When this header is the framed viewer chrome, derive that
+      // path from the embedded source so it resolves regardless of platform or
+      // depth; otherwise fall back to the report's own rawUrl (set by its
+      // generator on the bare report page).
+      var rawHref = cfg.rawUrl;
+      if (cfg.embedded && cfg.framedSrc && DOC.rawName) rawHref = cfg.framedSrc.replace(/[^\/]*$/, DOC.rawName);
       return [
         { label: DOC.regenLabel, icon: '\u21bb', kind: 'rerun', accent: true },
-        cfg.rawUrl ? { label: DOC.rawLabel, icon: '\u2197', href: cfg.rawUrl, newTab: true } : null,
+        rawHref ? { label: DOC.rawLabel, icon: '\u2197', href: rawHref, newTab: true } : null,
         commitUrl ? { label: 'This commit', icon: '\u2197', href: commitUrl, newTab: true } : null
       ].filter(Boolean);
     }
     var A = {
       'dashboard': [
-        { label: 'Configure Workers', icon: '\u2699', kind: 'configure', accent: true },
         { label: 'Apply to New Repo', icon: '\u2795', kind: 'integrate', primary: true }
       ],
       'worker-manifest': [],
@@ -263,7 +297,28 @@
       'report-viewer': [],
       'configure': [],
       'integrate': [],
-      'whats-new': []
+      'whats-new': [],
+      'faq': []
+    };
+    return (A[ctx] || []).filter(Boolean);
+  }
+  function buildSecondaryActions() {
+    var A = {
+      'dashboard': [
+        { label: 'Configure Workers', icon: '\u2699', kind: 'configure' },
+        { label: 'Update now', icon: '\u21b2', href: base + '/whats-new.html' },
+        { label: 'About', icon: '?', href: base + '/faq.html' }
+      ],
+      'worker-manifest': [],
+      'vi-browser': [
+        { label: 'Update now', icon: '\u21b2', href: base + '/whats-new.html' },
+        { label: 'About', icon: '?', href: base + '/faq.html' }
+      ],
+      'report-viewer': [],
+      'configure': [],
+      'integrate': [],
+      'whats-new': [],
+      'faq': []
     };
     return (A[ctx] || []).filter(Boolean);
   }
@@ -397,6 +452,24 @@
   // filtered to revisions that actually have a report of this type (probed via
   // `<prefix>/<sha>/summary.json`), so it never lands on a 404. The revision
   // being viewed is always present + selected, even while the probe runs.
+  // Where "view another revision" lands. Normally the bare per-revision report;
+  // but when this header is the framed VIEWER chrome (report-viewer.html embeds
+  // the report in an iframe), re-frame the viewer onto the new revision so the
+  // chrome — and its Regenerate button — stays put instead of dropping the user
+  // onto a bare (and, for older revisions, possibly header-less) report page.
+  function docDest(sha) {
+    if (!DOC || !sha) return base + '/';
+    if (cfg.embedded && cfg.framedSrc) {
+      var src = cfg.sha ? cfg.framedSrc.split(cfg.sha).join(sha) : cfg.framedSrc;
+      var title = DOC.label + ' \u00b7 ' + sha.slice(0, 7);
+      return base + '/report/index.html?type=' + encodeURIComponent(ctx)
+           + '&sha=' + encodeURIComponent(sha)
+           + (cfg.platform ? '&platform=' + encodeURIComponent(cfg.platform) : '')
+           + '&src=' + encodeURIComponent(src)
+           + '&title=' + encodeURIComponent(title);
+    }
+    return base + '/' + DOC.prefix + '/' + sha + '/index.html';
+  }
   function makeRevPicker() {
     var wrap = document.createElement('label'); wrap.className = 'lvci-rev';
     var lbl = document.createElement('span'); lbl.className = 'lvci-revlbl'; lbl.textContent = 'Revision';
@@ -409,7 +482,7 @@
     sel.value = cfg.sha || '';
     sel.addEventListener('change', function () {
       var v = sel.value;
-      if (v && v !== cfg.sha) window.location.href = base + '/' + DOC.prefix + '/' + v + '/index.html';
+      if (v && v !== cfg.sha) window.location.href = docDest(v);
     });
     wrap.appendChild(lbl); wrap.appendChild(sel);
     return { wrap: wrap, sel: sel };
@@ -472,11 +545,25 @@
     var hdr = document.createElement('header');
     hdr.className = 'lvci-hdr';
 
-    // Brand
+    // Brand — the repository this site is for, always visible, with a small
+    // "LabVIEW CI" kicker so the product identity is kept. Falls back to the
+    // product name when no repo can be derived. The whole mark links home.
     var brand = document.createElement('a');
     brand.className = 'lvci-brand';
     brand.href = base + '/';
-    brand.innerHTML = BRAND_SVG + '<span>LabVIEW CI</span>';
+    if (repo) {
+      var rname = repo.split('/').pop();
+      brand.title = repo;                                      // full owner/name on hover
+      brand.setAttribute('aria-label', 'LabVIEW CI \u2014 ' + repo);
+      brand.innerHTML = BRAND_SVG +
+        '<span class="lvci-repo">' +
+          '<span class="lvci-kicker">LabVIEW CI</span>' +
+          '<span class="lvci-name">' + esc(rname) + '</span>' +
+        '</span>';
+    } else {
+      brand.setAttribute('aria-label', 'LabVIEW CI');
+      brand.innerHTML = BRAND_SVG + '<span class="lvci-repo"><span class="lvci-name">LabVIEW CI</span></span>';
+    }
     hdr.appendChild(brand);
 
     // Primary nav
@@ -502,12 +589,50 @@
     var actions = document.createElement('div');
     actions.className = 'lvci-actions';
     buildActions().forEach(function (a) { actions.appendChild(actionEl(a, false)); });
+    // Secondary actions dropdown (Configure, Update, About)
+    var secActions = buildSecondaryActions();
+    if (secActions.length) {
+      var dropdown = document.createElement('div');
+      dropdown.className = 'lvci-dropdown';
+      var moreBtn = document.createElement('button');
+      moreBtn.className = 'lvci-more';
+      moreBtn.setAttribute('aria-label', 'More options');
+      moreBtn.innerHTML = '\u22ee';
+      dropdown.appendChild(moreBtn);
+      var ddMenu = document.createElement('div');
+      ddMenu.className = 'lvci-dropdown-menu';
+      secActions.forEach(function (a) {
+        var el;
+        if (a.href) {
+          el = document.createElement('a');
+          el.href = a.href;
+          if (a.newTab) { el.target = '_blank'; el.rel = 'noopener'; }
+        } else {
+          el = document.createElement('button');
+          el.type = 'button';
+        }
+        el.innerHTML = (a.icon ? esc(a.icon) + ' ' : '') + esc(a.label);
+        if (!a.href) {
+          el.addEventListener('click', function () {
+            if (a.kind === 'configure') { openPage('configure'); ddMenu.classList.remove('open'); }
+          });
+        }
+        ddMenu.appendChild(el);
+      });
+      dropdown.appendChild(ddMenu);
+      moreBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        ddMenu.classList.toggle('open');
+      });
+      document.addEventListener('click', function () { ddMenu.classList.remove('open'); });
+      actions.appendChild(dropdown);
+    }
     // Version badge (always present)
     var ver = document.createElement('a');
     ver.className = 'lvci-ver';
     ver.id = 'lvci-ver';
     ver.href = base + '/whats-new.html';
-    ver.innerHTML = '<span class="lvci-dot"></span><span id="lvci-ver-txt">LabVIEW CI</span>';
+    ver.innerHTML = '<span class="lvci-dot"></span><span class="lvci-run"></span><span id="lvci-ver-txt">LabVIEW CI</span>';
     actions.appendChild(ver);
     hdr.appendChild(actions);
 
@@ -532,6 +657,11 @@
     if (acts.length) {
       var sep = document.createElement('div'); sep.className = 'lvci-sep'; menu.appendChild(sep);
       acts.forEach(function (a) { menu.appendChild(actionEl(a, true)); });
+    }
+    var secActs = buildSecondaryActions();
+    if (secActs.length) {
+      var sep = document.createElement('div'); sep.className = 'lvci-sep'; menu.appendChild(sep);
+      secActs.forEach(function (a) { menu.appendChild(actionEl(a, true)); });
     }
     var sep2 = document.createElement('div'); sep2.className = 'lvci-sep'; menu.appendChild(sep2);
     var wn = document.createElement('a'); wn.href = base + '/whats-new.html'; wn.id = 'lvci-ver-m';
@@ -586,21 +716,62 @@
     document.body.insertBefore(hdr, menu);
   }
 
+  // ── Badge state ───────────────────────────────────────────────────────────
+  // The single version badge paints one of (priority high→low):
+  //   1. "Updating to vX…"  — a tooling update was just dispatched (localStorage)
+  //   2. "N running"        — CI workflow runs are in flight (live Actions poll)
+  //   3. "vX" + amber dot   — an update is available (consumer behind source)
+  //   4. "vX"               — idle, up to date
+  // Both loaders feed shared state and re-render, so the periodic activity poll
+  // and the version/update check never fight over the element.
+  var verState = { v: '', behind: false, to: '' };
+  var runState = { active: 0, names: [] };
+  function renderBadge() {
+    var badge = document.getElementById('lvci-ver'), txt = document.getElementById('lvci-ver-txt');
+    if (!badge || !txt) return;
+    badge.classList.remove('behind', 'working');
+    badge.removeAttribute('target'); badge.removeAttribute('rel');
+    var upd = updGet();
+    // 1) tooling update in flight (explicit user action — highest priority)
+    if (upd && (!verState.v || cmpVer(verState.v, upd.v) < 0)) {
+      txt.textContent = 'Updating to v' + upd.v + '\u2026';
+      badge.classList.add('behind');
+      badge.title = 'An update to v' + upd.v + ' is in progress (merge the update PR to finish).';
+      badge.href = base + '/whats-new.html';
+      return;
+    }
+    // 2) CI activity in flight — replace the version with a live "N running"
+    if (runState.active > 0) {
+      badge.classList.add('working');
+      txt.textContent = (runState.active === 1 ? '1 running' : runState.active + ' running');
+      badge.title = 'CI in progress: ' + (runState.names.join(', ') || 'workflow run')
+        + '\nThe dashboard updates when it finishes.';
+      badge.href = 'https://github.com/' + repo + '/actions';
+      badge.target = '_blank'; badge.rel = 'noopener';
+      return;
+    }
+    // 3) idle: show version, flag if an update is available
+    txt.textContent = verState.v ? 'v' + verState.v : 'LabVIEW CI';
+    badge.href = base + '/whats-new.html';
+    if (verState.behind) {
+      badge.classList.add('behind');
+      badge.title = 'Update available: v' + verState.v + ' \u2192 v' + verState.to;
+    } else {
+      badge.title = verState.v ? 'LabVIEW CI v' + verState.v : 'LabVIEW CI';
+    }
+  }
+
   // ── Version badge: read same-origin catalog.json for the installed version,
   //    and (on consumer repos) compare to the source repo to flag an update. ─
   function loadVersion() {
-    // Optimistic "Updating…" paint survives a page refresh: when an update was
-    // just dispatched (whats-new.html calls window.lvciMarkUpdating), show it
-    // until the deployed catalog catches up. Mirrors the dashboard's old badge.
-    var upd = updGet();
     fetch(base + '/catalog.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; })
       .then(function (cat) {
         if (!cat) return;
         var v = cat.version || '';
-        var txt = document.getElementById('lvci-ver-txt');
-        if (txt && v) txt.textContent = 'v' + v;
-        if (upd && cmpVer(v, upd.v) >= 0) { updClear(); upd = null; }       // deployed caught up
-        if (upd) { paintUpdating(upd.v); return; }                         // still updating
+        verState.v = v;
+        var upd = updGet();
+        if (upd && cmpVer(v, upd.v) >= 0) updClear();                        // deployed caught up
+        renderBadge();
         var src = (cat.source && cat.source.repo) || '';
         var isConsumer = src && repo && src.toLowerCase() !== repo.toLowerCase();
         if (!isConsumer) return;
@@ -609,10 +780,7 @@
           .then(function (r) { return r.ok ? r.json() : null; })
           .then(function (s) {
             if (!s || !s.version) return;
-            if (cmpVer(s.version, v) > 0) {
-              var badge = document.getElementById('lvci-ver');
-              if (badge) { badge.classList.add('behind'); badge.title = 'Update available: v' + v + ' \u2192 v' + s.version; }
-            }
+            if (cmpVer(s.version, v) > 0) { verState.behind = true; verState.to = s.version; renderBadge(); }
           }).catch(function () {});
       }).catch(function () {});
   }
@@ -621,6 +789,54 @@
     for (var i = 0; i < 3; i++) { var d = (pa[i] || 0) - (pb[i] || 0); if (d) return d > 0 ? 1 : -1; }
     return 0;
   }
+
+  // ── CI activity: poll the Actions API for in-flight runs. While any are
+  //    queued/running, the badge above shows "N running" (with a spinner) in
+  //    place of the version — so the dashboard visibly reflects work in
+  //    progress (e.g. a deploy you're waiting on) instead of looking stale.
+  //    Public repos work unauthenticated; private repos reuse the dashboard's
+  //    dispatch token. Conditional (ETag) requests keep it within the
+  //    unauthenticated rate budget — a 304 doesn't count and we poll only while
+  //    the tab is visible. ──────────────────────────────────────────────────
+  var ACT_MS = 60000, actEtag = '', actTimer = null;
+  function ghHeaders() {
+    var h = { 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' };
+    var t = tok(); if (t) h['Authorization'] = 'Bearer ' + t;
+    if (actEtag) h['If-None-Match'] = actEtag;
+    return h;
+  }
+  var ACTIVE = { in_progress: 1, queued: 1, waiting: 1, pending: 1, requested: 1 };
+  function loadActivity() {
+    if (!repo) return;
+    fetch('https://api.github.com/repos/' + repo + '/actions/runs?per_page=20', { cache: 'no-cache', headers: ghHeaders() })
+      .then(function (r) {
+        if (r.status === 304) return null;                                  // unchanged (free — no rate cost)
+        var et = r.headers.get('ETag'); if (et) actEtag = et;
+        return r.ok ? r.json() : { workflow_runs: [] };                     // 403/404/etc → treat as idle
+      })
+      .then(function (d) {
+        if (!d) return;                                                     // 304: keep current badge
+        var act = (d.workflow_runs || []).filter(function (w) { return ACTIVE[w.status]; });
+        runState.active = act.length;
+        runState.names = [];
+        act.slice(0, 6).forEach(function (w) {
+          var n = w.name || w.display_title || 'workflow run';
+          if (runState.names.indexOf(n) < 0) runState.names.push(n);
+        });
+        renderBadge();
+      }).catch(function () { /* network blip: keep prior badge state */ });
+  }
+  function startActivity() {
+    if (!repo) return;
+    loadActivity();
+    function arm() { if (!actTimer) actTimer = setInterval(function () { if (!document.hidden) loadActivity(); }, ACT_MS); }
+    function disarm() { if (actTimer) { clearInterval(actTimer); actTimer = null; } }
+    arm();
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) disarm(); else { loadActivity(); arm(); }
+    });
+  }
+
   // In-flight update paint (preserves the dashboard's "Updating…" UX). The
   // What's New dialog dispatches the update then calls window.lvciMarkUpdating
   // (directly when standalone, or via window.parent from the dashboard modal).
@@ -630,18 +846,13 @@
     return null;
   }
   function updClear() { try { localStorage.removeItem(UPD_KEY); } catch (e) {} }
-  function paintUpdating(v) {
-    var badge = document.getElementById('lvci-ver'), txt = document.getElementById('lvci-ver-txt');
-    if (txt) txt.textContent = 'Updating to v' + v + '\u2026';
-    if (badge) { badge.classList.add('behind'); badge.title = 'An update to v' + v + ' is in progress (merge the update PR to finish).'; }
-  }
   window.lvciMarkUpdating = function (v) {
     if (!v) return;
     try { localStorage.setItem(UPD_KEY, JSON.stringify({ v: v, ts: Date.now() })); } catch (e) {}
-    paintUpdating(v);
+    renderBadge();
   };
 
-  function init() { build(); loadVersion(); }
+  function init() { build(); loadVersion(); startActivity(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();
