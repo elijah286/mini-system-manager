@@ -33,8 +33,19 @@
     a{color:var(--link);text-decoration:none}a:hover{text-decoration:underline}
     .nav{margin-bottom:16px;font-size:.9em}
     .nav a{margin-right:16px;color:var(--link)}
-    .controls{margin:0 0 12px;display:flex;align-items:center;gap:8px;color:var(--fg-muted);font-size:.85em}
+    .controls{margin:0 0 12px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;color:var(--fg-muted);font-size:.85em}
     .controls input{margin:0;accent-color:var(--link)}
+    .cidash-check{display:inline-flex;align-items:center;gap:6px}
+    /* Column-visibility menu (standard "Columns" dropdown of checkboxes). */
+    .cidash-colmenu{position:relative;display:inline-block}
+    .cidash-colbtn{background:var(--surface);border:1px solid var(--border);color:var(--fg);padding:5px 11px;border-radius:6px;cursor:pointer;font-size:1em;line-height:1.2;display:inline-flex;align-items:center;gap:6px}
+    .cidash-colbtn:hover{background:var(--hover)}
+    .cidash-colpanel{position:absolute;top:calc(100% + 6px);left:0;z-index:120;min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 28px rgba(0,0,0,.35);padding:6px}
+    .cidash-colpanel[hidden]{display:none}
+    .cidash-colpanel .hd{font-size:.72em;color:var(--fg-muted);padding:4px 8px 6px;text-transform:uppercase;letter-spacing:.05em}
+    .cidash-colopt{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:5px;cursor:pointer;color:var(--fg);white-space:nowrap;font-size:.95em}
+    .cidash-colopt:hover{background:var(--hover)}
+    .cidash-colopt input{margin:0;accent-color:var(--link)}
     .run-badge{display:inline-flex;align-items:center;background:#1f6feb;color:#fff;padding:2px 8px;border-radius:4px;font-size:.75em;font-weight:600}
     .run-badge a:hover{text-decoration:underline}
     /* Optimistic "just queued from this browser" cue: a dashed ring distinguishes
@@ -42,7 +53,7 @@
     .run-badge.cidash-queued{outline:1px dashed rgba(255,255,255,.6);outline-offset:1px}
     .run-spin{width:9px;height:9px;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;border-radius:50%;display:inline-block;animation:cidash-spin .7s linear infinite}
     @keyframes cidash-spin{to{transform:rotate(360deg)}}
-    .cidash-run{display:inline-block;color:var(--fg-muted);font-size:.95em;line-height:1;text-decoration:none;opacity:.5;transition:opacity .12s,color .12s}.cidash-run:hover{opacity:1;color:var(--link);text-decoration:none}tr:hover .cidash-run{opacity:.85}.cidash-btn{border:1px solid var(--border);border-radius:6px;padding:8px 14px;font-size:.85em;font-weight:600;cursor:pointer;font-family:inherit}.cidash-go{background:#238636;color:#fff;border-color:transparent}.cidash-go:hover{background:#2ea043}.cidash-go:disabled{opacity:.6;cursor:default}.cidash-ghost{background:var(--bg);color:var(--fg)}.cidash-ghost:hover{border-color:var(--link)}.cidash-danger{background:#da3633;color:#fff;border-color:transparent}.cidash-danger:hover{background:#f85149}.cidash-danger:disabled{opacity:.6;cursor:default}.cidash-queued{cursor:pointer}.cidash-queued:hover{filter:brightness(1.13)}.cidash-queued:focus-visible{outline:2px solid var(--link);outline-offset:1px}.cidash-qpos{margin-left:5px;font-weight:700;opacity:.92;font-variant-numeric:tabular-nums}.cidash-qpos:empty{display:none}
+    .cidash-run{display:inline-block;color:var(--fg-muted);font-size:.95em;line-height:1;text-decoration:none;opacity:.5;transition:opacity .12s,color .12s}.cidash-run:hover{opacity:1;color:var(--link);text-decoration:none}tr:hover .cidash-run{opacity:.85}.cidash-btn{border:1px solid var(--border);border-radius:6px;padding:8px 14px;font-size:.85em;font-weight:600;cursor:pointer;font-family:inherit}.cidash-go{background:#238636;color:#fff;border-color:transparent}.cidash-go:hover{background:#2ea043}.cidash-go:disabled{opacity:.6;cursor:default}.cidash-ghost{background:var(--bg);color:var(--fg)}.cidash-ghost:hover{border-color:var(--link)}.cidash-danger{background:#da3633;color:#fff;border-color:transparent}.cidash-danger:hover{background:#f85149}.cidash-danger:disabled{opacity:.6;cursor:default}.cidash-queued{cursor:pointer}.cidash-queued:hover{filter:brightness(1.13)}.cidash-queued:focus-visible{outline:2px solid var(--link);outline-offset:1px}.cidash-qpos{margin-left:5px;font-weight:700;opacity:.92;font-variant-numeric:tabular-nums}.cidash-qpos:empty{display:none}.lvci-backfill{border:1px solid var(--border);border-left:3px solid #1f6feb;background:var(--surface);border-radius:10px;padding:14px 16px;margin:0 0 18px}.lvci-bf-main{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.lvci-bf-icon{font-size:1.5em;line-height:1}.lvci-bf-text{flex:1 1 320px;min-width:240px;font-size:.9em;line-height:1.5}.lvci-bf-text strong{display:block;font-size:1.03em;margin-bottom:2px}.lvci-bf-text span{color:var(--fg-muted)}.lvci-bf-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.lvci-bf-tok{margin-top:12px;border-top:1px solid var(--border);padding-top:12px;font-size:.84em;color:var(--fg-muted)}.lvci-bf-status{font-size:.82em;margin-top:10px}.lvci-bf-status:empty{display:none}.lvci-bf-note{display:block;margin-top:8px}.lvci-bf-info{margin-top:8px;font-size:.92em}.lvci-bf-info>summary{display:inline-block;cursor:pointer;color:var(--link);list-style:none;font-weight:600}.lvci-bf-info>summary::-webkit-details-marker{display:none}.lvci-bf-info>summary:hover{text-decoration:underline}.lvci-bf-info[open]>summary{margin-bottom:8px}.lvci-bf-infobody{color:var(--fg-muted);line-height:1.55;border-left:2px solid #1f6feb;padding-left:12px}.lvci-bf-cfg{display:inline-block;margin-top:8px;color:var(--link);font-weight:600}.cidash-hist-sec{margin:0 0 16px}.cidash-hist-lbl{display:block;font-size:.72em;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--fg-muted);margin:0 0 7px}.cidash-hist-scope{display:flex;flex-direction:column;gap:9px}.cidash-hist-radio{display:flex;align-items:center;gap:9px;font-size:.9em;cursor:pointer;user-select:none}.cidash-hist-radio input{accent-color:var(--link);width:15px;height:15px;margin:0;flex:0 0 auto}.cidash-hist-radio .sub{color:var(--fg-muted);font-size:.88em}.cidash-hist-rangerow{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;padding:2px 0 4px 25px}.cidash-hist-rangerow label{display:flex;align-items:center;gap:7px;font-size:.84em;color:var(--fg-muted)}#cidash-hist-from,#cidash-hist-to{padding:7px 9px;background:var(--bg);color:var(--fg);border:1px solid var(--border);border-radius:6px;font-size:.85em;font-family:inherit;max-width:248px}.cidash-hist-spectools{display:flex;gap:14px;margin:2px 0 6px 25px;font-size:.8em}.cidash-hist-spectools a{color:var(--link);cursor:pointer}.cidash-hist-spectools a:hover{text-decoration:underline}.cidash-hist-speclist{display:flex;flex-direction:column;gap:1px;max-height:210px;overflow:auto;margin-left:25px;padding:5px;border:1px solid var(--border);border-radius:7px;background:var(--bg)}.cidash-hist-specitem{display:flex;align-items:center;gap:9px;padding:5px 7px;border-radius:5px;font-size:.84em;cursor:pointer;min-width:0}.cidash-hist-specitem:hover{background:var(--surface)}.cidash-hist-specitem input{accent-color:var(--link);width:14px;height:14px;margin:0;flex:0 0 auto}.cidash-hist-specitem .sh{font-family:ui-monospace,Menlo,monospace;color:var(--fg-muted);flex:0 0 auto}.cidash-hist-specitem .ms{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--fg)}.cidash-hist-acts{display:flex;flex-direction:column;gap:7px}.cidash-hist-act{display:flex;align-items:center;gap:9px;padding:8px 11px;border:1px solid var(--border);border-radius:7px;background:var(--bg);cursor:pointer;font-size:.88em;user-select:none}.cidash-hist-act:hover{border-color:var(--link)}.cidash-hist-act input{accent-color:var(--link);width:15px;height:15px;margin:0;flex:0 0 auto}.cidash-hist-act .cidash-hist-actsub{color:var(--fg-muted);font-size:.85em;margin-left:auto;text-align:right}.cidash-hist-act.disabled{opacity:.45;cursor:default}.cidash-hist-act.disabled:hover{border-color:var(--border)}.cidash-hist-toggle{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border:1px solid var(--border);border-left:3px solid #1f6feb;border-radius:8px;background:var(--surface);cursor:pointer;font-size:.88em;user-select:none}.cidash-hist-toggle input{accent-color:var(--link);width:15px;height:15px;margin:2px 0 0;flex:0 0 auto}.cidash-hist-toggle .cidash-hist-tmain{font-weight:600}.cidash-hist-toggle .cidash-hist-tsub{color:var(--fg-muted);font-size:.9em;margin-top:2px;font-weight:400}.cidash-hist-summary{font-size:.84em;color:var(--fg-muted);margin:0 0 12px}.cidash-hist-summary b{color:var(--fg)}
   </style>
 </head>
 <body>
@@ -90,6 +101,15 @@
       <div id="cidash-q-body" style="padding:16px"></div>
     </div>
   </div>
+  <div id="cidash-hist-modal" onclick="if(event.target===this)cidashHistClose()" style="display:none;position:fixed;inset:0;z-index:310;background:rgba(0,0,0,.55)">
+    <div role="dialog" aria-modal="true" aria-labelledby="cidash-hist-title" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(600px,calc(100% - 32px));max-height:calc(100% - 48px);overflow:auto;background:var(--bg);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 48px rgba(0,0,0,.5)">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--surface)">
+        <strong id="cidash-hist-title" style="font-size:.95em">Populate dashboard history</strong>
+        <button onclick="cidashHistClose()" style="background:transparent;border:1px solid var(--border);color:var(--fg);padding:5px 12px;border-radius:6px;cursor:pointer;font-size:.82em">&#10005; Close</button>
+      </div>
+      <div id="cidash-hist-body" style="padding:16px"></div>
+    </div>
+  </div>
   <script>
   (function(){
     var RT = {"masscompile": {"label": "Mass Compile", "platforms": {"windows": {"wf": "masscompile-windows-container.yml", "inputs": {"commit_sha": "{sha}"}}, "linux": {"wf": "masscompile-linux-container.yml", "inputs": {"commit_sha": "{sha}"}}}}, "vi-analyzer": {"label": "VI Analyzer", "platforms": {"windows": {"wf": "run-vi-analyzer-windows-container.yml", "inputs": {"commit_sha": "{sha}"}}, "linux": {"wf": "run-vi-analyzer-linux-container.yml", "inputs": {"commit_sha": "{sha}"}}}}, "vidiff": {"label": "VIDiff", "platforms": {"windows": {"wf": "vidiff-windows-container.yml", "inputs": {"head_sha": "{sha}", "base_sha": "{parent}"}}, "linux": {"wf": "vidiff-linux-container.yml", "inputs": {"head_sha": "{sha}", "base_sha": "{parent}"}}}}, "snapshots": {"label": "VI Snapshots", "platforms": {"all": {"wf": "vi-snapshots.yml", "inputs": {"mode": "head"}}}}};
@@ -100,7 +120,12 @@
     function $(id){ return document.getElementById(id); }
     function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
     function fill(t){ return String(t).replace(/\{sha\}/g, state.sha).replace(/\{parent\}/g, state.parent||''); }
-    function getTok(){ try{ return localStorage.getItem(TOK_KEY)||''; }catch(e){ return ''; } }
+    // The dashboard's own dispatch token; if it isn't set, fall back to the token
+    // saved during "Apply to New Repo" (lvci_install_token — same browser, same
+    // origin) so the SAME token used to set the dashboard up also queues runs here
+    // with no second token to create. It still needs Actions: Read and write to
+    // dispatch; if it lacks that, the 403 hint explains the one box to add.
+    function getTok(){ try{ return localStorage.getItem(TOK_KEY)||localStorage.getItem("lvci_install_token")||''; }catch(e){ return ''; } }
     function setTok(v){ try{ localStorage.setItem(TOK_KEY, v); }catch(e){} }
     function clearTok(){ try{ localStorage.removeItem(TOK_KEY); }catch(e){} }
     function ghCmd(wf, inputs){
@@ -562,25 +587,339 @@
       }
     });
     document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ if(qModalOpen()) cidashQClose(); else cidashRunClose(); } });
+    // ── "Run all history" backfill card ──────────────────────────────
+    // On a fresh dashboard (gated server-side: no results, nothing running) the
+    // card offers to queue CI for the WHOLE history in one click, oldest commit
+    // first. Snapshots are not per-commit (every snapshot cell dispatches the same
+    // gallery workflow), so instead of one run per row we fire a SINGLE run in the
+    // workflow's "backfill" mode — it walks history oldest→newest and seeds from
+    // the already-deployed gallery, so nothing is rendered twice. Mass Compile /
+    // VI Analyzer / VIDiff are per-revision, so those are dispatched once each,
+    // oldest first and gently throttled. The card self-hides once anything is
+    // queued and can be dismissed (remembered per repo).
+    var BF_DISMISS_KEY = "lvci_backfill_dismissed";
+    function bfCard(){ return document.getElementById('lvci-backfill'); }
+    function bfDismissed(){ try{ return localStorage.getItem(BF_DISMISS_KEY) === REPO; }catch(e){ return false; } }
+    function bfHide(){ var c=bfCard(); if(c) c.style.display='none'; }
+    function bfDismiss(){ try{ localStorage.setItem(BF_DISMISS_KEY, REPO); }catch(e){} bfHide(); }
+    function bfTokPanel(show){ var p=document.getElementById('lvci-bf-tok'); if(p) p.style.display = show ? 'block' : 'none'; }
+    function bfStatus(html, kind){
+      var s=document.getElementById('lvci-bf-status'); if(!s) return;
+      var col = kind==='ok' ? '#3fb950' : (kind==='err' ? '#f85149' : (kind==='warn' ? '#d29922' : 'var(--fg-muted)'));
+      s.style.color=col; s.innerHTML=html||'';
+    }
+    function bfCells(){
+      // Every empty run-glyph paired with its row order. The table is rendered
+      // newest-first, so a larger row index = an older commit; dispatching in
+      // descending row order is therefore oldest-first.
+      var out=[]; var rows=document.querySelectorAll('tbody tr[data-project]');
+      Array.prototype.forEach.call(rows, function(tr, idx){
+        Array.prototype.forEach.call(tr.querySelectorAll('a.cidash-run'), function(a){
+          out.push({ cap:a.getAttribute('data-cap'), sha:a.getAttribute('data-sha'),
+                     parent:a.getAttribute('data-parent')||'', order:idx });
+        });
+      });
+      return out;
+    }
+    function bfShow(){
+      var c=bfCard(); if(!c) return;
+      // Hide on a repo we've dismissed, or once anything has been queued from here
+      // ("disappear after anything is run"); otherwise show with a live count.
+      var queued = Object.keys(qLoad()).length > 0;
+      if(bfDismissed() || queued){ c.style.display='none'; return; }
+      var cells=bfCells(); if(!cells.length){ c.style.display='none'; return; }
+      var shas={}; cells.forEach(function(x){ shas[x.sha]=1; });
+      var n=document.getElementById('lvci-bf-count'); if(n) n.textContent=String(Object.keys(shas).length);
+      c.style.display='';
+    }
+    function bfFill(t, sha, parent){ return String(t).replace(/\{sha\}/g, sha).replace(/\{parent\}/g, parent||''); }
+    function bfInputs(p, sha, parent){ var o={}; Object.keys(p.inputs).forEach(function(k){ o[k]=bfFill(p.inputs[k], sha, parent); }); return o; }
+    // Shared dispatch engine for BOTH the fresh-install backfill card and the
+    // Populate-history dialog: queue a set of empty run-cells, snapshots as ONE
+    // backfill run (the workflow walks the whole history oldest->newest and dedupes)
+    // and the per-revision activities oldest-first, gently throttled so a long
+    // history doesn't trip GitHub's secondary rate limits. Resolves with an
+    // {ok, err, total} tally; the caller owns its own status line + buttons.
+    function dispatchCells(cells, statusFn){
+      var perRev=[]; var snapShas=[]; var sawSnap=false;
+      cells.forEach(function(x){
+        if(x.cap==='snapshots'){ sawSnap=true; snapShas.push(x.sha); }
+        else if(!(x.cap==='vidiff' && !x.parent)){ perRev.push(x); }   // a root commit has no base to diff
+      });
+      perRev.sort(function(a,b){ return b.order - a.order; });   // oldest first
+      var total=perRev.length + (sawSnap?1:0);
+      var t0=Date.now(); var ok=0, err=0, done=0;
+      statusFn('Queuing '+total+' workflow'+(total>1?'s':'')+'\u2026', null);
+      var chain=Promise.resolve();
+      // 1) Snapshots — one backfill run for the whole history (oldest→newest, deduped).
+      if(sawSnap){
+        chain=chain.then(function(){
+          return dispatchOne('vi-snapshots.yml', { mode:'backfill' }).then(function(r){
+            done++;
+            if(r.ok){ ok++; snapShas.forEach(function(sha){ markQueued('snapshots', sha, ['all'], '', t0); }); }
+            else { err++; if(r.status===401) clearTok(); }
+            statusFn('Queuing\u2026 '+done+'/'+total, null);
+          });
+        });
+      }
+      // 2) Per-revision capabilities, oldest first, gently throttled.
+      perRev.forEach(function(x){
+        chain=chain.then(function(){
+          var def=RT[x.cap]; if(!def){ return; }
+          var plats=Object.keys(def.platforms);
+          var jobs=plats.map(function(k){ var p=def.platforms[k]; return dispatchOne(p.wf, bfInputs(p, x.sha, x.parent)).then(function(r){ r.plat=k; return r; }); });
+          return Promise.all(jobs).then(function(results){
+            done++;
+            if(results.some(function(r){return r.status===401;})) clearTok();
+            var okPlats=results.filter(function(r){return r.ok;}).map(function(r){return r.plat;});
+            if(okPlats.length){ ok++; markQueued(x.cap, x.sha, okPlats, x.parent, Date.now()); captureRuns(x.cap, x.sha); }
+            else { err++; }
+            statusFn('Queuing\u2026 '+done+'/'+total, null);
+          }).then(function(){ return new Promise(function(res){ setTimeout(res, 650); }); });
+        });
+      });
+      return chain.then(function(){ return { ok:ok, err:err, total:total }; });
+    }
+    function bfRunAll(){
+      var cells=bfCells();
+      if(!cells.length){ bfStatus('Nothing left to run \u2014 every revision is queued or already has results.', 'ok'); return; }
+      if(!getTok()){ bfTokPanel(true); bfStatus('Add a token (Actions: Read and write) to queue runs.', 'warn'); var i=document.getElementById('lvci-bf-tok-input'); if(i) i.focus(); return; }
+      bfTokPanel(false);
+      var runBtn=document.getElementById('lvci-bf-run'); var disBtn=document.getElementById('lvci-bf-dismiss');
+      if(runBtn) runBtn.disabled=true; if(disBtn) disBtn.disabled=true;
+      dispatchCells(cells, bfStatus).then(function(res){
+        if(runBtn) runBtn.disabled=false; if(disBtn) disBtn.disabled=false;
+        if(res.ok && !res.err){
+          bfStatus('\u2713 Queued '+res.ok+' workflow'+(res.ok>1?'s':'')+', oldest first \u2014 results appear as they finish. <a href="https://github.com/'+REPO+'/actions" target="_blank" rel="noopener" style="color:var(--link)">View runs \u2197</a>', 'ok');
+          bfDismiss();
+        } else if(res.ok && res.err){
+          bfStatus('Queued '+res.ok+', but '+res.err+' could not be dispatched \u2014 check the token has <strong>Actions: Read and write</strong> on this repo. <a href="https://github.com/'+REPO+'/actions" target="_blank" rel="noopener" style="color:var(--link)">View runs \u2197</a>', 'warn');
+        } else {
+          bfStatus('Could not queue runs. The token needs <strong>Actions: Read and write</strong> on <code>'+esc(REPO)+'</code> (runs dispatch on <code>'+esc(BRANCH)+'</code>). <a href="'+tokenSetupUrl()+'" target="_blank" rel="noopener" style="color:var(--link)">Create or update a token \u2197</a>', 'err');
+          bfTokPanel(true);
+        }
+      });
+    }
+    function bfInit(){
+      var c=bfCard(); if(!c) return;
+      var run=document.getElementById('lvci-bf-run'); if(run) run.addEventListener('click', bfRunAll);
+      var dis=document.getElementById('lvci-bf-dismiss'); if(dis) dis.addEventListener('click', function(){ bfDismiss(); });
+      var save=document.getElementById('lvci-bf-tok-save'); if(save) save.addEventListener('click', function(){ var i=document.getElementById('lvci-bf-tok-input'); var v=(i&&i.value||'').trim(); if(!v){ if(i) i.focus(); return; } setTok(v); bfRunAll(); });
+      var inp=document.getElementById('lvci-bf-tok-input'); if(inp) inp.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); var v=(inp.value||'').trim(); if(v){ setTok(v); bfRunAll(); } } });
+      var link=document.getElementById('lvci-bf-tok-link'); if(link) link.href=tokenSetupUrl();
+      var cust=document.getElementById('lvci-bf-custom'); if(cust) cust.addEventListener('click', function(e){ e.preventDefault(); histOpen(); });
+      bfShow();
+    }
+    // ── "Populate dashboard history" dialog ──────────────────────────────
+    // Opened from the header's More menu (window.lvciRunHistory) and the fresh
+    // install card's "Customize…" link. The user chooses where in history to
+    // start, whether to run the lean diff-based pass (VI Snapshots + VIDiff only —
+    // the modified-file visual history) or every activity, and exactly which
+    // activities to queue. Reuses dispatchCells (oldest-first, snapshots as one
+    // backfill) + the same token and optimistic-queued bridge as every other
+    // dispatch on the dashboard.
+    var HIST = [{"sha": "711230b48660cb638b0eb44fe3f1a9ccef12b8bb", "short": "711230b", "msg": "resized the graph"}, {"sha": "18f9d59a3f2763a5f651ac35fbf87eb72106238c", "short": "18f9d59", "msg": "moved a constant"}, {"sha": "f0e2b160d4e16d1caab904dfabf42ca85df7c772", "short": "f0e2b16", "msg": "moved the send command button"}, {"sha": "6a28235e326d3b7e6b6c62935610dd83594615b9", "short": "6a28235", "msg": "fixed errors in motor VIs"}, {"sha": "0af78bc98d5d8a3d6738568e5a88cb53040838d3", "short": "0af78bc", "msg": "Minor refinements"}, {"sha": "3fbb38f3421f067808b65f6348727ab4f2e30dbd", "short": "3fbb38f", "msg": "Excercise manual correction"}, {"sha": "a7bf734d16b48072121f3a755f867900d6d9aba5", "short": "a7bf734", "msg": "Copy of excercise generated"}, {"sha": "035ca37f4c0a1e2d63bc85036064b4d9cb166054", "short": "035ca37", "msg": "Added new excercises"}, {"sha": "553622daaf10f500f2400196197d5b88d4664360", "short": "553622d", "msg": "improved resize appearance"}, {"sha": "0008bdad2753c2e5b224818d0f13ab055190f839", "short": "0008bda", "msg": "mass compiled on windows"}, {"sha": "c37e5eaaa87fce7c347ed643cf20a671cdf7579e", "short": "c37e5ea", "msg": "Windows bug"}, {"sha": "5887ac14214314e5bf8bdfeffedfc873f2c436b8", "short": "5887ac1", "msg": "debugging the assignment of visa resources to curriculum code"}, {"sha": "a00bd34b6dec68ce1d18b8654894a058d41041c6", "short": "a00bd34", "msg": "curriculum renamed"}, {"sha": "e22d539099d5bddb6b2899370d9ddf1d16808c8c", "short": "e22d539", "msg": "Curriculum finder refinements"}, {"sha": "c05a21cf261849813ed418f596eda66ea873f64b", "short": "c05a21c", "msg": "Adding curriculum launcher"}, {"sha": "e3c4fe9710106ce0876fb86b79bc44666334b560", "short": "e3c4fe9", "msg": "String output"}, {"sha": "e46e1c8deafb089eb62e15994676d240dafddf5e", "short": "e46e1c8", "msg": "Various improvements"}, {"sha": "d54b4a1dda72d799b4d52fadb4e9dc9861025aa3", "short": "d54b4a1", "msg": "Initial upload"}];                        // [{sha, short, msg}] newest-first (project revisions)
+    var HIST_CAPS = [                           // activity rows, in display order
+      ['snapshots',   'VI Snapshots', 'Renders every changed VI (one backfill pass)'],
+      ['vidiff',      'VIDiff',       'Visual diff of the VIs each revision changed'],
+      ['masscompile', 'Mass Compile', 'Compiles the whole project, each revision'],
+      ['vi-analyzer', 'VI Analyzer',  'Runs the VI Analyzer suite, each revision']
+    ];
+    var DIFF_CAPS = { snapshots:1, vidiff:1 };  // the lean "diff-based" subset
+    function histModal(){ return document.getElementById('cidash-hist-modal'); }
+    function cidashHistClose(){ var m=histModal(); if(m) m.style.display='none'; document.body.style.overflow=''; }
+    function histStatus(html, kind){
+      var s=document.getElementById('cidash-hist-status'); if(!s) return;
+      var col = kind==='ok' ? '#3fb950' : (kind==='err' ? '#f85149' : (kind==='warn' ? '#d29922' : 'var(--fg-muted)'));
+      s.style.color=col; s.innerHTML=html||'';
+    }
+    function histTokPanel(show){ var p=document.getElementById('cidash-hist-tok'); if(p) p.style.display = show ? 'block' : 'none'; }
+    function histSelectedCaps(){
+      var caps={};
+      HIST_CAPS.forEach(function(o){ var b=document.getElementById('cidash-hist-act-'+o[0]); if(b && b.checked && !b.disabled) caps[o[0]]=1; });
+      return caps;
+    }
+    function histScopeMode(){ var r=document.querySelector('input[name="cidash-hist-scope"]:checked'); return r ? r.value : 'all'; }
+    function histIdx(sha){ for(var i=0;i<HIST.length;i++){ if(HIST[i].sha===sha) return i; } return -1; }
+    function histIncludedShas(){
+      // Three scopes drive which revisions are queued (HIST is newest-first):
+      //   all      -> every revision
+      //   range    -> Start (older bound) .. Stop (newer bound), inclusive; a blank
+      //               Start = oldest and a blank Stop = newest, and a reversed pair
+      //               is swapped so the range is always valid
+      //   specific -> exactly the ticked revisions (one or many)
+      var mode=histScopeMode(); var inc={};
+      if(mode==='specific'){
+        Array.prototype.forEach.call(document.querySelectorAll('input.cidash-hist-spec:checked'), function(b){ inc[b.value]=1; });
+        return inc;
+      }
+      if(mode==='range'){
+        var f=document.getElementById('cidash-hist-from'); var t=document.getElementById('cidash-hist-to');
+        var iFrom = (f && f.value) ? histIdx(f.value) : HIST.length-1;   // '' = oldest
+        var iTo   = (t && t.value) ? histIdx(t.value) : 0;               // '' = newest
+        if(iFrom<0) iFrom=HIST.length-1; if(iTo<0) iTo=0;
+        var lo=Math.min(iFrom,iTo), hi=Math.max(iFrom,iTo);
+        for(var j=lo;j<=hi;j++){ if(HIST[j]) inc[HIST[j].sha]=1; }
+        return inc;
+      }
+      HIST.forEach(function(r){ inc[r.sha]=1; });
+      return inc;
+    }
+    function histScopeApply(){
+      // Reveal only the sub-control for the chosen scope.
+      var mode=histScopeMode();
+      var rr=document.getElementById('cidash-hist-rangerow'); if(rr) rr.style.display = (mode==='range') ? '' : 'none';
+      var sw=document.getElementById('cidash-hist-specwrap'); if(sw) sw.style.display = (mode==='specific') ? '' : 'none';
+    }
+    function histCells(){
+      var caps=histSelectedCaps(); var inc=histIncludedShas();
+      return bfCells().filter(function(x){ return caps[x.cap] && inc[x.sha] && !(x.cap==='vidiff' && !x.parent); });
+    }
+    function histRefresh(){
+      // Live summary of what will be queued from the current selection.
+      var cells=histCells();
+      var shas={}; var snaps=0; var perRev=0;
+      cells.forEach(function(x){ shas[x.sha]=1; if(x.cap==='snapshots') snaps=1; else perRev++; });
+      var runs=perRev + snaps;   // snapshots collapse into one backfill run
+      var nrev=Object.keys(shas).length;
+      var sum=document.getElementById('cidash-hist-summary');
+      if(sum){
+        if(!HIST.length){ sum.innerHTML='No project revisions to populate yet \u2014 commit some VIs first.'; }
+        else if(!runs){ sum.innerHTML='Nothing to queue \u2014 the selected revisions already have results for those activities.'; }
+        else { sum.innerHTML='Will queue <b>'+runs+'</b> run'+(runs>1?'s':'')+' across <b>'+nrev+'</b> revision'+(nrev>1?'s':'')+', oldest first.'; }
+      }
+      var go=document.getElementById('cidash-hist-go'); if(go) go.disabled = !runs;
+    }
+    function histDiffApply(){
+      // The diff-based toggle constrains the run to Snapshots + VIDiff: when it is
+      // ON, Mass Compile + VI Analyzer are unchecked and greyed out; turning it OFF
+      // re-checks + re-enables them (its label promises "uncheck to also run" them).
+      // Only invoked from the toggle itself, so manually unchecking an activity
+      // afterwards is never overridden by a summary refresh.
+      var diff=document.getElementById('cidash-hist-diff');
+      var on = !!(diff && diff.checked);
+      HIST_CAPS.forEach(function(o){
+        if(DIFF_CAPS[o[0]]) return;
+        var b=document.getElementById('cidash-hist-act-'+o[0]);
+        var row=document.getElementById('cidash-hist-actrow-'+o[0]);
+        if(b){ b.disabled=on; b.checked=!on; }
+        if(row) row.classList.toggle('disabled', on);
+      });
+    }
+    function histRender(){
+      var body=document.getElementById('cidash-hist-body'); if(!body) return;
+      var h='';
+      h += '<p style="margin:0 0 16px;color:var(--fg-muted);font-size:.86em;line-height:1.55">Queue CI for revisions that already exist so the dashboard fills in. Runs <strong>oldest \u2192 newest</strong>; only activities that haven\u2019t run yet are queued, and VI Snapshots backfills the whole history in one incremental pass.</p>';
+      var optsHtml = HIST.map(function(r){ return '<option value="'+esc(r.sha)+'">'+esc((r.short||'')+(r.msg?(' \u2014 '+r.msg):''))+'</option>'; }).join('');
+      h += '<div class="cidash-hist-sec"><label class="cidash-hist-lbl">Which revisions</label><div class="cidash-hist-scope">';
+      h += '<label class="cidash-hist-radio"><input type="radio" name="cidash-hist-scope" value="all" checked> All '+HIST.length+' revision'+(HIST.length===1?'':'s')+' <span class="sub">\u2014 the full history</span></label>';
+      h += '<label class="cidash-hist-radio"><input type="radio" name="cidash-hist-scope" value="range"> A range of history</label>';
+      h += '<div class="cidash-hist-rangerow" id="cidash-hist-rangerow" style="display:none">';
+      h += '<label>Start at <select id="cidash-hist-from"><option value="">Oldest (beginning)</option>'+optsHtml+'</select></label>';
+      h += '<label>stop at <select id="cidash-hist-to"><option value="">Newest (latest)</option>'+optsHtml+'</select></label>';
+      h += '</div>';
+      h += '<label class="cidash-hist-radio"><input type="radio" name="cidash-hist-scope" value="specific"> Specific revision(s)</label>';
+      h += '<div id="cidash-hist-specwrap" style="display:none">';
+      h += '<div class="cidash-hist-spectools"><a href="#" id="cidash-hist-spec-all">Select all</a><a href="#" id="cidash-hist-spec-none">Clear</a></div>';
+      h += '<div class="cidash-hist-speclist" id="cidash-hist-speclist">';
+      HIST.forEach(function(r){ h += '<label class="cidash-hist-specitem"><input type="checkbox" class="cidash-hist-spec" value="'+esc(r.sha)+'"><span class="sh">'+esc(r.short||'')+'</span><span class="ms">'+esc(r.msg||'')+'</span></label>'; });
+      h += '</div></div>';
+      h += '</div></div>';
+      h += '<div class="cidash-hist-sec"><label class="cidash-hist-toggle"><input type="checkbox" id="cidash-hist-diff" checked>'
+        + '<span><span class="cidash-hist-tmain">Diff-based \u2014 modified files only</span>'
+        + '<span class="cidash-hist-tsub">Runs just VI Snapshots and VIDiff (the visual history of what each revision changed). Uncheck to also run Mass Compile and VI Analyzer on every revision.</span></span></label></div>';
+      h += '<div class="cidash-hist-sec"><label class="cidash-hist-lbl">Activities</label><div class="cidash-hist-acts">';
+      HIST_CAPS.forEach(function(o){
+        h += '<label class="cidash-hist-act" id="cidash-hist-actrow-'+o[0]+'"><input type="checkbox" id="cidash-hist-act-'+o[0]+'" data-cap="'+o[0]+'" checked>'
+          + '<span>'+esc(o[1])+'</span><span class="cidash-hist-actsub">'+esc(o[2])+'</span></label>';
+      });
+      h += '</div></div>';
+      h += '<div id="cidash-hist-tok" style="display:none;border:1px solid var(--border);border-radius:8px;padding:12px;background:var(--surface);margin:0 0 12px">';
+      h += '<div style="font-size:.82em;color:var(--fg);font-weight:600;margin-bottom:6px">One-time setup \u2014 a token to queue runs</div>';
+      h += '<ol style="font-size:.8em;color:var(--fg-muted);margin:0 0 8px;padding-left:18px;line-height:1.6">';
+      h += '<li><a href="'+tokenSetupUrl()+'" target="_blank" rel="noopener" style="color:var(--link)">Create a fine-grained token \u2197</a> \u2014 opens with the name, owner, and <strong>Actions: Read and write</strong> already set.</li>';
+      h += '<li><strong>Repository access</strong> \u2192 Only select repositories \u2192 add <code>'+esc(REPO)+'</code>.</li>';
+      h += '<li><strong>Permissions \u2192 Repository permissions \u2192 Actions \u2192 Read and write</strong>.</li>';
+      h += '<li>Generate, then paste it below.</li></ol>';
+      h += '<div style="display:flex;gap:8px;flex-wrap:wrap"><input id="cidash-hist-tok-input" type="password" autocomplete="off" placeholder="github_pat_\u2026 or ghp_\u2026" style="flex:1 1 240px;min-width:180px;padding:7px 10px;background:var(--bg);color:var(--fg);border:1px solid var(--border);border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:.8em">';
+      h += '<button class="cidash-btn cidash-go" id="cidash-hist-tok-save">Save &amp; queue</button></div></div>';
+      h += '<div id="cidash-hist-summary" class="cidash-hist-summary"></div>';
+      h += '<div id="cidash-hist-status" style="font-size:.82em;min-height:1.2em;margin:0 0 12px"></div>';
+      h += '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">';
+      h += '<button class="cidash-btn cidash-go" id="cidash-hist-go">\u25B6 Queue runs</button>';
+      h += '<button class="cidash-btn cidash-ghost" id="cidash-hist-cancel">Cancel</button></div>';
+      body.innerHTML=h;
+      var diff=document.getElementById('cidash-hist-diff'); if(diff) diff.addEventListener('change', function(){ histDiffApply(); histRefresh(); });
+      Array.prototype.forEach.call(document.querySelectorAll('input[name="cidash-hist-scope"]'), function(r){ r.addEventListener('change', function(){ histScopeApply(); histRefresh(); }); });
+      var hf=document.getElementById('cidash-hist-from'); if(hf) hf.addEventListener('change', histRefresh);
+      var ht=document.getElementById('cidash-hist-to'); if(ht) ht.addEventListener('change', histRefresh);
+      Array.prototype.forEach.call(document.querySelectorAll('input.cidash-hist-spec'), function(b){ b.addEventListener('change', histRefresh); });
+      var spa=document.getElementById('cidash-hist-spec-all'); if(spa) spa.addEventListener('click', function(e){ e.preventDefault(); Array.prototype.forEach.call(document.querySelectorAll('input.cidash-hist-spec'), function(b){ b.checked=true; }); histRefresh(); });
+      var spn=document.getElementById('cidash-hist-spec-none'); if(spn) spn.addEventListener('click', function(e){ e.preventDefault(); Array.prototype.forEach.call(document.querySelectorAll('input.cidash-hist-spec'), function(b){ b.checked=false; }); histRefresh(); });
+      HIST_CAPS.forEach(function(o){ var b=document.getElementById('cidash-hist-act-'+o[0]); if(b) b.addEventListener('change', histRefresh); });
+      var go=document.getElementById('cidash-hist-go'); if(go) go.addEventListener('click', histRun);
+      var cancel=document.getElementById('cidash-hist-cancel'); if(cancel) cancel.addEventListener('click', cidashHistClose);
+      var save=document.getElementById('cidash-hist-tok-save'); if(save) save.addEventListener('click', function(){ var i=document.getElementById('cidash-hist-tok-input'); var v=(i&&i.value||'').trim(); if(!v){ if(i) i.focus(); return; } setTok(v); histTokPanel(false); histRun(); });
+      var tin=document.getElementById('cidash-hist-tok-input'); if(tin) tin.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); var v=(tin.value||'').trim(); if(v){ setTok(v); histTokPanel(false); histRun(); } } });
+      histScopeApply(); histDiffApply(); histRefresh();
+    }
+    function histOpen(){
+      var m=histModal(); if(!m) return;
+      histRender();
+      m.style.display='block'; document.body.style.overflow='hidden';
+    }
+    function histRun(){
+      var cells=histCells();
+      if(!cells.length){ histStatus('Nothing to queue \u2014 the selected revisions already have results for those activities.', 'warn'); return; }
+      if(!getTok()){ histTokPanel(true); histStatus('Add a token (Actions: Read and write) to queue runs.', 'warn'); var i=document.getElementById('cidash-hist-tok-input'); if(i) i.focus(); return; }
+      histTokPanel(false);
+      var go=document.getElementById('cidash-hist-go'); var cancel=document.getElementById('cidash-hist-cancel');
+      if(go) go.disabled=true; if(cancel) cancel.disabled=true;
+      dispatchCells(cells, histStatus).then(function(res){
+        if(cancel) cancel.disabled=false;
+        if(res.ok && !res.err){
+          histStatus('\u2713 Queued '+res.ok+' run'+(res.ok>1?'s':'')+', oldest first \u2014 results appear on the dashboard as they finish. <a href="https://github.com/'+REPO+'/actions" target="_blank" rel="noopener" style="color:var(--link)">View runs \u2197</a>', 'ok');
+          bfDismiss();   // the fresh-install nudge has served its purpose
+        } else if(res.ok && res.err){
+          if(go) go.disabled=false;
+          histStatus('Queued '+res.ok+', but '+res.err+' could not be dispatched \u2014 check the token has <strong>Actions: Read and write</strong> on this repo. <a href="https://github.com/'+REPO+'/actions" target="_blank" rel="noopener" style="color:var(--link)">View runs \u2197</a>', 'warn');
+        } else {
+          if(go) go.disabled=false;
+          histStatus('Could not queue runs. The token needs <strong>Actions: Read and write</strong> on <code>'+esc(REPO)+'</code> (runs dispatch on <code>'+esc(BRANCH)+'</code>). <a href="'+tokenSetupUrl()+'" target="_blank" rel="noopener" style="color:var(--link)">Create or update a token \u2197</a>', 'err');
+          histTokPanel(true);
+        }
+      });
+    }
+    // Exposed for the shared header's "Populate history" menu item.
+    window.lvciRunHistory = histOpen;
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ var m=histModal(); if(m && m.style.display==='block') cidashHistClose(); } });
     // Re-apply optimistic "Queued" badges once the table exists (this script runs
-    // before the table is parsed), and after every auto-refresh thereafter.
-    if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', applyQueued); }
-    else { applyQueued(); }
+    // before the table is parsed), and after every auto-refresh thereafter; wire
+    // the backfill card the same way.
+    if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', function(){ applyQueued(); bfInit(); }); }
+    else { applyQueued(); bfInit(); }
   })();
   </script>
   <main class="lvci-main">
   <h1>CI Dashboard — mini-system-manager</h1>
-  <div class="sub">Last updated: 2026-06-17 20:39 UTC &nbsp;|&nbsp; Auto-refreshes every 15 min</div>
+  <div class="sub">Last updated: 2026-06-17 21:01 UTC &nbsp;|&nbsp; Auto-refreshes every 15 min</div>
   <div class="nav">
     <a href="https://github.com/elijah286/mini-system-manager">GitHub</a>
     <a href="https://github.com/elijah286/mini-system-manager/actions">Actions</a>
   </div>
-  <label class="controls" for="show-nonproject">
-    <input type="checkbox" id="show-nonproject">
-    Include CI-only revisions
-  </label>
+  <div id="lvci-backfill" class="lvci-backfill" role="region" aria-label="Run CI for existing history" style="display:none"><div class="lvci-bf-main"><div class="lvci-bf-icon" aria-hidden="true">&#9889;</div><div class="lvci-bf-text"><strong>Populate the dashboard with your history</strong><span>This dashboard has no results yet. Queue CI for all <b id="lvci-bf-count"></b> revisions in one click &mdash; processed <b>oldest&nbsp;&rarr;&nbsp;newest</b> so snapshots and diffs build on one another with no duplicated work. <a href="#" id="lvci-bf-custom" style="color:var(--link)">Choose activities or where to start&hellip;</a></span><span class="lvci-bf-note">This repository is currently set to run up to <b>5</b> CI jobs at a time. Anything past that &mdash; or past your GitHub account&rsquo;s own concurrency limit &mdash; just waits its turn and runs in order, so it&rsquo;s safe to queue the whole history at once.</span><details class="lvci-bf-info"><summary>&#9432; How concurrency works</summary><div class="lvci-bf-infobody">GitHub caps how many CI jobs run at the same time <b>per account</b> &mdash; shared across every repository you own (for example 20 jobs on Free, 40 on Pro), not per repo. This repository adds its own limit, <b>Max concurrent runners = 5</b>, so a large history backfill paces itself instead of monopolising your account&rsquo;s runners; routine pushes and tooling updates draw from the same pool. Runs beyond the limit are queued and start automatically as earlier ones finish &mdash; nothing is lost.<a href="#" class="lvci-bf-cfg" onclick="lvciOpen(&#39;configure.html?repo=elijah286/mini-system-manager&#39;,&#39;Configure Workers&#39;);return false;">Change this for mini-system-manager &rarr;</a></div></details></div><div class="lvci-bf-actions"><button type="button" id="lvci-bf-run" class="cidash-btn cidash-go">&#9654; Run all history</button><button type="button" id="lvci-bf-dismiss" class="cidash-btn cidash-ghost">Dismiss</button></div></div><div id="lvci-bf-tok" class="lvci-bf-tok" style="display:none">Paste a token with <strong>Actions: Read and write</strong> on this repository &mdash; the same token you set the dashboard up with works here too, or <a id="lvci-bf-tok-link" target="_blank" rel="noopener" style="color:var(--link)">create one &#8599;</a>.<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:7px"><input id="lvci-bf-tok-input" type="password" autocomplete="off" placeholder="github_pat_&hellip; or ghp_&hellip;" style="flex:1 1 240px;min-width:180px;padding:7px 10px;background:var(--bg);color:var(--fg);border:1px solid var(--border);border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:.8em"><button type="button" id="lvci-bf-tok-save" class="cidash-btn cidash-go">Save &amp; run</button></div></div><div id="lvci-bf-status" class="lvci-bf-status" role="status" aria-live="polite"></div></div>
+  <div class="controls">
+    <label class="cidash-check" for="show-nonproject">
+      <input type="checkbox" id="show-nonproject">
+      Include CI-only revisions
+    </label>
+    <div class="cidash-colmenu">
+      <button type="button" id="cidash-colbtn" class="cidash-colbtn" aria-haspopup="true" aria-expanded="false">&#9783; Columns &#9662;</button>
+      <div id="cidash-colpanel" class="cidash-colpanel" role="menu" hidden></div>
+    </div>
+  </div>
   <div class="lvci-tablewrap">
-  <table>
+  <table id="cidash-table">
     <thead>
       <tr>
         <th>Commit</th><th>Message</th><th>Author</th><th>Date</th>
@@ -588,11 +927,24 @@
         <th style="text-align:center">VI Analyzer</th>
         <th style="text-align:center">VIDiff</th>
         <th style="text-align:center">Snapshots</th>
-        <th style="text-align:center">Win Worker</th>
-        <th style="text-align:center">Linux Worker</th>
+        <th style="text-align:center">Unit Tests</th>
       </tr>
     </thead>
     <tbody>
+    <tr data-project="false">
+      <td style="padding:8px;font-family:monospace;font-size:.85em">
+        <a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=7312ac2e8a095315bc92064f1dea57865eeacd95" style="color:var(--link)" title="Browse this commit's VIs in the VI Browser">7312ac2</a>
+      </td>
+      <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Add LabVIEW CI pipeline"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=7312ac2e8a095315bc92064f1dea57865eeacd95" style="color:var(--fg)">Add LabVIEW CI pipeline</a></td>
+      <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">Elijah Kerry</td>
+      <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-06-17</td>
+      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
+      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
+      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
+      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
+      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
+    </tr>
+
     <tr data-project="false">
       <td style="padding:8px;font-family:monospace;font-size:.85em">
         <a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=d42791ac025f655d7aa17dc8abbc43ed6a79c2eb" style="color:var(--link)" title="Browse this commit's VIs in the VI Browser">d42791a</a>
@@ -600,7 +952,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Add LabVIEW CI pipeline"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=d42791ac025f655d7aa17dc8abbc43ed6a79c2eb" style="color:var(--fg)">Add LabVIEW CI pipeline</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">Elijah Kerry</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-06-17</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -620,17 +971,15 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
       <td style="padding:8px;font-family:monospace;font-size:.85em">
         <a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=9074e44586124bf8ff55e4fb561fe5b715f95da4" style="color:var(--link)" title="Browse this commit's VIs in the VI Browser">9074e44</a>
       </td>
-      <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="ci: adopt LabVIEW CI tooling v1.9.4 -> v1.12.1 (full update)"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=9074e44586124bf8ff55e4fb561fe5b715f95da4" style="color:var(--fg)">ci: adopt LabVIEW CI tooling v1.9.4 -> v1.12.1 (full update)</a></td>
+      <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="ci: adopt LabVIEW CI tooling v1.9.4 -&gt; v1.12.1 (full update)"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=9074e44586124bf8ff55e4fb561fe5b715f95da4" style="color:var(--fg)">ci: adopt LabVIEW CI tooling v1.9.4 -&gt; v1.12.1 (full update)</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-06-16</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -650,7 +999,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -660,7 +1008,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Merge pull request #5 from elijah286/ci/clean-precursor-dashboard-badges"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=9dd7069c592e8cb1387fbe489bec702efa9ed7c8" style="color:var(--fg)">Merge pull request #5 from elijah286/ci/clean-precursor-dashboard-badges</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">Elijah Kerry</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-06-16</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -680,7 +1027,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -690,7 +1036,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="ci: adopt LabVIEW CI tooling v1.9.4 (full update)"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=de961aa8dec6cfbcd6021c07cdbd2756f7aa165b" style="color:var(--fg)">ci: adopt LabVIEW CI tooling v1.9.4 (full update)</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">github-actions[bot]</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-06-16</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -710,7 +1055,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -720,7 +1064,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Merge pull request #3 from elijah286/ci/fix-dashboard-and-readme"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=c2979db4a0a23cb53122b5c94a217d098df39c74" style="color:var(--fg)">Merge pull request #3 from elijah286/ci/fix-dashboard-and-readme</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">Elijah Kerry</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-06-16</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -740,7 +1083,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -750,7 +1092,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="ci: install LabVIEW CI pipeline (dashboard, masscompile, vi-analyzer, vidiff, sn"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=6eb69b1a526c9f3859b456abf9512c5e1b640857" style="color:var(--fg)">ci: install LabVIEW CI pipeline (dashboard, masscompile, vi-analyzer, vidiff, sn</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">Elijah Kerry</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-06-16</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -770,7 +1111,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -780,7 +1120,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Merge pull request #2 from elijah286/ci/install-labview-ci"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=d33c27655f3761019cf39fdfcbd8ebeb4100dc92" style="color:var(--fg)">Merge pull request #2 from elijah286/ci/install-labview-ci</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">Elijah Kerry</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-06-16</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -800,7 +1139,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -810,7 +1148,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Merge pull request #1 from elijah286/ci/install-labview-ci"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=70144cd4b66f98efe21616913eed53c8c46e16a4" style="color:var(--fg)">Merge pull request #1 from elijah286/ci/install-labview-ci</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">Elijah Kerry</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-06-16</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -830,7 +1167,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -840,7 +1176,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Revert accidental commit of in-progress Linux container workflows"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=f6dfc1da612795ff861687b27e5820e0fd0baa2a" style="color:var(--fg)">Revert accidental commit of in-progress Linux container workflows</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-06-03</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -860,7 +1195,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -870,7 +1204,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Fix Dockerfile: remove nipkg list --available (invalid flag)"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=2db3dbaf12e0b223f464fac580995c48e65da911" style="color:var(--fg)">Fix Dockerfile: remove nipkg list --available (invalid flag)</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-06-03</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -890,7 +1223,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -900,7 +1232,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Add pre-baked LabVIEW CI Dockerfile and GHCR build workflow"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=c55d1de717c71d3f611df7bf9cbb6df99f4b36dd" style="color:var(--fg)">Add pre-baked LabVIEW CI Dockerfile and GHCR build workflow</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-06-03</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -920,7 +1251,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -930,7 +1260,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Honor system dark/light mode in VI Browser and Interactive Viewer"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=a89d3d15db6f0c72b72b7e32fcbc551277d827f9" style="color:var(--fg)">Honor system dark/light mode in VI Browser and Interactive Viewer</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-06-02</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -950,7 +1279,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -960,7 +1288,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Fix vi-browser.html BASE path: strip filename not just index.html"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=aeb493778b2251463cd3f4007b894e2559823c42" style="color:var(--fg)">Fix vi-browser.html BASE path: strip filename not just index.html</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-06-02</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -980,7 +1307,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -990,7 +1316,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Fix VIDiff: pass file list as CSV string to avoid Docker quoting embedding liter"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=e554867d1ef1d6484e26be23691caaafdb5778b2" style="color:var(--fg)">Fix VIDiff: pass file list as CSV string to avoid Docker quoting embedding liter</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-06-01</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1010,7 +1335,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1020,7 +1344,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Dashboard: add Show CI-only revisions checkbox, unchecked by default"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=a8c303445778052ffea52fcb30a7685dc7b6f02e" style="color:var(--fg)">Dashboard: add Show CI-only revisions checkbox, unchecked by default</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-06-01</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1040,7 +1363,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1050,7 +1372,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Fix dashboard report links: normalize SHAs to 7 chars to match report directorie"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=0faf3879605cde0b5d3f84e9a18c48619b7105b2" style="color:var(--fg)">Fix dashboard report links: normalize SHAs to 7 chars to match report directorie</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-06-01</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1070,7 +1391,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1080,7 +1400,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Label CI-only commits in dashboard rows"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=2d213d98abc9dce82e0ede185e2f03f083c68907" style="color:var(--fg)">Label CI-only commits in dashboard rows</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-06-01</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1100,7 +1419,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1110,7 +1428,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Use readable revision labels instead of full commit hashes on dashboard"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=84631942a5ece3321b56c216b6a7c907f21217a1" style="color:var(--fg)">Use readable revision labels instead of full commit hashes on dashboard</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-06-01</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1130,7 +1447,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1140,7 +1456,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Serve dashboard data from workflow to avoid browser API rate limits"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=cefa707d19b67dd5e0e6b1330705a5026497f18a" style="color:var(--fg)">Serve dashboard data from workflow to avoid browser API rate limits</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-06-01</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1160,7 +1475,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1170,7 +1484,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Restore historical dashboard rows from gh-pages report tree"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=d823cb5a8c252c88f875910721da17abc333e3be" style="color:var(--fg)">Restore historical dashboard rows from gh-pages report tree</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-06-01</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1190,7 +1503,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1200,7 +1512,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Reduce dashboard GitHub API usage to prevent 403 rate limits"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=10934f83431d6781a4cef8db4cb0e4fc8dacb3ae" style="color:var(--fg)">Reduce dashboard GitHub API usage to prevent 403 rate limits</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-06-01</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1220,17 +1531,15 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
       <td style="padding:8px;font-family:monospace;font-size:.85em">
         <a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=634f1536c66280b4bb6d1cd4b80f255151e32637" style="color:var(--link)" title="Browse this commit's VIs in the VI Browser">634f153</a>
       </td>
-      <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Merge branch 'main' of https://github.com/elijah286/mini-system-manager"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=634f1536c66280b4bb6d1cd4b80f255151e32637" style="color:var(--fg)">Merge branch 'main' of https://github.com/elijah286/mini-system-manager</a></td>
+      <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Merge branch &#x27;main&#x27; of https://github.com/elijah286/mini-system-manager"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=634f1536c66280b4bb6d1cd4b80f255151e32637" style="color:var(--fg)">Merge branch &#x27;main&#x27; of https://github.com/elijah286/mini-system-manager</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">Elijah Kerry</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-06-01</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1250,7 +1559,6 @@
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vidiff" data-sha="711230b48660cb638b0eb44fe3f1a9ccef12b8bb" data-parent="e79a32f54939ad389f937054972907717d0f40e1" data-short="711230b" title="Run VIDiff for commit 711230b">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="snapshots" data-sha="711230b48660cb638b0eb44fe3f1a9ccef12b8bb" data-parent="e79a32f54939ad389f937054972907717d0f40e1" data-short="711230b" title="Run VI Snapshots for commit 711230b">&#9655;</a></td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1260,7 +1568,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Add per-commit VI Browser with lvproj tree, commit selector, and VIDiff links"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=738dd3ec98c44e3d48b3051866309c50686549d1" style="color:var(--fg)">Add per-commit VI Browser with lvproj tree, commit selector, and VIDiff links</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-05-31</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1280,7 +1587,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1290,7 +1596,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Search for correct VIDiff nipkg package name, add NI feed"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=6a7ed013f5d2c86b50d1c7633709e810ed69628b" style="color:var(--fg)">Search for correct VIDiff nipkg package name, add NI feed</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-05-31</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1310,7 +1615,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1320,7 +1624,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Add VI file table to README, fix snapshot manifest BOM/empty handling, add CLI o"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=5276fae3c39d91e8ff83ed3ed7596a4064595d7d" style="color:var(--fg)">Add VI file table to README, fix snapshot manifest BOM/empty handling, add CLI o</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-05-31</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1340,7 +1643,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1355,17 +1657,15 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
       <td style="padding:8px;font-family:monospace;font-size:.85em">
         <a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=07a28bb403649dcb125d795bb07d1863551b5b58" style="color:var(--link)" title="Browse this commit's VIs in the VI Browser">07a28bb</a>
       </td>
-      <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Add VI Browser: export front panel & diagram snapshots for all VIs"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=07a28bb403649dcb125d795bb07d1863551b5b58" style="color:var(--fg)">Add VI Browser: export front panel & diagram snapshots for all VIs</a></td>
+      <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Add VI Browser: export front panel &amp; diagram snapshots for all VIs"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=07a28bb403649dcb125d795bb07d1863551b5b58" style="color:var(--fg)">Add VI Browser: export front panel &amp; diagram snapshots for all VIs</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-05-31</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1385,7 +1685,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1395,7 +1694,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Dashboard: fix parser to handle LabVIEW native HTML report format"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=112e147930deed2eaf06bfa6a4a341d6076c0790" style="color:var(--fg)">Dashboard: fix parser to handle LabVIEW native HTML report format</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-05-31</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1415,7 +1713,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1425,7 +1722,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="VIA: use default tests by pointing ConfigPath at workspace folder, generate HTML"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=518f8bb0e81e001c0ec421f4a741714a22651047" style="color:var(--fg)">VIA: use default tests by pointing ConfigPath at workspace folder, generate HTML</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-05-31</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1445,7 +1741,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1455,7 +1750,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="VIA: add NI product feeds to nipkg before installing VI Analyzer tests"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=350eeac1dd1e423066e5040d8b43ccc18fb14687" style="color:var(--fg)">VIA: add NI product feeds to nipkg before installing VI Analyzer tests</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-05-30</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1475,7 +1769,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1485,7 +1778,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="VIA: probe NIPM and attempt to install VI Analyzer tests in container"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=8a37023ca9b4a337d0174d13535dbef3e3f7b775" style="color:var(--fg)">VIA: probe NIPM and attempt to install VI Analyzer tests in container</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-05-30</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1505,7 +1797,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1515,7 +1806,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Enhanced VIA diagnostic: list all files, try without ConfigPath, search for test"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=bd5b6220006697812f8c1a9ae925814170ff600d" style="color:var(--fg)">Enhanced VIA diagnostic: list all files, try without ConfigPath, search for test</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-05-30</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1535,7 +1825,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1545,7 +1834,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Diagnostic: comprehensive search for VI Analyzer test LLBs in container"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=506ad63459947865bd0d18d954bac3b931917cdc" style="color:var(--fg)">Diagnostic: comprehensive search for VI Analyzer test LLBs in container</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-05-30</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1565,7 +1853,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1575,7 +1862,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Dashboard: distinguish material VIDiff changes from binary-only diffs"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=cc1b29a09e5247d4e976935f18dda51d472210b6" style="color:var(--fg)">Dashboard: distinguish material VIDiff changes from binary-only diffs</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-05-30</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1595,7 +1881,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1605,7 +1890,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Add Docker daemon startup step to all workflows (windows-2022 runner fix)"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=22699198fcda3d3282c07d96c98747e9c45852a3" style="color:var(--fg)">Add Docker daemon startup step to all workflows (windows-2022 runner fix)</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-05-30</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1625,7 +1909,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1635,7 +1918,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Fix diagnostic script syntax error"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=aa170e5c52754656cd979212bce91851bd8d8eae" style="color:var(--fg)">Fix diagnostic script syntax error</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-05-30</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1655,7 +1937,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1665,7 +1946,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Fix VI Analyzer diagnostic: use script file to avoid YAML escaping"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=2f2d63967517326bb2481947d47434791b7a82ae" style="color:var(--fg)">Fix VI Analyzer diagnostic: use script file to avoid YAML escaping</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-05-30</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1685,7 +1965,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1695,7 +1974,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Add CI dashboard, status badges, and deploy concurrency controls"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=db4e75da2d9c87d5c4f6ef7f004ddf57b8330ee0" style="color:var(--fg)">Add CI dashboard, status badges, and deploy concurrency controls</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-05-29</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1715,7 +1993,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1725,7 +2002,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Fix VI Analyzer config: use absolute container path for workspace"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=0c1930f8a2e90bd61fae69d6a182baa68b581154" style="color:var(--fg)">Fix VI Analyzer config: use absolute container path for workspace</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-05-29</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1745,7 +2021,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1755,7 +2030,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="VIDiff status link goes directly to report when only one"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=4a56353b849935aee51f56eaf64a599fde028c59" style="color:var(--fg)">VIDiff status link goes directly to report when only one</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-05-29</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1775,7 +2049,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1785,7 +2058,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Fix Docker failures (pin windows-2022) and link reports to commits"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=bae22f4b3d8a5cf1cd3d893323e413609400bcdb" style="color:var(--fg)">Fix Docker failures (pin windows-2022) and link reports to commits</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-05-29</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1805,7 +2077,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1820,17 +2091,15 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
       <td style="padding:8px;font-family:monospace;font-size:.85em">
         <a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=e79a32f54939ad389f937054972907717d0f40e1" style="color:var(--link)" title="Browse this commit's VIs in the VI Browser">e79a32f</a>
       </td>
-      <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Merge branch 'main' of https://github.com/elijah286/mini-system-manager"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=e79a32f54939ad389f937054972907717d0f40e1" style="color:var(--fg)">Merge branch 'main' of https://github.com/elijah286/mini-system-manager</a></td>
+      <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Merge branch &#x27;main&#x27; of https://github.com/elijah286/mini-system-manager"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=e79a32f54939ad389f937054972907717d0f40e1" style="color:var(--fg)">Merge branch &#x27;main&#x27; of https://github.com/elijah286/mini-system-manager</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">Elijah Kerry</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-05-29</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1850,7 +2119,6 @@
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vidiff" data-sha="18f9d59a3f2763a5f651ac35fbf87eb72106238c" data-parent="f0e2b160d4e16d1caab904dfabf42ca85df7c772" data-short="18f9d59" title="Run VIDiff for commit 18f9d59">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="snapshots" data-sha="18f9d59a3f2763a5f651ac35fbf87eb72106238c" data-parent="f0e2b160d4e16d1caab904dfabf42ca85df7c772" data-short="18f9d59" title="Run VI Snapshots for commit 18f9d59">&#9655;</a></td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1860,7 +2128,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Trigger VIDiff on push to main (not just PRs)"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=970ae2364ee44b912fd144d7f1a6ce4ec9ff4b19" style="color:var(--fg)">Trigger VIDiff on push to main (not just PRs)</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-05-29</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1880,7 +2147,6 @@
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vidiff" data-sha="f0e2b160d4e16d1caab904dfabf42ca85df7c772" data-parent="d3abc9d4563b3f0a8c793b7fa7b0241439973f80" data-short="f0e2b16" title="Run VIDiff for commit f0e2b16">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="snapshots" data-sha="f0e2b160d4e16d1caab904dfabf42ca85df7c772" data-parent="d3abc9d4563b3f0a8c793b7fa7b0241439973f80" data-short="f0e2b16" title="Run VI Snapshots for commit f0e2b16">&#9655;</a></td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1890,7 +2156,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Add LabVIEW CI pipeline (mass compile, VI Analyzer, VIDiff)"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=d3abc9d4563b3f0a8c793b7fa7b0241439973f80" style="color:var(--fg)">Add LabVIEW CI pipeline (mass compile, VI Analyzer, VIDiff)</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">elijah286</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-05-29</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1910,7 +2175,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1920,7 +2184,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Update image source in README"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=545a0685870fc292e7a37ec3cc9e6ac4a6b28556" style="color:var(--fg)">Update image source in README</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">Elijah Kerry</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-02-09</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1940,7 +2203,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="false">
@@ -1950,7 +2212,6 @@
       <td style="padding:8px;font-size:.85em;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="Enhance README with detailed project information"><a href="https://elijah286.github.io/mini-system-manager/vi-snapshots/index.html?sha=287a21aa37fd0e84d3abeac560147405162c0c66" style="color:var(--fg)">Enhance README with detailed project information</a></td>
       <td style="padding:8px;font-size:.82em;color:var(--fg-muted)">Elijah Kerry</td>
       <td style="padding:8px;font-size:.75em;color:var(--fg-muted)">2026-02-09</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
@@ -1970,7 +2231,6 @@
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="true">
@@ -1984,7 +2244,6 @@
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vi-analyzer" data-sha="6a28235e326d3b7e6b6c62935610dd83594615b9" data-parent="0af78bc98d5d8a3d6738568e5a88cb53040838d3" data-short="6a28235" title="Run VI Analyzer for commit 6a28235">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vidiff" data-sha="6a28235e326d3b7e6b6c62935610dd83594615b9" data-parent="0af78bc98d5d8a3d6738568e5a88cb53040838d3" data-short="6a28235" title="Run VIDiff for commit 6a28235">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="snapshots" data-sha="6a28235e326d3b7e6b6c62935610dd83594615b9" data-parent="0af78bc98d5d8a3d6738568e5a88cb53040838d3" data-short="6a28235" title="Run VI Snapshots for commit 6a28235">&#9655;</a></td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
@@ -2000,7 +2259,6 @@
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vidiff" data-sha="0af78bc98d5d8a3d6738568e5a88cb53040838d3" data-parent="3fbb38f3421f067808b65f6348727ab4f2e30dbd" data-short="0af78bc" title="Run VIDiff for commit 0af78bc">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="snapshots" data-sha="0af78bc98d5d8a3d6738568e5a88cb53040838d3" data-parent="3fbb38f3421f067808b65f6348727ab4f2e30dbd" data-short="0af78bc" title="Run VI Snapshots for commit 0af78bc">&#9655;</a></td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="true">
@@ -2014,7 +2272,6 @@
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vi-analyzer" data-sha="3fbb38f3421f067808b65f6348727ab4f2e30dbd" data-parent="a7bf734d16b48072121f3a755f867900d6d9aba5" data-short="3fbb38f" title="Run VI Analyzer for commit 3fbb38f">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vidiff" data-sha="3fbb38f3421f067808b65f6348727ab4f2e30dbd" data-parent="a7bf734d16b48072121f3a755f867900d6d9aba5" data-short="3fbb38f" title="Run VIDiff for commit 3fbb38f">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="snapshots" data-sha="3fbb38f3421f067808b65f6348727ab4f2e30dbd" data-parent="a7bf734d16b48072121f3a755f867900d6d9aba5" data-short="3fbb38f" title="Run VI Snapshots for commit 3fbb38f">&#9655;</a></td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
@@ -2030,7 +2287,6 @@
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vidiff" data-sha="a7bf734d16b48072121f3a755f867900d6d9aba5" data-parent="035ca37f4c0a1e2d63bc85036064b4d9cb166054" data-short="a7bf734" title="Run VIDiff for commit a7bf734">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="snapshots" data-sha="a7bf734d16b48072121f3a755f867900d6d9aba5" data-parent="035ca37f4c0a1e2d63bc85036064b4d9cb166054" data-short="a7bf734" title="Run VI Snapshots for commit a7bf734">&#9655;</a></td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="true">
@@ -2044,7 +2300,6 @@
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vi-analyzer" data-sha="035ca37f4c0a1e2d63bc85036064b4d9cb166054" data-parent="553622daaf10f500f2400196197d5b88d4664360" data-short="035ca37" title="Run VI Analyzer for commit 035ca37">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vidiff" data-sha="035ca37f4c0a1e2d63bc85036064b4d9cb166054" data-parent="553622daaf10f500f2400196197d5b88d4664360" data-short="035ca37" title="Run VIDiff for commit 035ca37">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="snapshots" data-sha="035ca37f4c0a1e2d63bc85036064b4d9cb166054" data-parent="553622daaf10f500f2400196197d5b88d4664360" data-short="035ca37" title="Run VI Snapshots for commit 035ca37">&#9655;</a></td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
@@ -2060,7 +2315,6 @@
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vidiff" data-sha="553622daaf10f500f2400196197d5b88d4664360" data-parent="0008bdad2753c2e5b224818d0f13ab055190f839" data-short="553622d" title="Run VIDiff for commit 553622d">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="snapshots" data-sha="553622daaf10f500f2400196197d5b88d4664360" data-parent="0008bdad2753c2e5b224818d0f13ab055190f839" data-short="553622d" title="Run VI Snapshots for commit 553622d">&#9655;</a></td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="true">
@@ -2074,7 +2328,6 @@
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vi-analyzer" data-sha="0008bdad2753c2e5b224818d0f13ab055190f839" data-parent="c37e5eaaa87fce7c347ed643cf20a671cdf7579e" data-short="0008bda" title="Run VI Analyzer for commit 0008bda">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vidiff" data-sha="0008bdad2753c2e5b224818d0f13ab055190f839" data-parent="c37e5eaaa87fce7c347ed643cf20a671cdf7579e" data-short="0008bda" title="Run VIDiff for commit 0008bda">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="snapshots" data-sha="0008bdad2753c2e5b224818d0f13ab055190f839" data-parent="c37e5eaaa87fce7c347ed643cf20a671cdf7579e" data-short="0008bda" title="Run VI Snapshots for commit 0008bda">&#9655;</a></td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
@@ -2090,7 +2343,6 @@
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vidiff" data-sha="c37e5eaaa87fce7c347ed643cf20a671cdf7579e" data-parent="5887ac14214314e5bf8bdfeffedfc873f2c436b8" data-short="c37e5ea" title="Run VIDiff for commit c37e5ea">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="snapshots" data-sha="c37e5eaaa87fce7c347ed643cf20a671cdf7579e" data-parent="5887ac14214314e5bf8bdfeffedfc873f2c436b8" data-short="c37e5ea" title="Run VI Snapshots for commit c37e5ea">&#9655;</a></td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="true">
@@ -2104,7 +2356,6 @@
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vi-analyzer" data-sha="5887ac14214314e5bf8bdfeffedfc873f2c436b8" data-parent="a00bd34b6dec68ce1d18b8654894a058d41041c6" data-short="5887ac1" title="Run VI Analyzer for commit 5887ac1">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vidiff" data-sha="5887ac14214314e5bf8bdfeffedfc873f2c436b8" data-parent="a00bd34b6dec68ce1d18b8654894a058d41041c6" data-short="5887ac1" title="Run VIDiff for commit 5887ac1">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="snapshots" data-sha="5887ac14214314e5bf8bdfeffedfc873f2c436b8" data-parent="a00bd34b6dec68ce1d18b8654894a058d41041c6" data-short="5887ac1" title="Run VI Snapshots for commit 5887ac1">&#9655;</a></td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
@@ -2120,7 +2371,6 @@
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vidiff" data-sha="a00bd34b6dec68ce1d18b8654894a058d41041c6" data-parent="e22d539099d5bddb6b2899370d9ddf1d16808c8c" data-short="a00bd34" title="Run VIDiff for commit a00bd34">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="snapshots" data-sha="a00bd34b6dec68ce1d18b8654894a058d41041c6" data-parent="e22d539099d5bddb6b2899370d9ddf1d16808c8c" data-short="a00bd34" title="Run VI Snapshots for commit a00bd34">&#9655;</a></td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="true">
@@ -2134,7 +2384,6 @@
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vi-analyzer" data-sha="e22d539099d5bddb6b2899370d9ddf1d16808c8c" data-parent="c05a21cf261849813ed418f596eda66ea873f64b" data-short="e22d539" title="Run VI Analyzer for commit e22d539">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vidiff" data-sha="e22d539099d5bddb6b2899370d9ddf1d16808c8c" data-parent="c05a21cf261849813ed418f596eda66ea873f64b" data-short="e22d539" title="Run VIDiff for commit e22d539">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="snapshots" data-sha="e22d539099d5bddb6b2899370d9ddf1d16808c8c" data-parent="c05a21cf261849813ed418f596eda66ea873f64b" data-short="e22d539" title="Run VI Snapshots for commit e22d539">&#9655;</a></td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
@@ -2150,7 +2399,6 @@
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vidiff" data-sha="c05a21cf261849813ed418f596eda66ea873f64b" data-parent="e3c4fe9710106ce0876fb86b79bc44666334b560" data-short="c05a21c" title="Run VIDiff for commit c05a21c">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="snapshots" data-sha="c05a21cf261849813ed418f596eda66ea873f64b" data-parent="e3c4fe9710106ce0876fb86b79bc44666334b560" data-short="c05a21c" title="Run VI Snapshots for commit c05a21c">&#9655;</a></td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="true">
@@ -2164,7 +2412,6 @@
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vi-analyzer" data-sha="e3c4fe9710106ce0876fb86b79bc44666334b560" data-parent="e46e1c8deafb089eb62e15994676d240dafddf5e" data-short="e3c4fe9" title="Run VI Analyzer for commit e3c4fe9">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vidiff" data-sha="e3c4fe9710106ce0876fb86b79bc44666334b560" data-parent="e46e1c8deafb089eb62e15994676d240dafddf5e" data-short="e3c4fe9" title="Run VIDiff for commit e3c4fe9">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="snapshots" data-sha="e3c4fe9710106ce0876fb86b79bc44666334b560" data-parent="e46e1c8deafb089eb62e15994676d240dafddf5e" data-short="e3c4fe9" title="Run VI Snapshots for commit e3c4fe9">&#9655;</a></td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
@@ -2180,7 +2427,6 @@
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vidiff" data-sha="e46e1c8deafb089eb62e15994676d240dafddf5e" data-parent="d54b4a1dda72d799b4d52fadb4e9dc9861025aa3" data-short="e46e1c8" title="Run VIDiff for commit e46e1c8">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="snapshots" data-sha="e46e1c8deafb089eb62e15994676d240dafddf5e" data-parent="d54b4a1dda72d799b4d52fadb4e9dc9861025aa3" data-short="e46e1c8" title="Run VI Snapshots for commit e46e1c8">&#9655;</a></td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr>
 
     <tr data-project="true">
@@ -2194,7 +2440,6 @@
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vi-analyzer" data-sha="d54b4a1dda72d799b4d52fadb4e9dc9861025aa3" data-parent="" data-short="d54b4a1" title="Run VI Analyzer for commit d54b4a1">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="vidiff" data-sha="d54b4a1dda72d799b4d52fadb4e9dc9861025aa3" data-parent="" data-short="d54b4a1" title="Run VIDiff for commit d54b4a1">&#9655;</a></td>
       <td style="text-align:center"><a href="#" class="cidash-run" data-cap="snapshots" data-sha="d54b4a1dda72d799b4d52fadb4e9dc9861025aa3" data-parent="" data-short="d54b4a1" title="Run VI Snapshots for commit d54b4a1">&#9655;</a></td>
-      <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
       <td style="text-align:center;color:var(--fg-muted);font-size:.75em">—</td>
     </tr></tbody>
   </table>
@@ -2225,6 +2470,59 @@
       };
       checkbox.addEventListener('change', applyFilter);
       applyFilter();
+    })();
+
+    // Column-visibility menu: a standard "Columns" dropdown of checkboxes that
+    // toggles each (non-identifier) column on/off, persisted per-repo in
+    // localStorage so the choice survives reloads. Commit (column 0) is the row
+    // identifier and is always shown.
+    (() => {
+      const STORE = 'lvci_dash_cols_elijah286/mini-system-manager';
+      const COLS = [
+        {key:'message',     label:'Message',      idx:1},
+        {key:'author',      label:'Author',       idx:2},
+        {key:'date',        label:'Date',         idx:3},
+        {key:'masscompile', label:'Mass Compile', idx:4},
+        {key:'vi-analyzer', label:'VI Analyzer',  idx:5},
+        {key:'vidiff',      label:'VIDiff',       idx:6},
+        {key:'snapshots',   label:'Snapshots',    idx:7},
+        {key:'unit-tests',  label:'Unit Tests',   idx:8}
+      ];
+      const btn = document.getElementById('cidash-colbtn');
+      const panel = document.getElementById('cidash-colpanel');
+      if (!btn || !panel) return;
+      const hidden = {};
+      try { (JSON.parse(localStorage.getItem(STORE)) || []).forEach((k) => { hidden[k] = true; }); } catch (e) {}
+      const persist = () => {
+        try { localStorage.setItem(STORE, JSON.stringify(COLS.map((c) => c.key).filter((k) => hidden[k]))); } catch (e) {}
+      };
+      const applyCol = (col) => {
+        const vis = !hidden[col.key];
+        document.querySelectorAll('#cidash-table > thead > tr, #cidash-table > tbody > tr').forEach((tr) => {
+          const cell = tr.children[col.idx];
+          if (cell) cell.style.display = vis ? '' : 'none';
+        });
+      };
+      const head = document.createElement('div');
+      head.className = 'hd';
+      head.textContent = 'Show columns';
+      panel.appendChild(head);
+      COLS.forEach((col) => {
+        const lab = document.createElement('label');
+        lab.className = 'cidash-colopt';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = !hidden[col.key];
+        cb.addEventListener('change', () => { hidden[col.key] = !cb.checked; applyCol(col); persist(); });
+        lab.appendChild(cb);
+        lab.appendChild(document.createTextNode(' ' + col.label));
+        panel.appendChild(lab);
+        applyCol(col);
+      });
+      const setOpen = (open) => { panel.hidden = !open; btn.setAttribute('aria-expanded', open ? 'true' : 'false'); };
+      btn.addEventListener('click', (e) => { e.stopPropagation(); setOpen(panel.hidden); });
+      document.addEventListener('click', (e) => { if (!panel.hidden && !panel.contains(e.target) && e.target !== btn) setOpen(false); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
     })();
   </script>
 </body>
