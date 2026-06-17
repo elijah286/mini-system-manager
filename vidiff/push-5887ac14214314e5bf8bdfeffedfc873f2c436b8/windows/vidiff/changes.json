@@ -1,0 +1,10 @@
+{
+  "platform": "windows",
+  "files": [
+    {"file": "Curriculum Launcher.vi", "type": "modified", "report": "Curriculum_Launcher.vi/index.html"},
+    {"file": "Curriculum/Generator Lessons/Generator Lesson 3.vi", "type": "modified", "report": "Curriculum-Generator_Lessons-Generator_Lesson_3.vi/index.html"},
+    {"file": "Curriculum/Solar Lessons/Solar Example.vi", "type": "modified", "report": "Curriculum-Solar_Lessons-Solar_Example.vi/index.html"},
+    {"file": "Status String Update.vi", "type": "modified", "report": "Status_String_Update.vi/index.html"},
+    {"file": "main.vi", "type": "modified", "report": "main.vi/index.html"}
+  ]
+}
