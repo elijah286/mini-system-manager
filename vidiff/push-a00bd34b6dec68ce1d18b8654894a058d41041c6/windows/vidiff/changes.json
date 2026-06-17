@@ -1,0 +1,12 @@
+{
+  "platform": "windows",
+  "files": [
+    {"file": "Curriculum/Generator Lessons/Generator Lesson 1.vi", "type": "modified", "report": "Curriculum-Generator_Lessons-Generator_Lesson_1.vi/index.html"},
+    {"file": "Curriculum/Generator Lessons/Generator Lesson 2.vi", "type": "modified", "report": "Curriculum-Generator_Lessons-Generator_Lesson_2.vi/index.html"},
+    {"file": "Curriculum/Generator Lessons/Generator Lesson 3.vi", "type": "modified", "report": "Curriculum-Generator_Lessons-Generator_Lesson_3.vi/index.html"},
+    {"file": "Curriculum/Generator Lessons/Generator Lesson 4.vi", "type": "modified", "report": "Curriculum-Generator_Lessons-Generator_Lesson_4.vi/index.html"},
+    {"file": "Curriculum/Generator Lessons/Generator Lesson 5.vi", "type": "modified", "report": "Curriculum-Generator_Lessons-Generator_Lesson_5.vi/index.html"},
+    {"file": "Curriculum/Generator Lessons/Generator Lesson 6.vi", "type": "modified", "report": "Curriculum-Generator_Lessons-Generator_Lesson_6.vi/index.html"},
+    {"file": "Curriculum/Generator Lessons/Generator Lesson 7.vi", "type": "modified", "report": "Curriculum-Generator_Lessons-Generator_Lesson_7.vi/index.html"}
+  ]
+}
