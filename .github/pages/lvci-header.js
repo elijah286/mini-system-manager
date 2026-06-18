@@ -112,6 +112,8 @@
     '.lvci-nav a.on::after{content:"";position:absolute}',
     '@media(prefers-color-scheme:light){.lvci-nav a:hover,.lvci-nav a.on{color:#1f2328;background:rgba(80,90,100,.10)}}',
     '.lvci-nav a .lvci-soon{font-size:9.5px;font-weight:600;color:#8b949e;border:1px solid #30363d;border-radius:999px;padding:0 5px;text-transform:uppercase;letter-spacing:.04em}',
+    // Count pill beside a nav item (e.g. Clients), filled in once the registry loads.
+    '.lvci-nav a .lvci-ncount{font-size:10px;font-weight:700;color:#8b949e;background:rgba(177,186,196,.16);border-radius:999px;padding:1px 6px;min-width:16px;text-align:center;line-height:1.4}',
     // Actions cluster (right)
     '.lvci-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}',
     '.lvci-btn{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;line-height:1;cursor:pointer;',
@@ -335,8 +337,10 @@
     configure: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1.5" y1="14" x2="6.5" y2="14"/><line x1="9.5" y1="8" x2="14.5" y2="8"/><line x1="17.5" y1="16" x2="22.5" y2="16"/></svg>',
     update: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
     about: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><line x1="12" y1="16" x2="12" y2="11.5"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+    clients: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-6A3.5 3.5 0 0 0 4 18.5V20"/><circle cx="10.5" cy="8" r="3.5"/><path d="M21 20v-1.5a3.5 3.5 0 0 0-2.6-3.4"/><path d="M15.5 4.6a3.5 3.5 0 0 1 0 6.8"/></svg>',
     news: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M11.5 3l1.8 5.2 5.2 1.8-5.2 1.8L11.5 17l-1.8-5.2L4.5 10l5.2-1.8z"/><path d="M18 14l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg>',
     history: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>',
+    tests: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v6L5.4 17.5A1.5 1.5 0 0 0 6.7 20h10.6a1.5 1.5 0 0 0 1.3-2.5L14 9V3"/><line x1="7.5" y1="14" x2="16.5" y2="14"/></svg>',
     sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 1.8v2.4M12 19.8v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M1.8 12h2.4M19.8 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>',
     moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>',
     system: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="19" height="13" rx="2"/><line x1="8.5" y1="20.5" x2="15.5" y2="20.5"/><line x1="12" y1="16.5" x2="12" y2="20.5"/></svg>'
@@ -404,12 +408,11 @@
   // ── Primary navigation (the durable site sections). Data-driven so future
   //    capabilities — Builds, Documentation, Unit Tests — are a one-line add. ─
   var NAV = [
-    { key: 'dashboard',  label: 'Dashboard',  href: base + '/' },
-    { key: 'vi-browser', label: 'VI Browser', href: base + '/vi-snapshots/' }
+    { key: 'dashboard',   label: 'Dashboard',    href: base + '/' },
+    { key: 'vi-browser',  label: 'VI Browser',   href: base + '/vi-snapshots/' }
     // Future (uncomment / extend as capabilities land):
     // { key: 'builds', label: 'Builds', href: base + '/builds/', soon: true },
-    // { key: 'docs',   label: 'Docs',   href: base + '/docs/',   soon: true },
-    // { key: 'tests',  label: 'Tests',  href: base + '/tests/',  soon: true }
+    // { key: 'docs',   label: 'Docs',   href: base + '/docs/',   soon: true }
   ];
   // Which nav item is "current" for each context (drives the active pill).
   var NAV_ACTIVE = {
@@ -417,12 +420,16 @@
     'vi-browser': 'vi-browser',
     'vi-analyzer-report': 'dashboard',
     'masscompile-report': 'dashboard',
+    'unit-tests-report': 'dashboard',
+    'antidoc-report': 'dashboard',
+    'unit-tests-config': 'dashboard',
     'worker-manifest': 'dashboard',
     'report-viewer': 'dashboard',
     'configure': 'dashboard',
     'integrate': 'dashboard',
     'whats-new': 'dashboard',
-    'faq': 'dashboard'
+    'faq': 'dashboard',
+    'clients': 'clients'
   };
 
   // ── Per-revision DOCUMENT types ───────────────────────────────────────────
@@ -446,6 +453,17 @@
       regenLabel: 'Regenerate report', rawLabel: 'Raw log', rawName: 'masscompile.log',
       workflow: { windows: 'masscompile-windows-container.yml',
                   linux:   'masscompile-linux-container.yml' }
+    },
+    'unit-tests-report': {
+      prefix: 'unit-tests', cap: 'unit-tests', label: 'Unit Tests',
+      regenLabel: 'Re-run tests', rawLabel: 'Test results (JSON)', rawName: 'results.json',
+      workflow: { windows: 'unit-tests-windows-container.yml',
+                  linux:   'unit-tests-linux-container.yml' }
+    },
+    'antidoc-report': {
+      prefix: 'antidoc', cap: 'antidoc', label: 'Antidoc',
+      regenLabel: 'Regenerate docs', rawLabel: 'Run log', rawName: 'antidoc.log',
+      workflow: { windows: 'run-antidoc-windows-container.yml' }
     }
   };
   var DOC = DOCTYPES[ctx] || null;   // non-null only on a per-revision report
@@ -492,10 +510,13 @@
       'dashboard': [
         { label: 'Populate history', svg: ICON.history, kind: 'runhistory' },
         { label: 'Configure Workers', svg: ICON.configure, kind: 'configure' },
+        { label: 'Unit Testing', svg: ICON.tests, kind: 'unittests' },
+        { label: 'Clients', svg: ICON.clients, href: base + '/clients.html', source: true },
         { label: 'About', svg: ICON.about, href: base + '/faq.html' }
       ],
       'worker-manifest': [],
       'vi-browser': [
+        { label: 'Clients', svg: ICON.clients, href: base + '/clients.html', source: true },
         { label: 'About', svg: ICON.about, href: base + '/faq.html' }
       ],
       'report-viewer': [],
@@ -512,6 +533,7 @@
   function openPage(kind) {
     var map = {
       configure: { src: 'configure.html' + (repo ? ('?repo=' + encodeURIComponent(repo)) : ''), title: 'Configure Workers' },
+      unittests: { src: 'unit-tests.html' + (repo ? ('?repo=' + encodeURIComponent(repo)) : ''), title: 'Unit Testing' },
       integrate: { src: 'integrate.html', title: 'Apply to New Repo' }
     };
     var t = map[kind]; if (!t) return;
@@ -631,7 +653,7 @@
     el.innerHTML = iconHtml(a) + esc(a.label);
     if (!a.href) {
       el.addEventListener('click', function () {
-        if (a.kind === 'configure' || a.kind === 'integrate') openPage(a.kind);
+        if (a.kind === 'configure' || a.kind === 'integrate' || a.kind === 'unittests') openPage(a.kind);
         else if (a.kind === 'rerun') rerun();
         else if (a.kind === 'runhistory') runHistory();
       });
@@ -836,12 +858,13 @@
           el = document.createElement('button');
           el.type = 'button';
           el.addEventListener('click', function () {
-            if (a.kind === 'configure' || a.kind === 'integrate') openPage(a.kind);
+            if (a.kind === 'configure' || a.kind === 'integrate' || a.kind === 'unittests') openPage(a.kind);
             else if (a.kind === 'runhistory') runHistory();
             closeDD();
           });
         }
         el.innerHTML = iconHtml(a) + esc(a.label);
+        if (a.source) { el.style.display = 'none'; clientsEls.push(el); }
         ddMenu.appendChild(el);
       });
       // Version / update entry — the single home for the installed version and
@@ -892,7 +915,11 @@
     var secActs = buildSecondaryActions();
     if (secActs.length) {
       var sep = document.createElement('div'); sep.className = 'lvci-sep'; menu.appendChild(sep);
-      secActs.forEach(function (a) { menu.appendChild(actionEl(a, true)); });
+      secActs.forEach(function (a) {
+        var el = actionEl(a, true);
+        if (a.source) { el.style.display = 'none'; clientsEls.push(el); }
+        menu.appendChild(el);
+      });
     }
     // Version / update entry (mobile) — same single home as the dropdown.
     var sepV = document.createElement('div'); sepV.className = 'lvci-sep'; menu.appendChild(sepV);
@@ -982,6 +1009,7 @@
   var verState = { v: '', behind: false, to: '' };
   var runState = { active: 0, names: [] };
   var verEls = [];
+  var clientsEls = [];
   // Page-rebuild banner: only the dashboard shows it (there "this page is being
   // regenerated" is literally true). buildWas remembers the prior poll so we can
   // auto-refresh exactly once when an in-flight rebuild finishes.
@@ -1001,7 +1029,7 @@
         renderBadge();
         var src = (cat.source && cat.source.repo) || '';
         var isConsumer = src && repo && src.toLowerCase() !== repo.toLowerCase();
-        if (!isConsumer) return;
+        if (!isConsumer) { revealClients(); return; }   // root repo: surface Clients even before a scan has published clients.json
         var ref = (cat.source && cat.source.ref) || 'main';
         fetch('https://raw.githubusercontent.com/' + src + '/' + ref + '/.github/labview-ci/catalog.json', { cache: 'no-cache' })
           .then(function (r) { return r.ok ? r.json() : null; })
@@ -1010,6 +1038,23 @@
             if (cmpVer(s.version, v) > 0) { verState.behind = true; verState.to = s.version; renderBadge(); }
           }).catch(function () {});
       }).catch(function () {});
+  }
+  // ── Clients registry (root/source repo only) ────────────────────────────
+  // The Clients nav entry belongs to the ROOT repo that originates this tooling.
+  // It is revealed when this repo is the source (no upstream — see loadVersion)
+  // or once the published clients.json is read (then it also shows a count). It
+  // stays hidden on consumer sites.
+  function revealClients(count) {
+    clientsEls.forEach(function (a) {
+      a.style.display = '';
+      if (count) { var c = a.querySelector('.lvci-ncount'); if (c) { c.textContent = count; c.hidden = false; } }
+    });
+  }
+  function loadClients() {
+    if (!clientsEls.length) return;
+    fetch(base + '/clients.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) { if (data) revealClients((data.clients && data.clients.length) || data.count || 0); })
+      .catch(function () {});
   }
   function cmpVer(a, b) {
     var pa = String(a).split('.').map(Number), pb = String(b).split('.').map(Number);
@@ -1188,7 +1233,7 @@
     renderBadge();
   };
 
-  function init() { build(); loadVersion(); startActivity(); }
+  function init() { build(); if (cfg.isSource) revealClients(); loadVersion(); loadClients(); startActivity(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();

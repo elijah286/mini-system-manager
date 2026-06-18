@@ -1,11 +1,285 @@
 {
   "schemaVersion": 1,
-  "version": "2.9.0",
+  "version": "3.4.14",
   "name": "LabVIEW CI",
   "description": "Portable, repo-agnostic CI/CD capabilities for LabVIEW repositories: mass compile, VI Analyzer, VIDiff comparison reports, VI snapshots / VI Browser, and a status dashboard. Driven entirely by this catalog so the configurator UI and the installer stay in sync and new capabilities are a one-entry change.",
   "history": {
     "comment": "Release notes for the tooling, newest first. `version` (above) is the CURRENT published release and MUST equal releases[0].version. The dashboard version badge and the What's New dialog read these notes to tell a consumer what changed between the version they run and the latest this source repo publishes. Each published version should also be tagged v<version> in this repo so consumers can pin an update to a specific release.",
     "releases": [
+      {
+        "version": "3.4.14",
+        "date": "2026-06-18",
+        "title": "Installing no longer floods a new repo with CI runs, and Linux container jobs are opt-in",
+        "summary": "Two fixes to what happens right after Apply to New Repo. First, opening the install pull request used to start the entire CI matrix - Mass Compile, VI Analyzer and VIDiff, on both Windows and Linux - even though you had not changed any of your own VIs. That happened because the tooling ships a few helper VIs (the PrintToSingleFileHtml diff helpers) and the VI workflows watched every '**.vi' path, so the install's own files tripped them. Those workflows now ignore changes under '.github/**', so a tooling-only commit or the install pull request no longer triggers them - only real changes to your VIs do. Second, the Linux container jobs run on the NI base image and are still experimental, yet they were installed and run by default and reliably failed on a fresh repo; installing now defaults to Windows only, with Linux offered as an opt-in (the installer and Configure Workers both leave Linux unchecked and label it experimental). Already-installed repositories are unchanged until you re-run the installer or reconfigure.",
+        "highlights": [
+          "Opening the install pull request no longer fans out the whole CI matrix: the VI workflows now ignore '.github/**', so only changes to your own VIs trigger Mass Compile, VI Analyzer and VIDiff.",
+          "Linux container jobs (experimental, NI base image) are no longer installed or run by default - they are an opt-in in the installer and Configure Workers, so a fresh repo no longer shows failing Linux checks.",
+          "Windows is the supported default; existing installs are unchanged until you re-run the installer or reconfigure."
+        ]
+      },
+      {
+        "version": "3.4.13",
+        "date": "2026-06-18",
+        "title": "Apply to New Repo: the dashboard link appears only once the page is really live",
+        "summary": "When the configurator auto-merges the install, it now waits for GitHub Pages to actually publish your dashboard before showing the link, so the link is never a dead 404. The install progress bar stays in an active \"publishing...\" state the whole time GitHub Pages is building the page (with a running timer), and only completes and reveals the clickable dashboard link once the page is confirmed live. Until then the dashboard URL is shown as plain text rather than a link you might click too early. No change to an already-installed pipeline.",
+        "highlights": [
+          "Publishing the dashboard is now part of the install progress - the bar keeps showing it is working until GitHub Pages serves the page.",
+          "The dashboard link is revealed only after the page is confirmed live, so it is never a 404.",
+          "Honest status while publishing, with an elapsed-time indicator; the link appears the moment the dashboard goes live."
+        ]
+      },
+      {
+        "version": "3.4.12",
+        "date": "2026-06-18",
+        "title": "Apply to New Repo: VI Browser 2.0 render setup removed from install",
+        "summary": "The Apply to New Repo / Integrate page no longer includes the optional \"VI Browser 2.0 - position-aware renders\" panel for setting a private render image and read-token. That configuration does not need to be done at install time and is still available later from the dashboard's own VI Browser 2.0 setup wizard, which provisions the same render image and token when you choose to enable the in-place 2.0 view. Because that panel was the only part of the installer that writes a repository secret, the pre-filled install token no longer requests the Secrets permission; Variables (used to pin your settings) and the other permissions are unchanged. There is no change to an already-installed pipeline.",
+        "highlights": [
+          "The installer's optional VI Browser 2.0 render-image/token panel is removed - that setup is not needed at install time.",
+          "VI Browser 2.0 can still be provisioned later from the dashboard's own VI Browser setup wizard.",
+          "The pre-filled install token no longer requests Secrets (it was only used by that panel); Variables and the other permissions are unchanged."
+        ]
+      },
+      {
+        "version": "3.4.11",
+        "date": "2026-06-18",
+        "title": "VI Browser 2.0 reflects real render status instead of the token prompt",
+        "summary": "Once a repository is provisioned, the 2.0 view no longer shows the 'needs a render token' prompt (or a 1.0 fallback) for a VI that has no position-aware frames. It now reflects the actual state: the token prompt only when the repo is not connected; the in-place render when frames exist; a 'rendering...' status with a link to the run while the snapshot action is in progress; and, when a run finished without frames for a VI, a plain explanation - controls (.ctl) and VIs without a block diagram are skipped, and a render the image could not open is skipped - plus View run and Re-run buttons. It reads the latest vi-snapshots-json.yml run via the Actions API using the dispatch token, and polls while a run is in progress.",
+        "highlights": [
+          "The 2.0 view now reflects real state: token prompt / in-place render / rendering-in-progress / finished-with-no-frames or failed.",
+          "A provisioned repo no longer shows 'needs a render token' for a VI that simply has no frames - it explains why and offers View run + Re-run.",
+          "Reads the latest vi-snapshots-json.yml run status via the Actions API (dispatch token) and auto-refreshes while a run is in progress."
+        ]
+      },
+      {
+        "version": "3.4.10",
+        "date": "2026-06-18",
+        "title": "Apply to New Repo: auto-tag your repository so it appears in the client directory",
+        "summary": "Installing via Apply to New Repo now tags your repository with the labview-ci topic so the source repository's client directory can discover and link it reliably (topic search is complete where code search is not). This uses the install token's Administration permission, which the pre-filled token now requests. If your existing token lacks it, the install still completes and a note prompts you to re-create the token with Administration so the repo can be tagged next time - tagging is best-effort and never blocks the install.",
+        "highlights": [
+          "Installs tag the repo with the labview-ci topic so it is reliably listed in the source client directory.",
+          "The pre-filled install token now requests Administration (Read and write); if it is missing the install still succeeds and prompts you to re-create the token with it.",
+          "Tagging is best-effort and never blocks the install."
+        ]
+      },
+      {
+        "version": "3.4.9",
+        "date": "2026-06-18",
+        "title": "VI Browser 2.0: clearer setup-token guidance (repository access + which permission)",
+        "summary": "The VI Browser 2.0 setup-token prompt now spells out the step the token URL cannot pre-fill: under Repository access, choose Only select repositories and pick this repo. A token left at the read-only default cannot write and returns a 403, which was the most common remaining cause of a stuck connect even after the permission params were fixed. When a token is then rejected, the error names exactly which permission is missing - 'cannot write Secrets' (check repository access plus Secrets: Read and write) versus 'the render token saved, but cannot write Variables' - so you know precisely what to fix instead of a generic message. The link still pre-checks Secrets and Variables.",
+        "highlights": [
+          "Setup-token prompt now tells you to select this repository under Repository access (the step the URL cannot pre-fill, and the most common 403 cause).",
+          "403 errors now name the exact missing permission - Secrets vs Variables - and note when the secret already saved.",
+          "VI Browser 2.0 only; the token link still pre-checks Secrets + Variables (Read and write)."
+        ]
+      },
+      {
+        "version": "3.4.8",
+        "date": "2026-06-18",
+        "title": "Clarification: code compatibility comes from your project save setting",
+        "summary": "The LabVIEW version used by CI stays fixed at the year the tooling is built for, and that is unchanged. An earlier note (3.4.3) said a future update would add a separate code-compatibility selector to the configurator; that is no longer planned. Keeping your code compatible with an older LabVIEW run-time is already handled by your project's own save-for-previous-version setting stored in the .lvproj, which the container honors when it opens the project to build and analyze it - so no extra control in the configurator is needed. This release only corrects the configurator's in-code notes and this guidance; there is no behavior change.",
+        "highlights": [
+          "Documentation-only clarification: the fixed LabVIEW version used by CI is unchanged.",
+          "Code compatibility with older run-times comes from your project's .lvproj save setting, which the container honors - not from a configurator option.",
+          "Supersedes the 3.4.3 note that mentioned a future code-compatibility picker; that control is not planned."
+        ]
+      },
+      {
+        "version": "3.4.7",
+        "date": "2026-06-18",
+        "title": "Setup-token links now pre-select the Variables permission",
+        "summary": "The pre-filled fine-grained token-creation links - the VI Browser 2.0 setup token and the installer token on the Integrate page - used the wrong URL parameter for the Variables permission (variables instead of GitHub's actual actions_variables), so GitHub silently ignored it and the generated token was missing Variables: Read and write. That left the token unable to save the TOIMAGES_IMAGE render-image variable even when Secrets was granted. The links now send actions_variables, so opening the token page pre-selects both Secrets and Variables (Read and write). Secrets and Actions were already correct.",
+        "highlights": [
+          "Token-creation links now correctly pre-select the Variables permission (GitHub's parameter is actions_variables, not variables).",
+          "Fixes both the VI Browser 2.0 setup token and the installer token on the Integrate page.",
+          "The pre-filled GitHub token form now has Secrets + Variables (Read and write) ready - no manual permission hunting."
+        ]
+      },
+      {
+        "version": "3.4.6",
+        "date": "2026-06-18",
+        "title": "Installing the pipeline no longer auto-runs CI on a new repo",
+        "summary": "Deploying LabVIEW CI to a new repository used to kick off CI and image-build jobs immediately: VI Snapshots, Unit Tests, and the LabVIEW container image build auto-ran on the tooling files the install adds (their scripts, the .github/labview-ci.yml config, the Dockerfile and the tooling vipc). Now those workflows trigger only on real LabVIEW source changes - your VIs, or your own project dependency vipc - or on demand. So installing simply stands up the dashboard showing your full revision history with no runs, and the dashboard offers a one-click Run all history prompt to backfill CI across history whenever you choose. Heavy work (snapshots, tests, image builds) starts only when you change source or ask for it.",
+        "highlights": [
+          "Installing no longer auto-runs CI: VI Snapshots, Unit Tests, and the LabVIEW image build now trigger only on real LabVIEW source changes (or on demand), not on the tooling files the install adds.",
+          "A fresh dashboard stands up with your full revision history and no runs, plus a one-click Run all history prompt so you choose when to backfill CI across history.",
+          "The LabVIEW image still rebuilds when your project depends on a new package (a *.vipc outside the tooling dir), monthly for base-image security, or on demand - just not on install."
+        ]
+      },
+      {
+        "version": "3.4.5",
+        "date": "2026-06-18",
+        "title": "VI Browser 2.0: a rejected render-token setup token can be fixed in place",
+        "summary": "After the connect-hang fix, a setup token that lacked permission - for example reusing the read:packages render token, which cannot write secrets - showed a clear error but left the bad token saved, so clicking Connect again just repeated the same error with no way to enter a different one. Now a rejected or insufficient setup token (401/403/404) is dropped automatically and the prompt reopens in place with specific guidance - including that the setup token is a separate, fine-grained token with Secrets and Variables set to Read and write, distinct from the render token - so you can paste a corrected token and finish without reloading. The render token you already pasted is kept, and the same in-place recovery now applies to the Actions: write token used by the Generate the 2.0 snapshot button.",
+        "highlights": [
+          "A rejected or under-scoped setup token is now cleared and re-requested in place instead of dead-ending on the error.",
+          "The prompt spells out that the setup token is a separate fine-grained token (Secrets + Variables: Read and write), not the read:packages render token.",
+          "The same in-place token recovery applies to the Actions: write token used to run the snapshot."
+        ]
+      },
+      {
+        "version": "3.4.4",
+        "date": "2026-06-18",
+        "title": "Apply to New Repo publishes the dashboard first, even if a CI check fails",
+        "summary": "Installing the pipeline into a new repository now makes the CI dashboard and its README link the first thing that goes live - independent of any CI run. Previously the dashboard only appeared after the first analysis run, so a failing check (for example the Windows VI Analyzer) could leave the site stuck on the publishing placeholder. The configurator now squash-merges the install pull request by default and dispatches the dashboard build immediately, so the dashboard publishes within a minute of applying, and the placeholder and on-screen guidance no longer say it waits for a CI run. Changing a VI still fills in the analysis columns (VI Analyzer, VIDiff, Mass Compile), but a failing check never keeps the dashboard from publishing. Uncheck the new default to review the install pull request first - the dashboard then publishes the moment you merge.",
+        "highlights": [
+          "The dashboard and README link publish as the first thing on Apply to New Repo - no CI run required, and a failing VI Analyzer no longer blocks the dashboard.",
+          "The install pull request now auto-merges by default and the dashboard build is dispatched immediately, so the site goes live within a minute (uncheck to review first).",
+          "Corrected the publishing placeholder and the installer guidance that wrongly said the dashboard appears only after the first CI run."
+        ]
+      },
+      {
+        "version": "3.4.3",
+        "date": "2026-06-18",
+        "title": "LabVIEW version is fixed to the supported year",
+        "summary": "The LabVIEW version field on the install and Configure Workers screens is now read-only and fixed to the year the CI tooling is built for (2026). The worker container images, baked VIPM dependencies, and LabVIEW paths all target that single year, so choosing a different one asked the Windows worker jobs to pull a container image tag that was never published and made them fail. Locking the field removes that pitfall, and reinstalling or reconfiguring a repository that was previously pinned to an unsupported year now heals it back to the supported year. A future update will reintroduce this control as a code-compatibility selector that keeps the 2026 editor but saves your code compatible with an older LabVIEW run-time using the new project save setting.",
+        "highlights": [
+          "The LabVIEW version selector is now read-only and fixed to the supported year (2026) in both the installer and Configure Workers.",
+          "This prevents the Windows container jobs from failing on a worker image tag that was never built for an unsupported year.",
+          "Reinstalling or reconfiguring a repository pinned to an old year now heals it back to the supported year."
+        ]
+      },
+      {
+        "version": "3.4.2",
+        "date": "2026-06-18",
+        "title": "VI Browser 2.0: reliable render-token connect",
+        "summary": "Connecting a render token from the VI Browser 2.0 lock screen could appear to hang at the sealing-and-saving step and never finish. The underlying cause - a response read before it had arrived, which silently aborted the connect - is fixed, and the flow now reports each step (reading the repository key, loading the encryption library, saving the token, checking the render image) and times out with a clear, retryable message instead of hanging. The in-browser encryption library also falls back to a second, integrity-pinned CDN if the first is blocked. On success the lock dialog is replaced by a Connected confirmation that names the render image and offers a one-click button to run the snapshot action that populates VI Browser 2.0 with imagery, and the two-step token prompt now confirms the render token is captured while it collects the one-time setup token.",
+        "highlights": [
+          "The render-token connect no longer hangs: each step reports progress and fails with a clear, retryable message.",
+          "The in-browser encryption library now has an integrity-pinned fallback CDN if the primary one is blocked.",
+          "On success the lock screen is replaced by a Connected panel with a one-click Generate the 2.0 snapshot button."
+        ]
+      },
+      {
+        "version": "3.4.1",
+        "date": "2026-06-18",
+        "title": "Clients directory moves into the More menu",
+        "summary": "The Clients directory link now lives in the header's More (...) menu, alongside About and What's new, instead of as a primary navigation tab - a better fit for a management view. It still appears only on the source repository that originates the tooling, never on a consumer site, and opens the same page (with the Scan for clients button) that lists every public repository discovered to be running this tooling.",
+        "highlights": [
+          "The Clients link is now in the header's More menu, next to About and What's new.",
+          "It still shows only on the root/source repository and never on a consumer site.",
+          "Same Clients page: lists discovered public repos and offers a Scan for clients button."
+        ]
+      },
+      {
+        "version": "3.4.0",
+        "date": "2026-06-18",
+        "title": "Container packages: the tooling can now ship baked-in VIPM tools additively",
+        "summary": "Until now the worker image's VIPM package list (ci-tooling.packages.json) was entirely repo-owned and preserved across updates, so LabVIEW CI could never add a baked-in package to repositories that already installed it. A new tooling-managed file, ci-tooling.defaults.json, closes that gap: it is replaced by updates (it is not in userConfig.files), so packages added to it are pushed to every repo, while build-tooling-vipc.py merges them UNDER your own ci-tooling.packages.json. Your packages always win on a name collision - a pin you set is never overridden, and a differing default version is surfaced as a notice - and a package that exists only in the defaults is added to your worker the next time you regenerate the VIPC (Reconfigure or Update). Because every change still bumps this version, you see exactly when a new tool is offered and choose to adopt it. The defaults file starts empty, so existing workers rebuild byte-identically until a default is actually added.",
+        "highlights": [
+          "New tooling-owned, version-locked ci-tooling.defaults.json lets LabVIEW CI ship baked-in VIPM packages to every repo, merged additively under your own list.",
+          "Your repo's packages are never clobbered: ci-tooling.packages.json stays preserved and wins on any name collision, with a notice when a default pins a different version.",
+          "No behavior change until a default is added - the defaults file starts empty and the generated worker VIPC is byte-identical."
+        ]
+      },
+      {
+        "version": "3.3.3",
+        "date": "2026-06-18",
+        "title": "Antidoc: reliably find g-cli in the worker image",
+        "summary": "Antidoc documentation generation could fail with \"g-cli was not found in the image\" even when g-cli was baked into the worker. The g-cli installer adds itself to the machine PATH in the registry, but a Windows container does not inherit that change into its runtime PATH, so the runner could not see it. The Antidoc runner now refreshes its PATH from the registry (the equivalent of restarting a build agent after install) and falls back to the known install locations and a bounded search, so a worker that has Antidoc enabled finds g-cli and produces documentation.",
+        "highlights": [
+          "The Antidoc runner refreshes PATH from the registry so a g-cli baked into the worker image is found at run time.",
+          "Added more g-cli install-location fallbacks plus a bounded search, covering the \"G CLI\" and \"G-CLI\" folder names.",
+          "Clearer diagnostics when g-cli genuinely is not present, pointing at enabling \"Use Antidoc\" and rebuilding the image."
+        ]
+      },
+      {
+        "version": "3.3.2",
+        "date": "2026-06-18",
+        "title": "Clients directory: available on the source dashboard right away, with one-click rescan",
+        "summary": "The Clients directory now appears on the source repository's dashboard immediately - it no longer waits for the first scan to publish a list - and the page gained a Scan for clients button at the top that opens the discovery workflow so the list can be refreshed on demand. The not-yet-scanned and empty states now point you at that button. The entry still shows only on the root repository that originates the tooling and never on a consumer site.",
+        "highlights": [
+          "The Clients menu shows on the source dashboard right away, before any scan has run.",
+          "A Scan for clients button on the page opens the discovery workflow to refresh the list on demand.",
+          "Not-yet-scanned and empty states now guide you to run a scan."
+        ]
+      },
+      {
+        "version": "3.3.1",
+        "date": "2026-06-18",
+        "title": "VI Browser 2.0 wizard: enter the setup token without leaving the page",
+        "summary": "The VI Browser 2.0 setup wizard could dead-end: if this browser had not already stored a setup token (one with Secrets: write), pasting the render token and clicking Connect only told you to go set one up on the Integrate page. Connect - and the Generate step - now prompt for the missing token right on the lock screen, with a pre-scoped 'Create one' link; you paste it, it is kept only in your browser, and the action retries automatically. If your browser already has the token from installing, nothing changes.",
+        "highlights": [
+          "Connect and Generate now request a missing setup or dispatch token inline, with a correctly-scoped create link, instead of redirecting to the Integrate page.",
+          "The render token stays a least-privilege read:packages token; the setup token is stored only in your browser and reused, so it is a one-time step."
+        ]
+      },
+      {
+        "version": "3.3.0",
+        "date": "2026-06-18",
+        "title": "See who is running your tooling: a Clients directory on the dashboard",
+        "summary": "The source repository now publishes a Clients directory - a new top-level menu entry that lists every public repository discovered to be running this LabVIEW CI tooling and links straight to each one's dashboard. Discovery is pull-based: a scheduled workflow queries GitHub's code-search index for repositories that reference this tooling, verifies each is public and really installed it, and publishes the list to the Pages site, so nothing is asked of client repositories and no external service is involved. The Clients entry appears only on the source repository, where the list is published, and never on a consumer site. Apply-to-new-repo affordances now always source the tooling from this root repository, so every fresh install is discoverable and the count stays accurate.",
+        "highlights": [
+          "A new source-only Clients menu lists every public repository running this tooling and links to each one's CI dashboard.",
+          "Discovery is pull-based via GitHub code search - clients are never modified and no external service or shared secret is needed; only public repositories are listed.",
+          "Every Apply-to-new-repo install now sources from the root repository, so new installs are discoverable and the client count stays accurate."
+        ]
+      },
+      {
+        "version": "3.2.0",
+        "date": "2026-06-18",
+        "title": "VI Browser 2.0: set up the render token right on the lock screen",
+        "summary": "When a repository has not been provisioned for the in-place VI Browser 2.0 view, the lock screen is now an interactive setup wizard instead of two links. Step 1 opens GitHub's token page with the read:packages scope preselected; step 2 is an in-place box where you paste the render token, which is sealed in your browser (libsodium) and saved as the TOIMAGES_REGISTRY_TOKEN secret along with the render image variable, reusing the setup token already stored in this browser; and once that succeeds a 'Generate the 2.0 snapshot' button appears that dispatches the render workflow. The repository is detected from the page URL. Because a browser cannot test a private-registry pull, the dispatched run is the real confirmation that the token works.",
+        "highlights": [
+          "The 2.0 lock screen is now a guided 3-step wizard: get a token, paste it to save the secret, then generate the snapshot - without leaving the page.",
+          "The render token is sealed in your browser and stored as the TOIMAGES_REGISTRY_TOKEN secret; the raw token never reaches the page host.",
+          "A 'Generate the 2.0 snapshot' button dispatches the render workflow and surfaces a token or permission error if the run cannot be queued."
+        ]
+      },
+      {
+        "version": "3.1.2",
+        "date": "2026-06-18",
+        "title": "VI Browser 2.0: the 'Get a render token' link now points to the right repository",
+        "summary": "On the VI Browser 2.0 lock screen - shown when a repository has not yet been provisioned with a render token - the 'Get a render token' link pointed at the wrong URL, so it could not take you to the private render repository. The link now points to the correct repository, so anyone with access lands where they can obtain a token. Nothing else changed: the token is still entered on the Integrate page, sealed in your browser, and stored as the TOIMAGES_REGISTRY_TOKEN secret, and a repository without a token still shows the 1.0 view.",
+        "highlights": [
+          "Corrected the 'Get a render token' link on the VI Browser 2.0 lock screen so it opens the right private render repository.",
+          "No change to entering or using the token - only the link target was fixed."
+        ]
+      },
+      {
+        "version": "3.1.1",
+        "date": "2026-06-17",
+        "title": "The VI Browser opens with your folder tree expanded the first time",
+        "summary": "The first time you open the VI Browser, its file tree on the left now starts fully expanded, so the whole VI hierarchy is visible at a glance instead of a single collapsed folder. It is a one-time courtesy remembered in your browser: after that first visit the tree opens collapsed as before, and your own expand and collapse choices are never overridden. The Expand all and Collapse all controls behave exactly as before.",
+        "highlights": [
+          "First-ever open of the VI Browser expands the entire folder tree, so the full VI hierarchy is visible without drilling in.",
+          "Remembered per browser as a one-time courtesy: later visits open collapsed, keeping the view tidy once you know your way around.",
+          "Your manual expand and collapse choices, and the Expand all / Collapse all buttons, are unchanged."
+        ]
+      },
+      {
+        "version": "3.1.0",
+        "date": "2026-06-17",
+        "title": "Queued runs stay visible: still-queued, failed, or done - they no longer vanish",
+        "summary": "When you retroactively run activities for a fresh repository's whole history, GitHub only runs a limited number at once, so the rest sit queued - sometimes for many minutes. Until now the dashboard's optimistic 'Queued' badge timed out after 20 minutes and quietly reverted the cell to its run button, so runs that were still queued looked like they had vanished with no result. The dashboard now reconciles each queued badge against the real run status on GitHub: a run still queued or running keeps its 'Queued' badge for as long as it takes, a run that failed turns into a red 'Failed' badge that links to the run (an early failure may never post a status the dashboard could otherwise show), and a finished run hands off to the normal green/red result. Snapshot backfill runs - which share one history-walking run - are tracked too, and the badge's manage dialog gained a 'Dismiss' action so you can clear a failed cell and run it again.",
+        "highlights": [
+          "Queued badges no longer disappear: a run still queued or running keeps its badge until it actually finishes, even past the old 20-minute timeout.",
+          "A run that fails now shows a red 'Failed' badge linking to the run, instead of silently reverting - so every cell reads as queued, failed, or done.",
+          "The History backfill's shared VI Snapshots run is tracked, and the manage dialog can Dismiss a failed cell so you can run it again."
+        ]
+      },
+      {
+        "version": "3.0.1",
+        "date": "2026-06-17",
+        "title": "Update fix: a brand-new workflow file no longer breaks the no-token update path",
+        "summary": "Clicking Update now on a repository without a workflow-scope token is meant to defer just the .github/workflows/** files and still push the rest - the version bump, vendored scripts, and pages - so the new tooling adopts on its own and only the workflow YAMLs wait for an optional token. A gap remained: when a release introduced a brand-new workflow file (as v3.0.0 did with the Windows unit-test workflow), the deferral reverted changed workflow files but left newly-added ones staged, so the follow-up push was rejected again and the entire update failed - the version never moved. The deferral now strips every workflow change - modified, deleted, AND newly added - so config + scripts land and the version adopts; the workflow YAMLs are listed in the pull request and applied later once a TOOLING_UPDATE_TOKEN (repo + workflow scope) is added.",
+        "highlights": [
+          "The no-token update path now also defers brand-new workflow files, not just modified ones, so the push is no longer rejected and the rest of the update lands.",
+          "Repositories without a TOOLING_UPDATE_TOKEN still adopt the new version (ref bump, scripts, pages); only the .github/workflows/** YAMLs wait for an optional repo + workflow scoped token.",
+          "No change for repositories that already have a workflow-scope token - those keep pushing the full update in a single commit."
+        ]
+      },
+      {
+        "version": "3.0.0",
+        "date": "2026-06-17",
+        "title": "Unit testing, end to end: configure frameworks, run in CI, triage failures",
+        "summary": "A major release: unit testing is now a first-class part of the LabVIEW CI pipeline. On the new Unit Testing page you turn on the frameworks you use (JKI Caraya and JKI VI Tester) and say where each one's tests live - a folder or a glob. They run in the Windows worker, and their different outputs are merged into one Unit Tests report per revision on the dashboard, where you can run them on demand just like Mass Compile or VI Analyzer and click any failure to open the VI under test in the VI Browser. NI's Unit Test Framework is scaffolded for when its headless runner lands.",
+        "highlights": [
+          "New Unit Testing configuration page: enable one or many frameworks and point each at its tests (directory or glob). Designed to scale to future tools.",
+          "Unit Tests is now in the activity matrix and the dashboard's Unit Tests column - run it on demand with the same Run-now flow as the other activities.",
+          "Every framework's results are normalised into one report; failing tests deep-link to the VI under test in the VI Browser.",
+          "Windows-only for now (Caraya and VI Tester are VIPM packages). The Caraya runner is the reference; execution is being validated on a real worker."
+        ]
+      },
       {
         "version": "2.9.0",
         "date": "2026-06-17",
@@ -761,8 +1035,7 @@
   "defaults": {
     "labviewVersion": "2026",
     "os": [
-      "windows",
-      "linux"
+      "windows"
     ],
     "branch": "main"
   },
@@ -839,7 +1112,8 @@
           ".github/pages/report-viewer.html",
           ".github/pages/integrate.html",
           ".github/pages/configure.html",
-          ".github/pages/whats-new.html"
+          ".github/pages/whats-new.html",
+          ".github/pages/unit-tests.html"
         ],
         "windows": [],
         "linux": []
@@ -1008,23 +1282,55 @@
       "id": "unit-tests",
       "name": "Unit Tests",
       "summary": "Run a LabVIEW unit-test framework (e.g. Caraya or VI Tester) in CI and publish pass/fail results to the dashboard.",
-      "status": "planned",
+      "status": "stable",
       "recommended": false,
       "supportsOs": [
-        "windows",
-        "linux"
+        "windows"
       ],
       "requires": [],
       "recommends": [
-        "dashboard"
+        "dashboard",
+        "custom-image"
       ],
       "statusContext": "CI / Unit Tests",
       "files": {
-        "any": [],
-        "windows": [],
+        "any": [
+          ".github/labview/build-unittest-report.py"
+        ],
+        "windows": [
+          ".github/workflows/unit-tests-windows-container.yml",
+          ".github/labview/run-unit-tests.ps1"
+        ],
         "linux": []
       },
-      "notes": "Planned \u2014 the CI runner is not yet implemented, but the test frameworks themselves (NI Unit Test Framework, JKI VI Tester, and Caraya) are already baked into the worker image. This entry demonstrates how the system scales: when the runner exists, add its workflow + script paths to the `files` map here and flip `status` to `stable`. It then appears automatically in both the configurator and the installer with no other code changes."
+      "notes": "Runs the configured LabVIEW unit-test frameworks (Caraya, JKI VI Tester) headlessly in the Windows worker via g-cli, normalises their JUnit output into one report, and links each failing test to the VI under test in the VI Browser. Windows-only because Caraya and VI Tester are VIPM packages; choose which tools run and where their tests live on the Unit Testing page. NI UTF headless execution is scaffolded (coming soon)."
+    },
+    {
+      "id": "antidoc",
+      "name": "Antidoc",
+      "summary": "Generates browsable project documentation with Antidoc (Wovalab) inside the Windows worker and publishes it to Pages, framed in the dashboard. Antidoc renders the project structure, VI descriptions and block-diagram images headlessly through the Antidoc CLI.",
+      "status": "stable",
+      "recommended": false,
+      "supportsOs": [
+        "windows"
+      ],
+      "requires": [],
+      "recommends": [
+        "dashboard",
+        "custom-image"
+      ],
+      "statusContext": "CI / Antidoc",
+      "files": {
+        "any": [
+          ".github/labview/build-antidoc-report.py"
+        ],
+        "windows": [
+          ".github/workflows/run-antidoc-windows-container.yml",
+          ".github/labview/run-antidoc.ps1"
+        ],
+        "linux": []
+      },
+      "notes": "Antidoc is a VIPM package (wovalab_lib_antidoc_cli) baked into the custom worker image, so enable the Shared LabVIEW image and turn on 'Use Antidoc' in Configure. Documentation generation renders diagrams via a Kroki server at run time (Wovalab-hosted by default), so the doc-gen step needs network access."
     }
   ]
 }

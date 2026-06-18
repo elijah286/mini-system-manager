@@ -165,14 +165,16 @@
         <div class="row">
           <div class="field">
             <label class="fl" for="version">LabVIEW version</label>
-            <select id="version"></select>
+            <select id="version" disabled aria-disabled="true" title="The CI tooling, container images, and baked dependencies are built for LabVIEW 2026."></select>
+            <p class="hint" style="margin-top:6px">Fixed to LabVIEW 2026 &mdash; the container images and tooling are built for it.</p>
           </div>
           <div class="field">
             <label class="fl">Operating systems</label>
             <div class="toggle-row" id="osToggle">
               <label class="toggle"><input type="checkbox" value="windows" checked> Windows</label>
-              <label class="toggle"><input type="checkbox" value="linux" checked> Linux</label>
+              <label class="toggle"><input type="checkbox" value="linux"> Linux</label>
             </div>
+            <p class="hint" style="margin-top:6px">Linux container jobs run on the NI base image and are <strong>experimental</strong> &mdash; opt in only if you want them. Windows is the supported default.</p>
           </div>
           <div class="field">
             <label class="fl" for="runners">Max concurrent runners
@@ -301,7 +303,7 @@
 
     let catalog = null;
     let pkgObj = null;                       // parsed ci-tooling.packages.json
-    const osSel = new Set(["windows", "linux"]);
+    const osSel = new Set(["windows"]);      // Linux container jobs are experimental (NI base image); opt in via the toggle below
     const actSel = new Set();
     let winLatest = null;                    // workers/windows/latest.json (current build)
     let containerUse = "latest";             // config.container.use (default tag activities pull)
@@ -395,11 +397,23 @@
     }
 
     // ---- rendering ---------------------------------------------------------
+    // LOCKED to the single supported LabVIEW year (catalog.defaults.labviewVersion).
+    // The container images / baked VIPC / LabVIEW.exe paths are all built for that
+    // year, so reconfiguring to another year asked for an image that doesn't exist
+    // and broke every container job. Ignore the repo's stored value and always show
+    // that year, disabled -- so saving heals a repo pinned to an unsupported year.
+    // Code COMPATIBILITY with an older LabVIEW run-time is owned by the project's own
+    // .lvproj "save for previous version" setting, honored by the 2026 container -- so
+    // this field stays permanently locked and needs no version/compatibility picker.
     function renderVersions(sel) {
-      const el = $("version"); const versions = catalog.labviewVersions || ["2026"];
-      const def = sel || (catalog.defaults && catalog.defaults.labviewVersion) || versions[versions.length - 1];
+      const el = $("version");
+      const locked = (catalog.defaults && catalog.defaults.labviewVersion) || "2026";
       el.innerHTML = "";
-      versions.forEach(v => { const o = document.createElement("option"); o.value = v; o.textContent = v; if (v === def) o.selected = true; el.appendChild(o); });
+      const o = document.createElement("option");
+      o.value = locked; o.textContent = locked; o.selected = true;
+      el.appendChild(o);
+      el.disabled = true;
+      el.setAttribute("aria-disabled", "true");
     }
 
     function renderActivities() {
