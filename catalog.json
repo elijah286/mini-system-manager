@@ -1,11 +1,60 @@
 {
   "schemaVersion": 1,
-  "version": "3.4.33",
+  "version": "3.4.37",
   "name": "LabVIEW CI",
   "description": "Portable, repo-agnostic CI/CD capabilities for LabVIEW repositories: mass compile, VI Analyzer, VIDiff comparison reports, VI snapshots / VI Browser, and a status dashboard. Driven entirely by this catalog so the configurator UI and the installer stay in sync and new capabilities are a one-entry change.",
   "history": {
     "comment": "Release notes for the tooling, newest first. `version` (above) is the CURRENT published release and MUST equal releases[0].version. The dashboard version badge and the What's New dialog read these notes to tell a consumer what changed between the version they run and the latest this source repo publishes. Each published version should also be tagged v<version> in this repo so consumers can pin an update to a specific release.",
     "releases": [
+      {
+        "version": "3.4.37",
+        "date": "2026-06-18",
+        "title": "The About page credits the repository these tools came from",
+        "summary": "The About page (opened from the dashboard menu) now starts with a short line naming where the tooling came from - 'These tools were installed from the <repo> repo, which are maintained by <owner>.' - with both the repository name and the owner shown as links. So from any client dashboard you can click About and go straight to the source project on GitHub. The names and links are resolved from the tooling's published source location and follow the relocation pointer, so they always point at the current official home and update automatically if the project ever moves to a new repository or owner.",
+        "highlights": [
+          "The About page now opens with a one-line credit naming the repository the tooling was installed from and the owner who maintains it.",
+          "Both the repository name and the owner name are clickable, so you can jump from any client's About page straight to the source project (and its owner) on GitHub.",
+          "The credit is resolved from the published source location and follows the relocation pointer, so it always points at the current official home and updates automatically if the project moves."
+        ]
+      },
+      {
+        "version": "3.4.36",
+        "date": "2026-06-18",
+        "title": "VI Browser shows a 'diff' badge on every changed VI and can run or regenerate the side-by-side VIDiff report on demand",
+        "summary": "In the VI Browser a changed VI now always shows a uniform 'diff' badge (its colour still encodes added/modified/deleted) instead of sometimes reading 'modified'. Opening a VI whose side-by-side VIDiff report has not been generated yet shows an in-viewer panel that explains the report has not been run and offers to run it - for just that VI or for every VI the revision changed. When a report already exists, the toolbar gains a 'Regenerate diff' button that re-runs VIDiff the same way. Runs are queued straight from the page using the same dispatch token the VI Browser 2.0 setup already stores; when the run finishes and the dashboard redeploys, reloading shows the report. The VIDiff container workflows gained an optional 'files' input so a single-VI diff only renders that VI, and the VIDiff deploy now merges each report into the revision's existing index so a single-VI run never drops other VIs' reports.",
+        "highlights": [
+          "Every changed VI shows a consistent 'diff' badge - no more 'modified' label when the side-by-side report has not been generated yet.",
+          "Opening a VI with no diff report shows a clear message plus a button to run VIDiff for just that VI or for the entire revision.",
+          "A 'Regenerate diff' button in the viewer toolbar re-runs VIDiff for a VI that already has a report.",
+          "VIDiff workflows accept an optional single-VI 'files' input, and the deploy merges reports so a single-VI run never removes other VIs' reports from the revision."
+        ]
+      },
+      {
+        "version": "3.4.35",
+        "date": "2026-06-18",
+        "title": "Populate history dialog: lists the workers you actually installed, can target only workers that have never run, and the banner opens it instead of launching everything",
+        "summary": "The Populate history dialog now reflects what each repository actually has installed and no longer hides or greys out activities by default. It lists exactly the workers that have runnable revisions (so a newly added worker such as Unit Tests now appears, and on a fresh install every installed activity is shown and selected with nothing greyed out), and it adds an \"Only workers that have never run\" option that queues just the activities with no results anywhere - leaving already-populated workers alone, which is handy right after you add a new worker. The \"Diff-based - modified files only\" preset is now off by default and no longer disables the other activities; ticking it simply narrows the selection to VI Snapshots and VIDiff, and you can still re-tick any worker by hand. Finally, the fresh-install banner button (and its inline link) now open the Populate history chooser instead of immediately launching CI for the whole history - so historical runs always start from the dialog and nothing is queued until you confirm.",
+        "highlights": [
+          "The dialog lists exactly the activities this repository actually installed, so newly added workers like Unit Tests appear and on a fresh install nothing is greyed out.",
+          "New \"Only workers that have never run\" option queues just the activities with no results anywhere, leaving already-populated workers untouched.",
+          "The Diff-based preset is now off by default and only (un)checks activities instead of disabling them, so you can re-tick any worker by hand.",
+          "The fresh-install banner button now opens the Populate history chooser instead of immediately launching everything - nothing is queued until you confirm."
+        ]
+      },
+      {
+        "version": "3.4.34",
+        "date": "2026-06-18",
+        "title": "Apply to a new repository: pick your target repo from a list, and re-installs wait for the new version to publish",
+        "summary": "On the Apply to a new repository page, the 'Target repo (owner/name)' field is now a suggest-as-you-type picker once an install token is saved in this browser: it offers a dropdown of the repositories that token can see (most recently pushed first, de-duplicated) while still accepting any owner/name you type, so you no longer have to remember and retype the exact slug. With no token saved the field is unchanged - a plain free-text box - so the command-line path and first-time visitors see exactly what they did before. A small 'Pick from your repositories...' link below the field reveals an inline row to paste or create a token; the Create a token link is pre-filled with the installer's permissions and carries a tip to choose 'All repositories' under Repository access so every repo shows up in the list. The token is the same one the one-click install already uses, so there is nothing extra to enter, and a 'Forget token' link clears it and the list. Separately, when you re-install or update an EXISTING dashboard, the installer now waits until the published catalog.json actually reaches the version you just installed before it shows the dashboard as live - so a re-install can no longer flash 'Done' while GitHub Pages is still serving the previous build; if the new build has not published in time it honestly reports that the dashboard is still updating rather than claiming it is done. The What's New update flow gained the matching guard: after an update pull request merges, the Update now controls lock while the new version publishes - verified against the real deployed catalog - so you cannot start a duplicate update, and the page refreshes itself the moment the new version goes live.",
+        "highlights": [
+          "The target-repo field becomes a suggest-as-you-type dropdown of your repositories when an install token is saved, while still accepting any owner/name you type.",
+          "With no token saved the field is unchanged - a plain free-text box - so nothing changes for the command-line path or first-time visitors.",
+          "A small 'Pick from your repositories...' link reveals an inline token paste/create row; the create link is pre-filled with the installer permissions and a tip to grant access to all repositories so the full list appears.",
+          "Re-installing or updating an existing dashboard now waits for the published catalog.json to reach the just-installed version before reporting the dashboard live, so a re-install cannot show a misleading 'Done' while the old build is still served.",
+          "If the new version has not published in time, the installer reports that the dashboard is still updating to the new version instead of claiming it is done.",
+          "On the What's New page, once an update pull request merges the Update now controls lock until the new version is actually published (verified against the deployed catalog), preventing duplicate update runs, and the page auto-refreshes when it goes live."
+        ]
+      },
       {
         "version": "3.4.33",
         "date": "2026-06-18",
