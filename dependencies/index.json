@@ -1,8 +1,15 @@
 {
   "schema": 1,
   "repo": "elijah286/mini-system-manager",
-  "sha": "bf7230fcaeccb5e9901c6dfd4eba3e1232814817",
+  "sha": "68fe671960e4251ddcc14e7cca2977a689ccc1d9",
   "revisions": [
+    {
+      "sha": "68fe671960e4251ddcc14e7cca2977a689ccc1d9",
+      "short": "68fe671",
+      "message": "Add LabVIEW CI pipeline",
+      "author": "Elijah Kerry",
+      "date": "2026-06-23T01:25:04Z"
+    },
     {
       "sha": "bf7230fcaeccb5e9901c6dfd4eba3e1232814817",
       "short": "bf7230f",
@@ -697,13 +704,6 @@
       "date": "2026-02-09T23:11:29Z"
     },
     {
-      "sha": "287a21aa37fd0e84d3abeac560147405162c0c66",
-      "short": "287a21a",
-      "message": "Enhance README with detailed project information",
-      "author": "Elijah Kerry",
-      "date": "2026-02-09T23:10:46Z"
-    },
-    {
       "sha": "6a28235e326d3b7e6b6c62935610dd83594615b9",
       "short": "6a28235",
       "message": "fixed errors in motor VIs",
@@ -816,10 +816,27 @@
   },
   "vipc": [
     {
-      "path": "github/labview/vipm/ci-tooling.vipc",
-      "configured": false,
-      "packages": [],
-      "error": "[Errno 2] No such file or directory: 'github/labview/vipm/ci-tooling.vipc'"
+      "path": ".github/labview/antidoc/antidoc.vipc",
+      "role": "capability",
+      "capability": "antidoc",
+      "configured": true,
+      "packages": [
+        "wovalab_lib_antidoc_cli-3.3.0.117"
+      ],
+      "error": ""
+    },
+    {
+      "path": ".github/labview/vipm/ci-tooling.vipc",
+      "role": "core",
+      "capability": "",
+      "configured": true,
+      "packages": [
+        "dataflow_g_lib_g_image-0.5.0.1",
+        "jki_lib_caraya-1.4.4.148",
+        "jki_vi_tester",
+        "ni_lib_utf_junit_report-1.0.1.43"
+      ],
+      "error": ""
     }
   ],
   "nipm": [
@@ -864,21 +881,30 @@
       "details": "NI UTF support package used by the Windows unit-test runner."
     },
     {
+      "name": "JKI Dragon",
+      "source": "NI Package Manager",
+      "packages": {
+        "windows": [
+          "jki-dragon"
+        ]
+      },
+      "platforms": [
+        "windows"
+      ],
+      "details": "JKI Dragon dependency-management tooling installed from the LabVIEW 2026 NI Package Manager feed."
+    },
+    {
       "name": "VI Package Manager",
       "source": "NI Package Manager",
       "packages": {
         "windows": [
           "ni-vipm"
-        ],
-        "linux": [
-          "ni-vipm"
         ]
       },
       "platforms": [
-        "windows",
-        "linux"
+        "windows"
       ],
-      "details": "NI-published VIPM package that enables VIPC application during worker builds."
+      "details": "NI-published Windows VIPM package that enables VIPC application during worker builds. Linux installs VIPM from the native Debian package during its worker build."
     }
   ],
   "system": [
@@ -928,6 +954,7 @@
         "jki_vi_tester",
         "wovalab_lib_antidoc_cli-3.3.0.117"
       ],
+      "failed_packages": [],
       "nipkg_ready": true,
       "nipkg_packages": [
         {
@@ -1030,28 +1057,15 @@
       "key": "linux",
       "label": "Linux",
       "platform": "linux",
-      "tag": "base",
+      "defaultTag": "latest",
+      "tag": "latest",
       "ready": true,
       "packages": [],
-      "version": "pending",
-      "unsupported": true,
+      "failed_packages": [],
       "nipkg_ready": true,
       "nipkg_packages": [],
-      "nipkg_version": "linux-c6484cf4d66a",
-      "labview_version": "2026"
-    },
-    {
-      "key": "linuxBeta",
-      "label": "Linux Beta",
-      "platform": "linux-beta",
-      "tag": "latest",
-      "defaultTag": "latest",
-      "ready": false,
-      "packages": [],
-      "nipkg_ready": false,
-      "nipkg_packages": [],
-      "labview_version": "",
-      "version": "latest"
+      "labview_version": "2026",
+      "version": "linux-c6484cf4d66a"
     }
   ]
 }
