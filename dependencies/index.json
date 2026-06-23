@@ -1,8 +1,15 @@
 {
   "schema": 1,
   "repo": "elijah286/mini-system-manager",
-  "sha": "68fe671960e4251ddcc14e7cca2977a689ccc1d9",
+  "sha": "6148be2811390a9ba6f969a95ac614430907e525",
   "revisions": [
+    {
+      "sha": "6148be2811390a9ba6f969a95ac614430907e525",
+      "short": "6148be2",
+      "message": "Add LabVIEW CI pipeline",
+      "author": "Elijah Kerry",
+      "date": "2026-06-23T02:39:31Z"
+    },
     {
       "sha": "68fe671960e4251ddcc14e7cca2977a689ccc1d9",
       "short": "68fe671",
@@ -695,13 +702,6 @@
       "message": "Update image source in README",
       "author": "Elijah Kerry",
       "date": "2026-02-09T23:14:32Z"
-    },
-    {
-      "sha": "250f6e937df5659ae34051d901c91a9f0212e1ae",
-      "short": "250f6e9",
-      "message": "Delete screenshot instructions from README",
-      "author": "Elijah Kerry",
-      "date": "2026-02-09T23:11:29Z"
     },
     {
       "sha": "6a28235e326d3b7e6b6c62935610dd83594615b9",
