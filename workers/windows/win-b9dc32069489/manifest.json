@@ -6,9 +6,9 @@
   "base_image": "ghcr.io/elijah286/mini-system-manager-labview-vipm-base:2026",
   "base_digest": "ghcr.io/elijah286/mini-system-manager-labview-vipm-base@sha256:be270c937570d3931074f2164eb7bc9fa702214ff2eb6c84b029b85a87b0505d",
   "image_ref": "ghcr.io/elijah286/mini-system-manager-labview:win-b9dc32069489",
-  "build_date": "2026-06-23T04:49:51Z",
+  "build_date": "2026-07-01T07:13:12Z",
   "git_sha": "6148be2811390a9ba6f969a95ac614430907e525",
-  "run_url": "https://github.com/elijah286/mini-system-manager/actions/runs/27998389132",
+  "run_url": "https://github.com/elijah286/mini-system-manager/actions/runs/28496142158",
   "vipc": [
     {
       "file": "antidoc.vipc",
