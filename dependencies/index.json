@@ -746,6 +746,13 @@
       "date": "2024-11-04T12:09:33Z"
     },
     {
+      "sha": "0008bdad2753c2e5b224818d0f13ab055190f839",
+      "short": "0008bda",
+      "message": "mass compiled on windows",
+      "author": "Elijah Kerry",
+      "date": "2024-11-04T12:06:41Z"
+    },
+    {
       "sha": "c37e5eaaa87fce7c347ed643cf20a671cdf7579e",
       "short": "c37e5ea",
       "message": "Windows bug",
