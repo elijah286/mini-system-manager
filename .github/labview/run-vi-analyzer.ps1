@@ -89,7 +89,8 @@ function Read-ViaConfig([string]$ManifestPath) {
     for (; $i -lt $lines.Count; $i++) {
         $line = $lines[$i]
         if ($line -match '^\s{0,3}\S') { break }
-        if ($line -match '^\s{4}default:\s*"?([^"\s]+)"?') { $cfg.default = $Matches[1]; $inRules = $false; continue }
+        if ($line -match '^\s{4}default:\s*"([^"]+)"') { $cfg.default = $Matches[1]; $inRules = $false; continue }
+        elseif ($line -match '^\s{4}default:\s*(\S.*)') { $cfg.default = $Matches[1].Trim(); $inRules = $false; continue }
         if ($line -match '^\s{4}rules:\s*$') { $inRules = $true; continue }
         if ($inRules) {
             if ($line -match '^\s{6}-\s*config:\s*"?([^"]+?)"?\s*$') {
@@ -110,7 +111,7 @@ function Read-ViaConfig([string]$ManifestPath) {
 # when the project committed a config but didn't pick one in the dialog.
 function Get-FirstViancfg([string]$Root) {
     $found = @(Get-ChildItem -LiteralPath $Root -Recurse -File -Filter '*.viancfg' -ErrorAction SilentlyContinue |
-        Where-Object { $_.FullName -notmatch '[\\/](\.github|ci-out|build)[\\/]' } |
+        Where-Object { $_.FullName -notmatch '[\\/](\.github|actions|ci-out|build)[\\/]' } |
         Sort-Object FullName)
     if ($found.Count -gt 0) {
         return ($found[0].FullName.Substring($Root.Length).TrimStart('\', '/') -replace '\\', '/')
@@ -122,14 +123,22 @@ function ConvertTo-ContainerPath([string]$Root, [string]$Rel) {
     return (Join-Path $Root ($Rel -replace '/', '\'))
 }
 
-# Build a runtime .viancfg from a base config with <ItemsToAnalyze> rewritten to
-# the given absolute item paths (so a config's TEST settings apply to a chosen
-# subset). __WORKSPACE_PATH__ is also expanded.
+# <ItemsToAnalyze> paths are relative to the config file's location. "." means
+# the config's own directory. The generated config must be written beside its
+# source so that relative paths resolve against the project folder, not the report dir.
+function Get-RuntimeConfigPath([string]$SourceConfigAbs, [string]$Name) {
+    return (Join-Path (Split-Path -Parent $SourceConfigAbs) $Name)
+}
+
+# Build a runtime .viancfg with <ItemsToAnalyze> rewritten to the given paths,
+# expressed relative to the config file's directory. Used for targeted re-runs.
 function Build-ScopedConfig([string]$BaseConfigPath, [string[]]$ItemAbsPaths, [string]$OutPath, [string]$Workspace) {
     $xml = Get-Content -LiteralPath $BaseConfigPath -Raw
     $xml = $xml -replace '__WORKSPACE_PATH__', $Workspace
+    $configDir = (Split-Path -Parent $OutPath).TrimEnd('\')
     $itemXml = ($ItemAbsPaths | ForEach-Object {
-        "`t`t<Item>`r`n`t`t`t<Path>`"$_`"</Path>`r`n`t`t`t<Removed>FALSE</Removed>`r`n`t`t</Item>"
+        $rel = $_.Substring($configDir.Length).TrimStart('\', '/') -replace '\\', '/'
+        "`t`t<Item>`r`n`t`t`t<Path>`"$rel`"</Path>`r`n`t`t`t<Removed>FALSE</Removed>`r`n`t`t</Item>"
     }) -join "`r`n"
     $block = "<ItemsToAnalyze>`r`n$itemXml`r`n`t</ItemsToAnalyze>"
     $rx = [regex]'(?s)<ItemsToAnalyze>.*?</ItemsToAnalyze>'
@@ -139,6 +148,9 @@ function Build-ScopedConfig([string]$BaseConfigPath, [string[]]$ItemAbsPaths, [s
         $xml = $xml -replace '</Config>', ($block + "`r`n</Config>")
     }
     [System.IO.File]::WriteAllText($OutPath, $xml, [System.Text.UTF8Encoding]::new($false))
+    $selected = ([regex]::Matches($xml, '<Selected>TRUE</Selected>')).Count
+    Write-Host ("  Built {0}: {1} <Item>, {2} selected test(s)" -f (Split-Path $OutPath -Leaf), $ItemAbsPaths.Count, $selected)
+    Write-Host ("    first item: {0}" -f $ItemAbsPaths[0])
 }
 
 # Minimal JSON string encoder (PowerShell's ConvertTo-Json collapses single-element
@@ -161,16 +173,46 @@ function ConvertTo-JsonString([string]$s) {
     return '"' + $sb.ToString() + '"'
 }
 
+# Total VI Analyzer tests a pass actually executed, parsed from the CLI output
+# ("N tests passed. N tests failed. N tests skipped."). 0 => the pass produced no
+# results, so the caller can fall back to the full built-in directory suite.
+function Get-PassTestTotal([string]$out) {
+    $total = 0
+    foreach ($kw in @('passed', 'failed', 'skipped')) {
+        $m = [regex]::Match($out, "(\d+)\s+tests?\s+$kw")
+        if ($m.Success) { $total += [int]$m.Groups[1].Value }
+    }
+    return $total
+}
+
 function Invoke-ViaPass([string]$ConfigArg, [string]$ReportPath) {
     Write-Host "  RunVIAnalyzer -ConfigPath '$ConfigArg' -ReportPath '$ReportPath'"
-    & $CliExe `
-        -LogToConsole   TRUE `
-        -OperationName  RunVIAnalyzer `
-        -ConfigPath     $ConfigArg `
-        -ReportPath     $ReportPath `
-        -ReportSaveType HTML `
-        -LabVIEWPath    $LabVIEWPath `
-        -Headless
+    # LabVIEWCLI writes progress AND warnings (e.g. a broken VI in the analyzed
+    # tree, like a missing-dependency subVI) to STDERR. Under the script's global
+    # ErrorActionPreference='Stop' a native stderr write is promoted to a
+    # TERMINATING NativeCommandError, which aborts a pass that actually ran to
+    # completion and wrote its report - observed on the whole-directory fallback
+    # when the project contains one bad VI, failing the whole job with exit 1.
+    # Shield the call exactly like the pre-analysis MassCompile does: switch to
+    # EAP='Continue' and fold stderr into the host stream, then judge success by
+    # the process exit code alone. Capture the output so the caller can tell how
+    # many tests actually ran.
+    $prevEAP = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    $Script:LastPassOutput = ''
+    try {
+        $Script:LastPassOutput = (& $CliExe `
+            -LogToConsole   TRUE `
+            -OperationName  RunVIAnalyzer `
+            -ConfigPath     $ConfigArg `
+            -ReportPath     $ReportPath `
+            -ReportSaveType HTML `
+            -LabVIEWPath    $LabVIEWPath `
+            -Headless 2>&1 | Out-String)
+        Write-Host $Script:LastPassOutput
+    } finally {
+        $ErrorActionPreference = $prevEAP
+    }
     return $LASTEXITCODE
 }
 
@@ -209,6 +251,11 @@ Write-Host "  LabVIEW    : $LabVIEWPath"
 $filterList = @()
 if (-not $FilesFilter -and $env:VIA_FILES) { $FilesFilter = $env:VIA_FILES }
 if (-not $ConfigOverride -and $env:VIA_CONFIG) { $ConfigOverride = $env:VIA_CONFIG }
+
+Write-Host "  VIA_FILES      : '$FilesFilter'"
+Write-Host "  VIA_CONFIG     : '$ConfigOverride'"
+Write-Host "  ConfigManifest : '$ConfigManifest'"
+
 if ($FilesFilter) { $filterList = @($FilesFilter -split '\|' | ForEach-Object { $_.Trim() } | Where-Object { $_ }) }
 
 $passes = @()
@@ -218,8 +265,9 @@ if ($filterList.Count -gt 0) {
     # Single-VI re-run with a chosen .viancfg (the "Re-run" action on a report).
     if (-not $ConfigOverride) { throw "A single-VI re-run (-FilesFilter) requires -ConfigOverride (a .viancfg)." }
     $abs = @($filterList | ForEach-Object { ConvertTo-ContainerPath $WorkspaceRoot $_ })
-    $scoped = Join-Path $ReportDir 'via-rerun.viancfg'
-    Build-ScopedConfig (ConvertTo-ContainerPath $WorkspaceRoot $ConfigOverride) $abs $scoped $WorkspaceRoot
+    $srcCfg = ConvertTo-ContainerPath $WorkspaceRoot $ConfigOverride
+    $scoped = Get-RuntimeConfigPath $srcCfg '.lvci-runtime.viancfg'
+    Build-ScopedConfig $srcCfg $abs $scoped $WorkspaceRoot
     $passes = @(@{ kind = 'rule'; config = $ConfigOverride; label = $ConfigOverride; paths = $filterList; configArg = $scoped; report = $HtmlOut })
     $singleMode = $true
     Write-Host "  Mode       : single-VI re-run ($($filterList.Count) VI) with $ConfigOverride"
@@ -244,8 +292,9 @@ if ($filterList.Count -gt 0) {
                 $passes += @{ kind = 'exclude'; config = 'none'; label = 'Excluded (not tested)'; paths = $r.paths; configArg = $null; report = $null }
             } else {
                 $abs = @($r.paths | ForEach-Object { ConvertTo-ContainerPath $WorkspaceRoot $_ })
-                $scoped = Join-Path $PassesDir ("rule{0}.viancfg" -f $idx)
-                Build-ScopedConfig (ConvertTo-ContainerPath $WorkspaceRoot $r.config) $abs $scoped $WorkspaceRoot
+                $srcCfg = ConvertTo-ContainerPath $WorkspaceRoot $r.config
+                $scoped = Get-RuntimeConfigPath $srcCfg (".lvci-rule{0}.viancfg" -f $idx)
+                Build-ScopedConfig $srcCfg $abs $scoped $WorkspaceRoot
                 $passes += @{ kind = 'rule'; config = $r.config; label = $r.config; paths = $r.paths; configArg = $scoped; report = ("rule{0}.html" -f $idx) }
                 $idx++
             }
@@ -253,9 +302,12 @@ if ($filterList.Count -gt 0) {
         if ($def -eq 'builtin') {
             $passes += @{ kind = 'default'; config = 'builtin'; label = 'Built-in full test suite'; paths = @(); configArg = $WorkspaceRoot; report = 'default.html' }
         } elseif ($def -ne 'none') {
-            $scoped = Join-Path $PassesDir 'default.viancfg'
-            Build-ScopedConfig (ConvertTo-ContainerPath $WorkspaceRoot $def) @($WorkspaceRoot) $scoped $WorkspaceRoot
-            $passes += @{ kind = 'default'; config = $def; label = $def; paths = @(); configArg = $scoped; report = 'default.html' }
+            # The committed config already has <Path>"."</Path> in <ItemsToAnalyze>,
+            # so it can be passed directly — no runtime copy needed.
+            # Falls back to the full built-in suite if 0 tests run.
+            $srcCfg = ConvertTo-ContainerPath $WorkspaceRoot $def
+            Write-Host ("  Default pass: {0}" -f $def)
+            $passes += @{ kind = 'default'; config = $def; label = $def; paths = @(); configArg = $srcCfg; report = 'default.html'; fallback = $WorkspaceRoot }
         }
     }
 }
@@ -274,17 +326,31 @@ Write-Host "=== Pre-analysis MassCompile (upgrade VIs to image LabVIEW version) 
 $preStart = Get-Date
 $prevEAP  = $ErrorActionPreference
 $ErrorActionPreference = 'Continue'
-try {
-    & $CliExe `
-        -LogToConsole       TRUE `
-        -OperationName      MassCompile `
-        -DirectoryToCompile $WorkspaceRoot `
-        -LabVIEWPath        $LabVIEWPath `
-        -Headless 2>&1 | Out-Host
-    Write-Host ("  MassCompile exit={0} duration={1}s" -f $LASTEXITCODE, [math]::Round(((Get-Date) - $preStart).TotalSeconds, 1))
-} catch {
-    Write-Warning "  Pre-analysis MassCompile skipped: $($_.Exception.Message)"
+# Compile the PROJECT's VIs one top-level folder at a time, EXCLUDING the CI's own
+# tooling under .github (and .git/actions/ci-out/build). The vendored VI Browser 2.0
+# render engine under .github/labview/toimages carries VIs whose dependencies live
+# only in its own Linux render image (e.g. "LV AI Core.lvlib"), so compiling the whole
+# workspace root hit those first (alphabetically) and FAILED the MassCompile before
+# reaching the project VIs -> they were never upgraded to this image's LabVIEW version
+# and RunVIAnalyzer then silently skipped them ("0 VIs analyzed").
+$compileExclude = @('.git', '.github', 'actions', 'ci-out', 'build')
+$compileDirs = @(Get-ChildItem -LiteralPath $WorkspaceRoot -Directory -Force -ErrorAction SilentlyContinue |
+    Where-Object { $compileExclude -notcontains $_.Name })
+if ($compileDirs.Count -eq 0) { $compileDirs = @(Get-Item -LiteralPath $WorkspaceRoot) }
+foreach ($compileDir in $compileDirs) {
+    try {
+        & $CliExe `
+            -LogToConsole       TRUE `
+            -OperationName      MassCompile `
+            -DirectoryToCompile $compileDir.FullName `
+            -LabVIEWPath        $LabVIEWPath `
+            -Headless 2>&1 | Out-Host
+        Write-Host ("  MassCompile '{0}' exit={1}" -f $compileDir.Name, $LASTEXITCODE)
+    } catch {
+        Write-Warning "  MassCompile '$($compileDir.Name)' skipped: $($_.Exception.Message)"
+    }
 }
+Write-Host ("  Pre-analysis MassCompile duration={0}s" -f [math]::Round(((Get-Date) - $preStart).TotalSeconds, 1))
 $ErrorActionPreference = $prevEAP
 Write-Host ""
 
@@ -305,6 +371,13 @@ foreach ($p in $passes) {
     $reportPath = if ($singleMode) { $p.report } else { (Join-Path $PassesDir $p.report) }
     Write-Host "=== VI Analyzer pass: $($p.label) ==="
     $ec = Invoke-ViaPass $p.configArg $reportPath
+    # Safety net: if a default project pass executed ZERO tests (the config/mode
+    # produced nothing in this LabVIEW), re-run it as the full built-in suite over
+    # the workspace directory so the report is never blank (the historical mode).
+    if ($p.fallback -and (Get-PassTestTotal $Script:LastPassOutput) -eq 0) {
+        Write-Host "  Pass ran 0 tests; falling back to the full built-in suite over '$($p.fallback)'."
+        $ec = Invoke-ViaPass $p.fallback $reportPath
+    }
     $ran++
     Write-Host "  pass exit=$ec"
     if ($ec -ne 0 -and $ec -ne 3 -and $overallExit -eq 0) { $overallExit = $ec }

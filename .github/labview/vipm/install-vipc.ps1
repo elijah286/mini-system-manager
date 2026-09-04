@@ -54,6 +54,19 @@ $PublicRepoUrl    = if ($Env:VIPM_PUBLIC_REPO_URL) { $Env:VIPM_PUBLIC_REPO_URL }
 $Env:VIPM_NONINTERACTIVE    = '1'
 $Env:VIPM_ASSUME_YES        = '1'
 $Env:NO_COLOR               = '1'
+# The worker base bakes ENV LV_RTE_HEADLESS=1 so g-cli/Antidoc run headless in
+# the finished image at CI time. But the VIPM Desktop engine this script launches
+# is ITSELF a LabVIEW-runtime app: with that global headless default it never
+# completes the startup handshake the vipm CLI waits on, and every operation
+# dies with 'wait for VIPM startup timed out' (the failure that broke all
+# Windows dependency bakes after 2026-07-22 baked the variable in). Clear it for
+# this process tree only - the image keeps the baked ENV for runtime workflows,
+# and the headless LabVIEW below is launched with an explicit --headless flag,
+# which does not depend on this variable.
+if ($Env:LV_RTE_HEADLESS) {
+    Write-Host "Clearing LV_RTE_HEADLESS=$($Env:LV_RTE_HEADLESS) for the VIPM install (the VIPM Desktop engine cannot start under a global headless default; the baked image ENV is unaffected)."
+    Remove-Item Env:LV_RTE_HEADLESS -ErrorAction SilentlyContinue
+}
 # Turn on VIPM's verbose debug log so a failing build records WHY an install
 # fails - e.g. why `vipm refresh` reports success yet `vipm install <name>`
 # returns exit 3 "package not found" (an empty resolver index), and why applying
@@ -84,6 +97,15 @@ if ($PublicRepoUrl -match 'github\.com[:/]+(?<owner>[^/]+)/(?<name>[^/]+?)(?:\.g
 # overrides the default/CI-adjusted timeout, in seconds.
 # See docs.vipm.io/latest/cli/environment-variables.
 $Env:VIPM_TIMEOUT           = if ($Env:VIPM_TIMEOUT) { $Env:VIPM_TIMEOUT } else { '900' }
+# Large packages (wovalab_lib_asciidoc_for_labview is the repeat offender) run
+# post-install actions where VIPM Desktop is silently busy for minutes. The CLI's
+# default 60s liveliness watchdog then aborts a HEALTHY install with "VIPM
+# command 'package_set_install' made no progress for 60.0s - VIPM Desktop may be
+# stuck" (exit 124); whether a bake survived was pure timing (the source repo's
+# validation bake squeaked past the same error a client bake failed on 3/3
+# retries). Tolerate long silences up to the same ceiling as VIPM_TIMEOUT - the
+# per-operation timeout still bounds a genuinely stuck install.
+$Env:VIPM_DESKTOP_LIVELINESS_TIMEOUT = if ($Env:VIPM_DESKTOP_LIVELINESS_TIMEOUT) { $Env:VIPM_DESKTOP_LIVELINESS_TIMEOUT } else { $Env:VIPM_TIMEOUT }
 
 # VIPM 26.3 Community Edition shells out to a real `git` binary to verify that the
 # working directory is a PUBLIC Git repository (see New-PublicRepoWorkdir below). The
@@ -95,6 +117,38 @@ foreach ($gitDir in @('C:\git\cmd', 'C:\Program Files\Git\cmd')) {
         $Env:Path = "$gitDir;$Env:Path"
     }
 }
+
+# -- 0. Container memory preflight --------------------------------------------
+# This script runs the whole VIPM stack at once: headless LabVIEW (~300 MB) +
+# the VIPM Desktop engine (>1.3 GB peak during its package-list refresh on
+# LabVIEW 2026 Q3) + the vipm CLI. A memory-capped container (Windows `docker
+# build` can default to a low cap; `docker run` does not) starves the engine so
+# it never finishes starting -- presenting as the same silent 'Operation "wait
+# for VIPM startup" timed out after 900s' the Aug 2026 LV_RTE_HEADLESS outage
+# produced, with zero distinguishing symptoms. Name the condition up front and
+# fail fast instead of wedging: the build workflows pass `docker build -m 8GB`,
+# so tripping this means that flag was lost or the host is genuinely too small.
+# VIPM_ALLOW_LOW_MEMORY=1 proceeds anyway.
+try {
+    $memMB = [int]((Get-CimInstance Win32_OperatingSystem).TotalVisibleMemorySize / 1KB)
+    Write-Host ("Container memory visible: {0:N0} MB" -f $memMB)
+    if ($memMB -lt 2560) {
+        $memMsg = ("Only {0:N0} MB of memory is visible to this container, but the VIPM stack " -f $memMB) +
+            "(headless LabVIEW + VIPM Desktop engine + CLI) needs well over 2 GB - the engine will hang at " +
+            "'wait for VIPM startup' long before any package installs. If this is a docker build step, pass " +
+            "'docker build -m 8GB' (Windows build containers are memory-capped by default; docker run containers are not). " +
+            "Set VIPM_ALLOW_LOW_MEMORY=1 to attempt the install anyway."
+        if ($Env:VIPM_ALLOW_MISSING_PACKAGES -eq '1' -or $Env:VIPM_ALLOW_LOW_MEMORY -eq '1') {
+            Write-Warning $memMsg
+        } else {
+            Write-Error $memMsg
+            exit 1
+        }
+    } elseif ($memMB -lt 4096) {
+        Write-Warning (("Only {0:N0} MB of memory is visible to this container; the VIPM stack peaks near that. " -f $memMB) +
+            "If installs time out at 'wait for VIPM startup', raise the docker build memory limit (-m 8GB).")
+    }
+} catch { Write-Host ("Memory preflight skipped: " + $_.Exception.Message) }
 
 # -- 1. Install VIPM if not already present -----------------------------------
 # VIPM is normally pre-installed into the image by labview-ci.Dockerfile, which
@@ -164,13 +218,15 @@ if ($vipcFiles.Count -eq 0) {
 $ErrorActionPreference = 'Continue'
 
 # Diagnostics: record which VIPM CLI we have. The 'ni-vipm' build baked into this
-# image is the modern VIPM CLI (2024+), whose 'install' verb REJECTS the
-# config.xml-only .vipc generated by build-tooling-vipc.py ("Code 42: this file
-# does not appear to be a valid VI package configuration") and which no longer has
-# the legacy 'apply_vipc' verb at all. So instead of applying the .vipc FILE, we
+# image is the modern VIPM CLI (2024+), which no longer has the legacy 'apply_vipc'
+# verb, and whose 'install' verb is unreliable at applying a .vipc FILE headlessly
+# (Pro-activation / interactive prompts). So instead of applying the .vipc file, we
 # read the package list out of its config.xml and install each package BY NAME
 # using the documented 'vipm install <name>@<version>' form - the reliable path
-# that needs no VIPM Pro activation (verified against VIPM 2026 Free Edition).
+# that needs no VIPM Pro activation (verified against VIPM 2026 Free Edition). The
+# .vipc itself is a real, VIPM-openable VIPC (build-tooling-vipc.py harvests each
+# package's real spec+icon from the public indexes), so a human can still open and
+# edit it in VIPM; CI just doesn't depend on VIPM to parse it.
 & $VipmExe --version 2>&1 | Out-Host
 & $VipmExe about    2>&1 | Out-Host
 
@@ -246,10 +302,17 @@ CommunityEdition 0="TRUE"
         Write-Warning ("Could not seed VIPM Settings.ini (" + $_.Exception.Message + "); vipm install may fail to load.")
     }
 }
-if ($lvExe) {
+# Launch headless LabVIEW for VIPM. Factored into a function so a wedged VIPM
+# stack can be torn down and relaunched mid-build (see Restart-VipmStack) instead
+# of failing the whole image on a transient cold-start race.
+function Start-HeadlessLabVIEW {
+    if (-not $lvExe) {
+        Write-Warning 'LabVIEW.exe not found; attempting VIPM install without pre-launching LabVIEW.'
+        return
+    }
     Write-Host "Launching headless LabVIEW for VIPM: $lvExe"
     try {
-        $LabVIEWProc = Start-Process -FilePath $lvExe -ArgumentList '--headless' -PassThru
+        $script:LabVIEWProc = Start-Process -FilePath $lvExe -ArgumentList '--headless' -PassThru
         $deadline = (Get-Date).AddSeconds(180)
         $ready = $false
         while ((Get-Date) -lt $deadline) {
@@ -264,8 +327,6 @@ if ($lvExe) {
     } catch {
         Write-Warning ("Could not launch headless LabVIEW (" + $_.Exception.Message + "); attempting VIPM install anyway.")
     }
-} else {
-    Write-Warning 'LabVIEW.exe not found; attempting VIPM install without pre-launching LabVIEW.'
 }
 
 # The vipm CLI does not install packages itself -- it delegates to the VIPM "engine"
@@ -277,14 +338,16 @@ if ($lvExe) {
 # engine is already running. Pre-launch the engine here (best-effort) and give it
 # time to come up so the install can attach to an already-running engine.
 $VipmEngineProc = $null
-$vipmEngineExe = @(
+$script:VipmEngineExe = @(
     (Join-Path $VipmDir 'VI Package Manager.exe'),
     'C:\Program Files (x86)\JKI\VI Package Manager\VI Package Manager.exe'
 ) | Where-Object { Test-Path $_ } | Select-Object -First 1
-if ($vipmEngineExe -and -not (Get-Process -Name 'VI Package Manager' -ErrorAction SilentlyContinue)) {
-    Write-Host "Pre-launching VIPM engine so the CLI can attach: $vipmEngineExe"
+function Start-VipmEngineProcess {
+    if (-not $script:VipmEngineExe) { return }
+    if (Get-Process -Name 'VI Package Manager' -ErrorAction SilentlyContinue) { return }
+    Write-Host "Pre-launching VIPM engine so the CLI can attach: $script:VipmEngineExe"
     try {
-        $VipmEngineProc = Start-Process -FilePath $vipmEngineExe -PassThru -ErrorAction Stop
+        $script:VipmEngineProc = Start-Process -FilePath $script:VipmEngineExe -PassThru -ErrorAction Stop
         # Give the LabVIEW-runtime engine time to initialize before the first install.
         Start-Sleep -Seconds 45
         Write-Host 'VIPM engine launch requested (allowed 45s to initialize).'
@@ -293,14 +356,59 @@ if ($vipmEngineExe -and -not (Get-Process -Name 'VI Package Manager' -ErrorActio
     }
 }
 
+# -- VIPM engine crash-recovery budget ----------------------------------------
+# A cold headless VIPM engine occasionally never finishes its startup handshake,
+# so the FIRST 'vipm install' burns the full VIPM_TIMEOUT and the engine stays
+# wedged for the rest of the build (build 28951187926 failed exactly this way, yet
+# the identical code succeeded on the very next run -- a transient cold-start race).
+# Rather than fail the whole image on that transient, tear the stack down and
+# relaunch it, then retry the install. Bounded by a build-wide budget so a
+# genuinely-broken engine still fails fast instead of hanging for hours. Override
+# with VIPM_MAX_ENGINE_RESTARTS (0 disables recovery, restoring the old
+# fail-fast-on-first-wedge behavior).
+$script:VipmMaxEngineRestarts  = if ($Env:VIPM_MAX_ENGINE_RESTARTS -match '^\d+$') { [int]$Env:VIPM_MAX_ENGINE_RESTARTS } else { 2 }
+$script:VipmEngineRestartsUsed = 0
+# Refresh is the first engine health check. Give a transient cold-start race one
+# clean retry, but do not let a dead engine spend another hour in install calls.
+$script:VipmMaxRefreshRestarts  = if ($Env:VIPM_MAX_REFRESH_RESTARTS -match '^\d+$') { [int]$Env:VIPM_MAX_REFRESH_RESTARTS } else { 1 }
+$script:VipmRefreshRestartsUsed = 0
+
+# Kill the whole VIPM stack (CLI, engine, headless LabVIEW) and relaunch it, then
+# clear the wedged flag so the caller can retry. If the relaunched engine wedges
+# again the next 'vipm install' re-sets the flag and the budget check stops the loop.
+function Restart-VipmStack {
+    param(
+        [int] $Attempt,
+        [int] $Maximum = $script:VipmMaxEngineRestarts
+    )
+    Write-Warning ("  VIPM engine wedged; restarting the VIPM stack (attempt " + $Attempt + "/" + $Maximum + ") and retrying ...")
+    foreach ($procName in @('vipm', 'VI Package Manager', 'LabVIEW', 'LabVIEWCLI')) {
+        Get-Process -Name $procName -ErrorAction SilentlyContinue |
+            Stop-Process -Force -ErrorAction SilentlyContinue
+    }
+    $script:LabVIEWProc    = $null
+    $script:VipmEngineProc = $null
+    # Let the killed processes release the VI Server port (3363) and file locks.
+    Start-Sleep -Seconds 10
+    Start-HeadlessLabVIEW
+    Start-VipmEngineProcess
+    $script:VipmEngineDead = $false
+}
+
+# Launch the VIPM stack for the first time.
+Start-HeadlessLabVIEW
+Start-VipmEngineProcess
+
 # NOTE: this vipm CLI (2026.1.0) has NO standalone 'refresh' command; the package
 # list is refreshed via the global '--refresh' option passed to 'install' below.
 
 # Read the package list out of a .vipc's config.xml and return install specs.
 # The config.xml lists each package as '<Package><Name>pkg_name-1.2.3.4</Name>...';
 # the modern 'vipm install' wants 'pkg_name@1.2.3.4' (the hyphen form is misread as
-# a file path). Names without a trailing dotted version (e.g. 'jki_vi_tester')
-# install the latest available.
+# a file path). VIPM IDs may carry a trailing '-<release>' build suffix (e.g.
+# 'jki_labs_tool_vi_tester-1.1.2.164-1', 'jki_rsc_toolkits_palette-1.1-1'); that
+# suffix is dropped here (install resolves the dotted version). Names without a
+# trailing dotted version (e.g. 'jki_vi_tester') install the latest available.
 function Get-VipcPackageSpecs([string]$VipcPath) {
     Add-Type -AssemblyName System.IO.Compression.FileSystem -ErrorAction SilentlyContinue
     $zip = [System.IO.Compression.ZipFile]::OpenRead($VipcPath)
@@ -313,7 +421,7 @@ function Get-VipcPackageSpecs([string]$VipcPath) {
     $names = @($cfg.VI_Package_Configuration.Target.Package | ForEach-Object { $_.Name })
     $specs = foreach ($n in $names) {
         if ([string]::IsNullOrWhiteSpace($n)) { continue }
-        if ($n -match '^(?<n>.+)-(?<v>\d+(?:\.\d+)+)$') { '{0}@{1}' -f $Matches.n, $Matches.v } else { $n.Trim() }
+        if ($n -match '^(?<n>.+)-(?<v>\d+(?:\.\d+)+)(?:-\d+)?$') { '{0}@{1}' -f $Matches.n, $Matches.v } else { $n.Trim() }
     }
     return @($specs)
 }
@@ -487,8 +595,79 @@ function Save-PublicVipmPackage($Package, [string] $OutDir) {
     return $outFile
 }
 
+# Index the local .vip package files staged into the worker (C:\vipm) so a
+# VIPC-referenced package can be installed FROM THE COMMITTED .vip instead of being
+# downloaded from the public mirrors. This is the supported way to bake a package
+# that is published on NO VIPM repository (e.g. an in-house framework) without a
+# private mirror: commit its .vip and reference the package in a .vipc. A loose .vip
+# is only ever used when an applied .vipc references it - it is never installed on
+# its own.
+#
+# NOTE: -Filter '*.vip' ALSO matches '*.vipc' (Windows 8.3 wildcard), so enumerate
+# and filter on the exact extension instead. Package id + version come from the file
+# name (VIPM's canonical export form '<package-id>-<version>.vip'); the package's
+# internal 'spec' is read as a best-effort override when the file was renamed.
+function Get-LocalVipFileIndex([string] $Dir) {
+    $index = New-Object System.Collections.Generic.List[object]
+    if (-not $Dir -or -not (Test-Path -LiteralPath $Dir)) { return @($index.ToArray()) }
+    $vipFiles = @(Get-ChildItem -LiteralPath $Dir -File -ErrorAction SilentlyContinue |
+        Where-Object { $_.Extension -eq '.vip' })
+    foreach ($f in $vipFiles) {
+        $name = ''
+        $version = ''
+        $base = [System.IO.Path]::GetFileNameWithoutExtension($f.Name)
+        if ($base -match '^(?<n>.+)-(?<v>\d+(?:\.\d+)+)(?:-\d+)?$') {
+            $name = $Matches.n
+            $version = $Matches.v
+        }
+        # Best-effort override from the package's internal 'spec' (a .vip is a zip).
+        try {
+            Add-Type -AssemblyName System.IO.Compression.FileSystem -ErrorAction SilentlyContinue
+            $zip = [System.IO.Compression.ZipFile]::OpenRead($f.FullName)
+            try {
+                $entry = $zip.Entries | Where-Object { $_.Name -eq 'spec' } | Select-Object -First 1
+                if ($entry) {
+                    $reader = New-Object System.IO.StreamReader($entry.Open())
+                    try { $specText = $reader.ReadToEnd() } finally { $reader.Close() }
+                    $mN = [regex]::Match($specText, '(?im)^\s*Package(?:\s*Name)?\s*=\s*"?(?<v>[A-Za-z0-9_.\-]+)"?\s*$')
+                    if ($mN.Success) { $name = $mN.Groups['v'].Value.Trim() }
+                    $mV = [regex]::Match($specText, '(?im)^\s*Version\s*=\s*"?(?<v>\d+(?:\.\d+)+)"?')
+                    if ($mV.Success) { $version = $mV.Groups['v'].Value.Trim() }
+                }
+            } finally { $zip.Dispose() }
+        } catch { }
+        if (-not $name) { $name = $base }
+        $index.Add([pscustomobject]@{
+            Name       = $name
+            Version    = $version
+            VersionKey = Get-NumericVersionKey $version
+            File       = $f.FullName
+        })
+    }
+    return @($index.ToArray())
+}
+
+# Pick the best local .vip for a request, mirroring Select-PublicVipmPackage's
+# name + (exact | minimum) version matching.
+function Select-LocalVipPackage($Request, [object[]] $LocalVips) {
+    $cands = @($LocalVips | Where-Object { $_.Name -ieq $Request.Name })
+    if ($cands.Count -eq 0) { return $null }
+    if ($Request.Version) {
+        if ($Request.Minimum) {
+            $minKey = Get-NumericVersionKey $Request.Version
+            $cands = @($cands | Where-Object { $_.VersionKey -ge $minKey })
+        } else {
+            $cands = @($cands | Where-Object { $_.Version -eq $Request.Version })
+        }
+    }
+    if ($cands.Count -eq 0) { return $null }
+    return @($cands | Sort-Object VersionKey -Descending | Select-Object -First 1)[0]
+}
+
 function Get-LocalVipFilesForSpecs([string[]] $Specs) {
     $repoPackages = @(Get-PublicVipmRepositoryPackages)
+    # Committed .vip files take priority over the public mirrors when applying.
+    $localVips = @(Get-LocalVipFileIndex $VipcDir)
     $rootRequests = @($Specs | ForEach-Object { Split-VipmPackageSpec $_ })
     $exactByName = @{}
     foreach ($root in $rootRequests) {
@@ -499,7 +678,7 @@ function Get-LocalVipFilesForSpecs([string[]] $Specs) {
     $visited = @{}
     $visitedPackageIds = @{}
 
-    function Resolve-One($Request) {
+    function Resolve-One($Request, [bool]$IsDependency = $false) {
         if ($Request.Minimum -and $exactByName.ContainsKey($Request.Name)) {
             $Request = $exactByName[$Request.Name]
         }
@@ -507,27 +686,65 @@ function Get-LocalVipFilesForSpecs([string[]] $Specs) {
         if ($visited.ContainsKey($key)) { return }
         if ($visiting.ContainsKey($key)) { return }
         $visiting[$key] = $true
+        # Prefer a committed local .vip over the public mirrors. This also resolves a
+        # package that is in NO public index (e.g. an in-house framework): its
+        # dependencies are not parsed from the .vip - they come from the .vipc, which
+        # enumerates the full closure as separate specs that resolve on their own.
+        $local = Select-LocalVipPackage $Request $localVips
+        if ($local) {
+            if (-not $visitedPackageIds.ContainsKey($local.File)) {
+                $resolved.Add([pscustomobject]@{
+                    Id        = ('{0}-{1}' -f $local.Name, $local.Version)
+                    Name      = $local.Name
+                    Version   = $local.Version
+                    LocalFile = $local.File
+                })
+                $visitedPackageIds[$local.File] = $true
+            }
+            $visited[$key] = $true
+            $visiting.Remove($key)
+            return
+        }
         $pkg = Select-PublicVipmPackage $Request $repoPackages
         if (-not $pkg) {
-            if ($Request.Version) { throw "Package '$($Request.Name)' version '$($Request.Version)' was not found in the public VIPM indexes." }
-            throw "Package '$($Request.Name)' was not found in the public VIPM indexes."
+            $vtext = if ($Request.Version) { " version '$($Request.Version)'" } else { '' }
+            # A ROOT request that can't be resolved is fatal. A transitive
+            # DEPENDENCY that isn't in any reachable index is skipped with a warning:
+            # some packages declare a dependency whose content is bundled inside the
+            # parent .vip and is never published standalone (e.g. the LUnit CLI lists
+            # astemes_lib_lunit_cli_system, which ships inside the CLI package). VIPM
+            # installs the parent fine without a separate file for it.
+            if ($IsDependency) {
+                Write-Warning ("  Skipping dependency '$($Request.Name)'$vtext" + ": not in the reachable public VIPM indexes (assumed bundled in its parent package).")
+                $visited[$key] = $true
+                $visiting.Remove($key)
+                return
+            }
+            throw "Package '$($Request.Name)'$vtext was not found in the public VIPM indexes."
         }
         if ($visitedPackageIds.ContainsKey($pkg.Id)) {
             $visited[$key] = $true
             $visiting.Remove($key)
             return
         }
-        foreach ($dep in (Get-PublicVipmDependencyRequests $pkg)) { Resolve-One $dep }
+        foreach ($dep in (Get-PublicVipmDependencyRequests $pkg)) { Resolve-One $dep $true }
         $resolved.Add($pkg)
         $visitedPackageIds[$pkg.Id] = $true
         $visited[$key] = $true
         $visiting.Remove($key)
     }
 
-    foreach ($root in $rootRequests) { Resolve-One $root }
+    foreach ($root in $rootRequests) { Resolve-One $root $false }
     $downloadDir = Join-Path $env:TEMP 'vipm-package-files'
     $files = New-Object System.Collections.Generic.List[string]
-    foreach ($pkg in $resolved) { $files.Add((Save-PublicVipmPackage $pkg $downloadDir)) }
+    foreach ($pkg in $resolved) {
+        if ($pkg.PSObject.Properties.Name -contains 'LocalFile' -and $pkg.LocalFile) {
+            Write-Host "  Using committed local .vip for $($pkg.Id): $(Split-Path $pkg.LocalFile -Leaf)"
+            $files.Add($pkg.LocalFile)
+        } else {
+            $files.Add((Save-PublicVipmPackage $pkg $downloadDir))
+        }
+    }
     return @($files.ToArray() | Select-Object -Unique)
 }
 
@@ -555,7 +772,9 @@ $GlobalFlags = @('--labview-version', $LabVIEWVersion, '--labview-bitness', $Lab
 # Run 'vipm install' with the global LabVIEW target flags in front of the subcommand.
 # Exit 2 (COMMAND_SYNTAX_ERROR) means this CLI build rejected the flag position; fall
 # back to the bare form, which targets the active LabVIEW from the seeded Settings.ini.
-function Invoke-VipmInstall {
+# This is the single-attempt worker; callers go through Invoke-VipmInstall, which adds
+# the wedged-engine restart-and-retry recovery on top of it.
+function Invoke-VipmInstallOnce {
     param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Targets)
     $out = & $VipmExe @GlobalFlags install @Targets 2>&1
     $out | Out-Host
@@ -564,14 +783,55 @@ function Invoke-VipmInstall {
         $out = & $VipmExe install @Targets 2>&1
         $out | Out-Host
     }
+    # Capture the vipm exit code before any further work: 124 is the CLI's timeout
+    # exit (the operation ran the full VIPM_TIMEOUT and was killed), which is the
+    # by-name install's symptom of an unresponsive engine.
+    $vipmExit = $LASTEXITCODE
     # Stash the CLI text so callers can distinguish failure causes that share exit
     # code 8 (IO_ERROR) - e.g. the engine-startup timeout vs. the engine rejecting
-    # the .vipc file itself.
-    $script:LastVipmOutput = ($out | Out-String)
-    # A 'wait for VIPM startup' timeout means the engine is wedged for the rest of
-    # this build; record it so callers stop hammering it (each retry costs ~900s).
-    if ($script:LastVipmOutput -match 'wait for VIPM startup') { $script:VipmEngineDead = $true }
-    return $LASTEXITCODE
+    # the .vipc file itself. Capture WIDE: Out-String wraps at the host buffer width
+    # (default 120) and can split a message mid-phrase, which previously made the
+    # detector below MISS a wrapped 'wait for VIPM startup' line - so the build kept
+    # stacking 900s timeouts for every remaining package instead of bailing once.
+    $script:LastVipmOutput = ($out | Out-String -Width 8192)
+    # Match against a whitespace-flattened copy so a wrap can never hide the phrase.
+    $flatVipmOutput = ($script:LastVipmOutput -replace '\s+', ' ')
+    # A wedged VIPM engine means every subsequent 'vipm install' burns another full
+    # VIPM_TIMEOUT (~900s) before failing, so record it once and let callers bail
+    # instead of stacking 15-minute timeouts into a multi-hour hang (build
+    # 28951187926 ran ~2h that way). The engine is wedged when EITHER:
+    #   * the CLI reports the startup handshake timed out ('wait for VIPM startup'),
+    #     which the local-file fallback path surfaces; OR
+    #   * a plain 'vipm install' hits the full VIPM_TIMEOUT -- the by-name path does
+    #     NOT print 'wait for VIPM startup', it prints "operation 'install' timed out
+    #     after <VIPM_TIMEOUT>s" and exits 124. That timeout was previously missed,
+    #     so the four essentials retried one-by-one at 900s each before the fallback
+    #     finally tripped the detector. Match the timeout message AND exit 124 too.
+    if ($vipmExit -eq 124 -or
+        $flatVipmOutput -match 'wait for VIPM startup' -or
+        $flatVipmOutput -match "operation '[^']*' timed out after") {
+        $script:VipmEngineDead = $true
+    }
+    return $vipmExit
+}
+
+# Wedged-engine recovery wrapper around Invoke-VipmInstallOnce. If a 'vipm install'
+# wedges the headless VIPM engine (the transient cold-start race that fails ~1 build
+# in N), tear the whole VIPM stack down and relaunch it, then retry the SAME install.
+# Restart-VipmStack clears $script:VipmEngineDead so the loop can retry; if the
+# relaunched engine wedges again the next attempt re-sets the flag and the build-wide
+# restart budget stops the loop, falling through to the existing fast-abort path so a
+# genuinely-broken engine still fails fast instead of hanging for hours.
+function Invoke-VipmInstall {
+    param([Parameter(ValueFromRemainingArguments = $true)] [string[]] $Targets)
+    $vipmExit = Invoke-VipmInstallOnce @Targets
+    while ($script:VipmEngineDead -and $script:VipmEngineRestartsUsed -lt $script:VipmMaxEngineRestarts) {
+        $script:VipmEngineRestartsUsed++
+        Restart-VipmStack $script:VipmEngineRestartsUsed
+        Write-Host ("  Retrying 'vipm install' after VIPM engine restart " + $script:VipmEngineRestartsUsed + "/" + $script:VipmMaxEngineRestarts + " ...")
+        $vipmExit = Invoke-VipmInstallOnce @Targets
+    }
+    return $vipmExit
 }
 
 # Install a set of package SPECS (name@version) using the by-name path first and,
@@ -587,6 +847,7 @@ function Install-VipmSpecs {
     if ($rc -ne 0) {
         Write-Host "  batch install failed (exit $rc); retrying each package individually ..."
         foreach ($spec in $Specs) {
+            if ($script:VipmEngineDead) { Write-Warning '  VIPM engine wedged; stopping per-package retries.'; return $false }
             $rc = Invoke-VipmInstall $spec
             if ($rc -ne 0) { Write-Warning "  package '$spec' failed (exit $rc)."; $failed = $true }
             if ($script:VipmEngineDead) { Write-Warning '  VIPM engine wedged; stopping per-package retries.'; return $false }
@@ -603,6 +864,7 @@ function Install-VipmSpecs {
         Write-Host "  local VIP file batch install failed (exit $rc); retrying each file individually ..."
         $localFailed = $false
         foreach ($vipFile in $vipFiles) {
+            if ($script:VipmEngineDead) { Write-Warning '  VIPM engine wedged; stopping per-file retries.'; return $false }
             $rc = Invoke-VipmInstall $vipFile
             if ($rc -ne 0) { Write-Warning "  local package file '$vipFile' failed (exit $rc)."; $localFailed = $true }
             if ($script:VipmEngineDead) { Write-Warning '  VIPM engine wedged; stopping per-file retries.'; return $false }
@@ -611,6 +873,34 @@ function Install-VipmSpecs {
     } catch {
         Write-Warning ("  local VIP file fallback failed: " + $_.Exception.Message)
         return $false
+    }
+}
+
+# A refresh timeout that specifically says the VIPM Desktop startup handshake
+# failed means installs will hit the same wall. Retry from a fresh process stack
+# once, then mark the engine unavailable so no package install can add 15-minute
+# waits after the failed health check.
+function Invoke-VipmRefresh {
+    while ($true) {
+        $out = & $VipmExe refresh --force 2>&1
+        $out | Out-Host
+        $refreshExit = $LASTEXITCODE
+        $refreshOutput = ($out | Out-String -Width 8192)
+        $flatRefreshOutput = ($refreshOutput -replace '\s+', ' ')
+        $startupTimedOut = $flatRefreshOutput -match 'wait for VIPM startup'
+        if (-not $startupTimedOut) { return $refreshExit }
+
+        if ($script:VipmRefreshRestartsUsed -ge $script:VipmMaxRefreshRestarts) {
+            $script:VipmEngineDead = $true
+            Write-Warning ('VIPM Desktop never completed its startup handshake during package-source refresh. ' +
+                'Skipping package installs because they would time out against the same engine.')
+            return $refreshExit
+        }
+
+        $script:VipmRefreshRestartsUsed++
+        Restart-VipmStack $script:VipmRefreshRestartsUsed $script:VipmMaxRefreshRestarts
+        Write-Host ("Retrying VIPM package-source refresh after engine restart " +
+            $script:VipmRefreshRestartsUsed + "/" + $script:VipmMaxRefreshRestarts + " ...")
     }
 }
 
@@ -693,7 +983,12 @@ try {
     # a plain `vipm refresh` reported "complete" but downloaded no specs, so every
     # package resolved as "not found" (exit 3). --force re-fetches the index.
     Write-Host 'Refreshing VIPM package sources (vipm refresh --force) ...'
-    & $VipmExe refresh --force 2>&1 | Out-Host
+    $refreshExit = Invoke-VipmRefresh
+    if ($script:VipmEngineDead) {
+        $applyFailed = $true
+    } elseif ($refreshExit -ne 0) {
+        Write-Warning "VIPM package-source refresh failed (exit $refreshExit); continuing because version-pinned installs can use the local cache."
+    }
 
     # Phase A (REQUIRED, installed FIRST): the UTF JUnit essentials the built-in
     # 'LabVIEWCLI -OperationName RunUnitTests' operation links against. Install them
@@ -708,11 +1003,41 @@ try {
     $requiredSpecs = @($requiredRaw -split '[,;]' | ForEach-Object { $_.Trim() } | Where-Object { $_ -and $_ -ne '-' })
     if ($requiredSpecs.Count -gt 0) {
         Write-Host ("Installing REQUIRED UTF essentials first: " + ($requiredSpecs -join ', '))
-        if (Install-VipmSpecs $requiredSpecs) {
+        if ($script:VipmEngineDead) {
+            Write-Warning 'Skipping REQUIRED UTF essentials because VIPM Desktop did not start during the refresh health check.'
+            $applyFailed = $true
+        } elseif (Install-VipmSpecs $requiredSpecs) {
             Write-Host 'REQUIRED UTF essentials installed.'
         } else {
             Write-Warning 'One or more REQUIRED UTF essentials failed to install; headless UTF (RunUnitTests) will fail with -350053.'
             $applyFailed = $true
+        }
+    }
+
+    # Phase A2 (EARLY, BEST-EFFORT): unit-test framework packages that only resolve
+    # through the public-index local-file fallback (the container's by-name resolver
+    # is empty, so `vipm install <name>` returns exit 3). Astemes LUnit is the case:
+    # it IS on the JKI/NI public indexes (downloadable), but must be installed HERE,
+    # right after the UTF essentials while the headless VIPM engine is still fresh.
+    # The later heavy ci-tooling.vipc local-file install (Caraya + VI Tester + their
+    # OpenG dependency closures) can wedge the engine ('wait for VIPM startup'), and
+    # once wedged nothing else installs - so LUnit, if left to that phase, never gets
+    # a healthy engine. Installing it early mirrors how the (now-removed) local .vip
+    # bundle made LUnit survive. Best-effort: a failure warns but does not fail the
+    # build. Gated to unit-tests builds: defaults to empty when the required UTF
+    # essentials are disabled (VIPM_REQUIRED_PACKAGES='-', i.e. Unit Tests capability
+    # not installed). Override with VIPM_EARLY_PACKAGES ('-' disables).
+    $earlyRaw = if ($null -ne $Env:VIPM_EARLY_PACKAGES) { $Env:VIPM_EARLY_PACKAGES }
+                elseif ($requiredSpecs.Count -gt 0) { 'astemes_lib_lunit,astemes_lib_lunit_cli' }
+                else { '' }
+    $earlySpecs = @($earlyRaw -split '[,;]' | ForEach-Object { $_.Trim() } | Where-Object { $_ -and $_ -ne '-' })
+    if ($earlySpecs.Count -gt 0 -and -not $script:VipmEngineDead) {
+        Write-Host ("Installing EARLY best-effort framework packages (engine still fresh): " + ($earlySpecs -join ', '))
+        if (Install-VipmSpecs $earlySpecs) {
+            Write-Host 'Early framework packages installed.'
+        } else {
+            $script:bestEffortFailed = $true
+            Write-Warning 'One or more early framework packages (e.g. LUnit base/CLI) did not install; the LUnit CLI may be missing from the worker (run-unit-tests.ps1 will show the missing-tooling banner).'
         }
     }
 
@@ -800,10 +1125,16 @@ if ($VipmEngineProc -and -not $VipmEngineProc.HasExited) {
 }
 
 if ($applyFailed) {
-    $message = ('One or more REQUIRED VIPM packages could not be installed (a project .vipc ' +
-        'dependency or a UTF JUnit essential the RunUnitTests CLI links against). Headless UTF ' +
-        'may fail with LabVIEW CLI error -350053, or project VIs may not load. Check the install ' +
-        'log above for the failing package(s) and confirm they exist on the configured VIPM repository.')
+    if ($script:VipmEngineDead) {
+        $message = ('VIPM Desktop did not complete its startup handshake after the bounded refresh recovery. ' +
+            'No package install was attempted against the unresponsive engine. This is an engine-startup failure, ' +
+            'not a package-resolution failure; rerun the worker-image build on a fresh runner.')
+    } else {
+        $message = ('One or more REQUIRED VIPM packages could not be installed (a project .vipc ' +
+            'dependency or a UTF JUnit essential the RunUnitTests CLI links against). Headless UTF ' +
+            'may fail with LabVIEW CLI error -350053, or project VIs may not load. Check the install ' +
+            'log above for the failing package(s) and confirm they exist on the configured VIPM repository.')
+    }
     if ($Env:VIPM_ALLOW_MISSING_PACKAGES -eq '1') {
         Write-Warning ($message + ' VIPM_ALLOW_MISSING_PACKAGES=1 is set, so the image build will continue without those packages.')
         exit 0
