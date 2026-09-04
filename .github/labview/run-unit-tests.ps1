@@ -12,8 +12,10 @@
     g-cli (already baked into the CI image), writing JUnit XML.
 
     Caraya is the reference implementation, driven via g-cli. NI UTF runs through the
-    built-in LabVIEWCLI RunUnitTests operation (see Invoke-UtfTests); JKI VI Tester is
-    scaffolded with the same contract. The exact command for each tool is a per-tool
+    built-in LabVIEWCLI RunUnitTests operation (see Invoke-UtfTests); LUnit (Astemes)
+    runs through the native LabVIEWCLI "LUnit" operation the same way (see
+    Invoke-LUnitTests); JKI VI Tester is scaffolded with the same contract. The exact
+    command for each tool is a per-tool
     template that can be overridden from the config (`command:` key) so the precise
     invocation can be corrected on a real worker without editing this script.
 
@@ -310,6 +312,17 @@ $DEFAULT_CMD = @{
 # path, {ver}=LabVIEW year. Override per tool with the config `command:` key.
 $UTF_DEFAULT_CMD = '"{cli}" -LogToConsole TRUE -OperationName RunUnitTests -ProjectPath "{proj}" -JUnitReportPath "{out}" -LabVIEWPath "{lv}" -Headless'
 
+# LUnit (Astemes' xUnit-style framework) is driven the SAME WAY as NI UTF: through
+# the native LabVIEW CLI, not g-cli. Its `astemes_lib_lunit_cli` package registers
+# the "LUnit" operation, which discovers Test Case classes under -Path and writes a
+# JUnit report when -ReportPath ends in .xml. Unlike UTF, -Path accepts a directory
+# (or project/class/library), so LUnit resolves test-root DIRECTORIES like the
+# g-cli tools rather than .lvproj files. -Headless is required on LabVIEW 2026
+# Windows containers (same constraint as UTF / VI Analyzer). Tokens: {cli}=LabVIEWCLI,
+# {lv}=LabVIEW.exe, {dir}=a resolved test-root directory, {out}=JUnit output path,
+# {ver}=LabVIEW year. Override per tool with the config `command:` key.
+$LUNIT_DEFAULT_CMD = '"{cli}" -LogToConsole TRUE -OperationName LUnit -Path "{dir}" -ReportPath "{out}" -LabVIEWPath "{lv}" -Headless'
+
 function Invoke-Tool($tool, [int]$index) {
     $id   = $tool.tool
     $tmpl = if ($tool.command) { $tool.command } elseif ($DEFAULT_CMD.ContainsKey($id)) { $DEFAULT_CMD[$id] } else { '' }
@@ -342,30 +355,76 @@ function Invoke-Tool($tool, [int]$index) {
 }
 
 # -- NI Unit Test Framework (UTF) ---------------------------------------------
-# UTF tests live as .lvtest files inside a .lvproj. Resolve the project(s) to run
-# from the tool's locations (a .lvproj path, or a directory/glob to search), keeping
-# only projects that actually reference UTF tests so we never launch LabVIEW for
-# nothing. Empty locations means "search the whole project".
+# UTF tests live as .lvtest files inside a .lvproj, and RunUnitTests runs a whole
+# PROJECT, so we must resolve the tool's locations to the owning .lvproj(s). This
+# is deliberately robust to however a repo is laid out - a location may be:
+#   * a .lvproj path            -> run that project;
+#   * a directory that CONTAINS one or more test-bearing .lvproj -> run each;
+#   * a directory of .lvtest files whose .lvproj lives ABOVE it  -> walk parents
+#     up to the workspace root and run the nearest owning project(s);
+#   * empty                     -> discover EVERY test-bearing .lvproj anywhere in
+#     the repo and run them all.
+# Only projects that actually reference UTF tests are kept, so we never launch
+# LabVIEW for nothing, and CI tooling folders (.github, ci-out, build, .git) are
+# always excluded.
+function Test-ProjHasUtfTests([string]$projPath) {
+    $txt = Get-Content -LiteralPath $projPath -Raw -ErrorAction SilentlyContinue
+    return [bool]($txt -and ($txt -match 'Type="TestItem"' -or $txt -match '\.lvtest'))
+}
+
 function Resolve-UtfProjects([string[]]$locations) {
-    $found = New-Object System.Collections.Generic.List[string]
-    # A location may itself be a .lvproj.
-    foreach ($loc in @($locations)) {
-        if (-not $loc) { continue }
+    $found  = New-Object System.Collections.Generic.List[string]
+    $exclRe = '(?i)[\\/](\.github|ci-out|build|\.git)[\\/]'
+    $wsFull = (Resolve-Path -LiteralPath $WorkspaceRoot).Path
+
+    # No explicit locations => discover every test-bearing project in the repo.
+    $locList = @($locations | Where-Object { $_ -and $_.Trim() })
+    if ($locList.Count -eq 0) {
+        Get-ChildItem -LiteralPath $wsFull -Recurse -File -Filter '*.lvproj' -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -notmatch $exclRe -and (Test-ProjHasUtfTests $_.FullName) } |
+            ForEach-Object { $found.Add($_.FullName) }
+        return ($found | Sort-Object -Unique)
+    }
+
+    foreach ($loc in $locList) {
         $full = Join-Path $WorkspaceRoot ($loc -replace '/', '\')
+
+        # (a) the location is itself a .lvproj -> run it directly.
         if ((Test-Path -LiteralPath $full -PathType Leaf) -and ($full -match '\.lvproj$')) {
             $found.Add((Resolve-Path -LiteralPath $full).Path)
+            continue
+        }
+
+        # (b) the location is a directory or glob -> resolve to concrete roots.
+        foreach ($root in @(Resolve-TestRoots @($loc))) {
+            if (-not (Test-Path -LiteralPath $root)) { continue }
+
+            # (b1) downward: test-bearing .lvproj at or under the location.
+            $downward = @(Get-ChildItem -LiteralPath $root -Recurse -File -Filter '*.lvproj' -ErrorAction SilentlyContinue |
+                Where-Object { $_.FullName -notmatch $exclRe -and (Test-ProjHasUtfTests $_.FullName) })
+            if ($downward.Count -gt 0) {
+                $downward | ForEach-Object { $found.Add($_.FullName) }
+                continue
+            }
+
+            # (b2) upward: the location holds .lvtest files but the owning .lvproj
+            # lives above it. Walk parents up to the workspace root and take the
+            # nearest ancestor that has a test-bearing project.
+            $hasTests = @(Get-ChildItem -LiteralPath $root -Recurse -File -Filter '*.lvtest' -ErrorAction SilentlyContinue).Count -gt 0
+            if (-not $hasTests) { continue }
+            $dir = (Resolve-Path -LiteralPath $root).Path
+            while ($dir) {
+                $up = @(Get-ChildItem -LiteralPath $dir -File -Filter '*.lvproj' -ErrorAction SilentlyContinue |
+                    Where-Object { $_.FullName -notmatch $exclRe -and (Test-ProjHasUtfTests $_.FullName) })
+                if ($up.Count -gt 0) { $up | ForEach-Object { $found.Add($_.FullName) }; break }
+                if ($dir -eq $wsFull) { break }
+                $parent = Split-Path -Parent $dir
+                if (-not $parent -or $parent -eq $dir -or $parent.Length -lt $wsFull.Length) { break }
+                $dir = $parent
+            }
         }
     }
-    $roots = if (@($locations | Where-Object { $_ -and $_.Trim() }).Count -gt 0) { Resolve-TestRoots $locations } else { @($WorkspaceRoot) }
-    foreach ($root in $roots) {
-        if (-not (Test-Path -LiteralPath $root)) { continue }
-        $projs = @(Get-ChildItem -LiteralPath $root -Recurse -File -Filter '*.lvproj' -ErrorAction SilentlyContinue |
-            Where-Object { $_.FullName -notmatch '(?i)\\\.github\\' -and $_.FullName -notmatch '(?i)\\ci-out\\' })
-        foreach ($p in $projs) {
-            $txt = Get-Content -LiteralPath $p.FullName -Raw -ErrorAction SilentlyContinue
-            if ($txt -and ($txt -match 'Type="TestItem"' -or $txt -match '\.lvtest')) { $found.Add($p.FullName) }
-        }
-    }
+
     return ($found | Sort-Object -Unique)
 }
 
@@ -453,6 +512,81 @@ function Invoke-UtfTests($tool, [int]$index) {
     }
 }
 
+# -- LUnit (Astemes) ----------------------------------------------------------
+# LUnit tests are Test Case classes (.lvclass) discovered under a directory or
+# project. We resolve the tool's locations to test-root DIRECTORIES (empty =
+# whole project) and run the native LabVIEWCLI "LUnit" operation against each,
+# writing one JUnit XML per root. Mirrors Invoke-UtfTests' diagnostics: it echoes
+# the LabVIEW CLI session log on failure and records a missing-tooling finding so
+# a worker without the astemes_lib_lunit_cli package surfaces the shared
+# "missing container tooling" banner (instead of a bare "no tests found").
+function Invoke-LUnitTests($tool, [int]$index) {
+    $id = $tool.tool
+    Write-Host "--- tool: $id (LUnit) ---"
+    if (-not $CliExe) { Write-Warning "  LabVIEWCLI not found; cannot run LUnit."; return }
+
+    $locs  = @($tool.locations | Where-Object { $_ -and $_.Trim() })
+    $roots = if ($locs.Count -gt 0) { Resolve-TestRoots $locs } else { @($WorkspaceRoot) }
+    if ($roots.Count -eq 0) {
+        Write-Warning "  no test locations resolved for '$id' (locations: $($tool.locations -join ', ')) - skipping."
+        return
+    }
+
+    $tmpl = if ($tool.command) { $tool.command } else { $LUNIT_DEFAULT_CMD }
+
+    $i = 0
+    foreach ($dir in $roots) {
+        $out = Join-Path $ResultsDir ("lunit-{0}.xml" -f ($index * 100 + $i))
+        Write-Host "  [lunit] path: $dir"
+
+        $cmd = $tmpl.Replace('{cli}', $CliExe).Replace('{lv}', $LabVIEWPath).Replace('{dir}', $dir).Replace('{out}', $out).Replace('{ver}', $LabVIEWVersion)
+        Write-Host "  [lunit] $cmd"
+
+        $prevEAP = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+        $cliOut = ''
+        try {
+            $cliOut = (& cmd.exe /c $cmd 2>&1 | Out-String)
+            Write-Host $cliOut
+            Write-Host ("  [lunit] exit={0}" -f $LASTEXITCODE)
+        } catch {
+            Write-Warning "  [lunit] runner error: $($_.Exception.Message)"
+        }
+        $ErrorActionPreference = $prevEAP
+
+        if (Test-Path -LiteralPath $out) { Write-Host "  [lunit] wrote $out" }
+        else {
+            Write-Warning "  [lunit] produced no JUnit at $out (check the LUnit output above; override with the tool's command: key)."
+            # Echo the LabVIEW CLI session log (the console error is generic; the
+            # real detail lives in the CLI's own log), same as Invoke-UtfTests.
+            $m = [regex]::Match($cliOut, '(?i)started logging in file:\s*(.+\.log)')
+            if ($m.Success) {
+                $logPath = $m.Groups[1].Value.Trim()
+                Write-Host "  [lunit] --- LabVIEW CLI session log ($logPath) ---"
+                if (Test-Path -LiteralPath $logPath) {
+                    Get-Content -LiteralPath $logPath | ForEach-Object { Write-Host "  [lunit-log] $_" }
+                } else {
+                    Write-Host "  [lunit] (session log not found on disk)"
+                }
+                Write-Host "  [lunit] --- end LabVIEW CLI session log ---"
+            } else {
+                Write-Host "  [lunit] (no CLI session-log path found in output)"
+            }
+            # -350053 / "missing or bad files" / "required modules or toolkits" =>
+            # the LUnit CLI add-on (astemes_lib_lunit_cli) is not installed in this
+            # container, so the "LUnit" operation could not load.
+            if (-not ($Script:ToolingIssues | Where-Object { $_.tool -eq 'lunit' })) {
+                $missingTooling = ($cliOut -match '350053' -or $cliOut -match 'missing or bad files' -or $cliOut -match 'required modules or toolkits')
+                if ($missingTooling) {
+                    Add-ToolingIssue 'lunit' 'LUnit' 'missing-tooling' 'The LUnit CLI toolkit (astemes_lib_lunit_cli) is not installed in this container, so the LabVIEW CLI LUnit operation could not load (error -350053).'
+                } else {
+                    Add-ToolingIssue 'lunit' 'LUnit' 'error' 'The LUnit operation produced no JUnit output.'
+                }
+            }
+        }
+        $i++
+    }
+}
+
 # -- Main ---------------------------------------------------------------------
 $tools = Read-UnitTestTools $ConfigPath
 if (-not $tools -or $tools.Count -eq 0) {
@@ -466,7 +600,9 @@ Write-Host ""
 
 $idx = 0
 foreach ($t in $tools) {
-    if ($t.tool -eq 'utf') { Invoke-UtfTests $t $idx } else { Invoke-Tool $t $idx }
+    if ($t.tool -eq 'utf') { Invoke-UtfTests $t $idx }
+    elseif ($t.tool -eq 'lunit') { Invoke-LUnitTests $t $idx }
+    else { Invoke-Tool $t $idx }
     $idx++; Write-Host ""
 }
 

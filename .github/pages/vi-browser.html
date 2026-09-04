@@ -42,6 +42,10 @@
         --error:#cf222e;
       }
     }
+    /* Re-assert page-specific tokens the shared header's theme toggle doesn't
+       manage, so a forced Light/Dark choice fully re-themes this page. */
+    :root[data-lvci-theme=dark]{--sidebar:#161b22;--sidebar-hover:#1c2128;--sidebar-active:#1f6feb33;--item:#c9d1d9;--viewer-bg:#ffffff;--error:#da3633}
+    :root[data-lvci-theme=light]{--sidebar:#f6f8fa;--sidebar-hover:#eef2f6;--sidebar-active:#0969da22;--item:#1f2328;--viewer-bg:#ffffff;--error:#cf222e}
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
          background:var(--bg);color:var(--fg);display:flex;height:100vh;overflow:hidden}
@@ -90,6 +94,13 @@
                     color:var(--fg-muted);cursor:pointer;user-select:none}
     .changed-toggle input{margin:0;accent-color:var(--link)}
     .changed-toggle .count{color:var(--fg-muted);font-weight:600}
+
+    /* ── Resizable divider ── */
+    #divider{width:6px;background:var(--border);cursor:col-resize;user-select:none;flex:0 0 auto;
+             transition:background .15s ease;border-left:1px solid rgba(255,255,255,.05);border-right:1px solid rgba(255,255,255,.05)}
+    #divider:hover{background:var(--link);opacity:.6}
+    body.resizing #divider{background:var(--link)}
+    @media (max-width:720px){#divider{display:none}}
 
     /* ── Main panel ── */
     #main{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
@@ -147,6 +158,16 @@
                     border-top-color:var(--link);border-radius:50%;animation:spin .7s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
     #nt-state .spinner{display:inline-block;width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--link);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+    #tip-layer{position:absolute;inset:0;z-index:7;pointer-events:none}
+    .lvci-tip{position:absolute;min-width:240px;max-width:min(360px,calc(100vw - 28px));padding:12px 14px;border:1px solid var(--border);
+          border-radius:12px;background:var(--sidebar);color:var(--fg);box-shadow:0 16px 30px rgba(0,0,0,.22);pointer-events:auto}
+    .lvci-tip__title{font-weight:700;font-size:.92em;color:var(--fg);margin-bottom:4px}
+    .lvci-tip__body{font-size:.82em;line-height:1.45;color:var(--fg-muted)}
+    .lvci-tip__footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;font-size:.78em}
+    .lvci-tip__never{display:flex;align-items:center;gap:6px;user-select:none;color:var(--fg-muted)}
+    .lvci-tip__close{border:none;border-radius:8px;background:var(--link);color:#fff;cursor:pointer;font:inherit;font-weight:700;padding:6px 11px}
+    .lvci-tip__close:hover{filter:brightness(1.05)}
+    .lvci-tip-target{box-shadow:0 0 0 3px var(--link),0 0 0 6px rgba(88,166,255,.15);border-radius:8px}
     /* Run / regenerate a VIDiff report (shown when a changed VI has no side-by-side report yet) */
     #vi-diffrun{position:absolute;inset:0;z-index:3;display:none;overflow:auto;padding:28px;box-sizing:border-box;background:var(--bg)}
     #vi-diffrun button:disabled{opacity:.5;cursor:default}
@@ -180,16 +201,52 @@
     body.lens-report #viewer{display:none}
     body.lens-report #lens-bar{display:flex}
     body.lens-report #lens-frame{display:block}
+    /* ── Mobile drawer controls (hidden on desktop; the @media block below turns
+       them on at narrow widths) ── */
+    #mobile-files{display:none;align-items:center;gap:6px;border:1px solid var(--border);
+                  border-radius:7px;background:var(--bg);color:var(--fg);font:inherit;
+                  font-weight:600;font-size:.9em;padding:4px 10px;cursor:pointer}
+    #mobile-files:hover{background:var(--sidebar-hover)}
+    #mobile-files svg{width:15px;height:15px;flex:0 0 auto}
+    #vb-files-close{display:none}
+    #vb-scrim{display:none}
     @media (max-width:720px){
       body{flex-direction:column;height:100dvh;overflow:hidden}
-      #sidebar{width:100%;min-width:0;max-height:42dvh;border-right:0;border-bottom:1px solid var(--border)}
-      #sidebar-header{padding:10px 12px}
+      /* The VI tree becomes an off-canvas drawer so the snapshot / block diagram
+         gets the whole screen. The toolbar "VIs" button opens it; the scrim, the
+         drawer's own close button, or picking a VI collapses it. Revision
+         switching lives in the always-visible header context bar, so navigation
+         and switching document types never depend on the drawer. */
+      #sidebar{position:fixed;top:var(--lvh-h,0px);bottom:0;left:0;z-index:260;
+               width:min(86vw,340px);max-height:none;min-width:0;
+               border-right:1px solid var(--border);border-bottom:0;
+               transform:translateX(-105%);transition:transform .22s ease;
+               box-shadow:2px 0 18px rgba(0,0,0,.45)}
+      body.vb-files-open #sidebar{transform:translateX(0)}
+      #sidebar-header{padding:10px 44px 10px 12px;position:relative}
       #vi-list{min-height:120px}
+      #vb-scrim{display:block;position:fixed;inset:var(--lvh-h,0px) 0 0 0;z-index:255;
+                background:rgba(1,4,9,.5);opacity:0;pointer-events:none;transition:opacity .22s ease}
+      body.vb-files-open #vb-scrim{opacity:1;pointer-events:auto}
+      #vb-files-close{display:inline-flex;align-items:center;justify-content:center;
+                      position:absolute;top:8px;right:8px;width:30px;height:30px;
+                      border:1px solid var(--border);border-radius:7px;background:var(--bg);
+                      color:var(--fg-muted);font-size:1em;line-height:1;cursor:pointer}
+      #vb-files-close:hover{color:var(--fg);background:var(--sidebar-hover)}
       .lvci-ctxbar #commit-select{max-width:100%;min-width:0;width:100%}
       #main{min-height:0;min-width:0}
-      #toolbar,#lens-bar{padding:8px 10px;gap:8px}
-      #viewer-toggle-label{flex-basis:100%}
-      #viewer-hint,#lens-bar #lens-open{margin-left:0}
+      /* Compact, horizontally-scrollable toolbar keeps the controls to one slim
+         row so the viewer keeps its height. */
+      #toolbar{padding:7px 10px;gap:7px;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;
+               -webkit-overflow-scrolling:touch;scrollbar-width:none}
+      #toolbar::-webkit-scrollbar{display:none}
+      #toolbar>*{flex:0 0 auto}
+      #mobile-files{display:inline-flex;position:sticky;left:0;z-index:1}
+      #viewer-toggle-label{display:none}
+      #viewer-hint{display:none}
+      #vi-title{max-width:42vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      #lens-bar{padding:8px 10px;gap:8px}
+      #lens-bar #lens-open{margin-left:auto}
       #viewer{min-height:220px}
       #vi-diffrun{padding:18px 14px}
     }
@@ -199,6 +256,7 @@
 
 <div id="sidebar">
   <div id="sidebar-header">
+    <button type="button" id="vb-files-close" aria-label="Close the VI list" title="Close">&#10005;</button>
     <h1>VI Browser</h1>
     <select id="commit-select"><option value="">Loading commits…</option></select>
     <input id="search" type="search" placeholder="Filter VIs…">
@@ -214,8 +272,11 @@
   <div id="vi-list"></div>
 </div>
 
+<div id="divider" title="Drag to resize the file tree"></div>
+
 <div id="main">
   <div id="toolbar">
+    <button type="button" id="mobile-files" aria-expanded="false" aria-label="Show or hide the VI list" title="Show or hide the VI list"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M2 3.5h12v2H2zM2 7h12v2H2zM2 10.5h12v2H2z"/></svg>VIs</button>
     <span id="viewer-toggle-label">Viewer</span>
     <span id="viewer-toggle" title="Switch between the classic VI Browser (1.0), the in-place renderer (2.0), and this VI's side-by-side diff">
       <button type="button" data-viewer="1" title="1.0 — classic gallery: front panel + block diagram, with each structure's cases in a stepper below the diagram">1.0</button>
@@ -307,6 +368,7 @@
     </div>
     <div id="viewer-loading"><span class="spinner"></span><span>Rendering…</span></div>
   </div>
+  <div id="tip-layer" aria-hidden="true"></div>
   <!-- Unified Explorer: a per-revision report (Activity lens) framed in this pane. -->
   <div id="lens-bar">
     <a id="lens-back" href="#" title="Back to the VI tree">&#8249;&nbsp;VIs</a>
@@ -316,6 +378,9 @@
   <iframe id="lens-frame" title="CI report"></iframe>
   <div id="lens-loading"><span class="spinner"></span><span>Loading report&hellip;</span></div>
 </div>
+
+<!-- Mobile: dim scrim behind the VI-list drawer; tap to close. -->
+<div id="vb-scrim"></div>
 
 <script src="vi-render.js"></script>
 <script>
@@ -356,6 +421,7 @@ let currentDiffRow = null;       // the tree row backing the current view (for r
 // uses each VI's frames JSON and gracefully falls back to 1.0 when none exists yet.
 let viewerMode = (new URLSearchParams(location.search).get('viewer') === '2') ? '2' : '1';
 let currentSnapshot = null;      // { html, title } of the open plain snapshot (re-rendered on a 1.0/2.0 switch)
+let frameRequestId = 0;          // cancels stale async 1.0 snapshot preflight results
 // VI Browser 2.0 sub-view: 'fp' = front panel (frames[0]), 'bd' = block diagram
 // (frames[1] + its nested case frames). Sticky across VIs; defaults to the front
 // panel so the in-place view opens on what the previous build already showed.
@@ -382,6 +448,11 @@ let json2Set = null;             // blobs that have a 2.0 JSON (from json-blobs.
 let vb2Plat = (new URLSearchParams(location.search).get('plat2') === 'windows') ? 'windows' : 'linux';
 let json2WinSet = null;          // blobs that ALSO have a Windows 2.0 render (json-blobs.windows.json); null = none published
 let vb2DidWinRestore = false;    // one-shot: honor a ?plat2=windows deep link once the Windows index loads
+const VB2_VIEWER_KEY = 'lvci_vi_browser_viewer_mode';
+const VB2_PLAT_KEY = 'lvci_vi_browser_vb2_plat';
+const VB2_TIP_KEYS = { bd: 'lvci_vi_browser_tip_block_diagram_v2', selectors: 'lvci_vi_browser_tip_selectors_v2' };
+const VB2_HAS_VIEWER_QUERY = new URLSearchParams(location.search).has('viewer');
+const VB2_HAS_PLAT2_QUERY = new URLSearchParams(location.search).has('plat2');
 
 const ICON = {
   chevron: '<svg viewBox="0 0 16 16" width="10" height="10" fill="currentColor"><path d="M6 4l4 4-4 4z"/></svg>',
@@ -391,6 +462,48 @@ const ICON = {
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+function vb2LsGet(key) { try { return localStorage.getItem(key) || ''; } catch (e) { return ''; } }
+function vb2LsSet(key, value) { try { localStorage.setItem(key, value); } catch (e) {} }
+function vb2TipHidden(key) { return vb2LsGet(VB2_TIP_KEYS[key]) === '1'; }
+function vb2TipClear(key) {
+  const tip = document.getElementById('tip-' + key);
+  if (tip) tip.remove();
+  const target = document.querySelector('.lvci-tip-target[data-tip-key="' + key + '"]');
+  if (target) { target.classList.remove('lvci-tip-target'); target.removeAttribute('data-tip-key'); }
+}
+function vb2TipClearAll() { vb2TipClear('bd'); vb2TipClear('selectors'); }
+function vb2TipShow(key, target, title, body, left, top) {
+  if (!target || vb2TipHidden(key)) return;
+  const layer = document.getElementById('tip-layer');
+  if (!layer) return;
+  vb2TipClear(key);
+  const tip = document.createElement('div');
+  tip.id = 'tip-' + key;
+  tip.className = 'lvci-tip';
+  tip.innerHTML =
+    '<div class="lvci-tip__title">' + escapeHtml(title) + '</div>' +
+    '<div class="lvci-tip__body">' + body + '</div>' +
+    '<div class="lvci-tip__footer">' +
+      '<label class="lvci-tip__never"><input type="checkbox" data-never="1">Never show this again</label>' +
+      '<button type="button" class="lvci-tip__close">Dismiss</button>' +
+    '</div>';
+  layer.appendChild(tip);
+  tip.style.left = Math.max(12, left) + 'px';
+  tip.style.top = Math.max(12, top) + 'px';
+  target.classList.add('lvci-tip-target');
+  target.dataset.tipKey = key;
+  const close = tip.querySelector('.lvci-tip__close');
+  const never = tip.querySelector('input[data-never="1"]');
+  const dismiss = () => { if (never && never.checked) vb2LsSet(VB2_TIP_KEYS[key], '1'); vb2TipClear(key); };
+  if (close) close.addEventListener('click', dismiss);
+}
+
+function populateHistoryUrl() {
+  const root = BASE.replace(/vi-snapshots\/$/, '');
+  const sha = (document.getElementById('commit-select') || {}).value || '';
+  return root + '?lvci-populate=1' + (sha ? '&sha=' + encodeURIComponent(sha) : '');
 }
 
 // Build a folder tree from the flat manifest using each VI's on-disk relative path.
@@ -756,6 +869,7 @@ async function loadJson2Index() {
   } catch (e) { /* no Windows index published yet — the 2.0 view stays Linux-only */ }
   decorate2();
   syncVb2PlatToggle();
+  if (vb2Prefer2Default() && currentSnapshot && !currentDiffVi) openSnapshot(currentSnapshot.html, currentSnapshot.title);
   // One-shot: if a shared ?plat2=windows link landed before the Windows index was
   // known and the open VI does have a Windows render, upgrade it to the Windows view.
   if (!vb2DidWinRestore && json2WinSet) {
@@ -793,10 +907,25 @@ function vb2WinAvail(blob) { return !!(json2WinSet && blob && json2WinSet.has(bl
 function vb2EffPlat(_htmlUrl) { return vb2Plat === 'windows' ? 'windows' : 'linux'; }
 function vb2JsonUrl(htmlUrl) { return htmlUrl.replace(/\.html$/i, vb2EffPlat(htmlUrl) === 'windows' ? '.windows.json' : '.json'); }
 
+function vb2Prefer2Default() {
+  if (VB2_HAS_VIEWER_QUERY || VB2_HAS_PLAT2_QUERY) return false;
+  if (!currentSnapshot || currentDiffVi) return false;
+  const blob = vb2BlobOf(currentSnapshot.html);
+  if (!blob) return false;
+  const win = vb2WinAvail(blob);
+  const lin = !!(json2Set && json2Set.has(blob));
+  if (!win && !lin) return false;
+  viewerMode = '2';
+  vb2Plat = win ? 'windows' : 'linux';
+  vb2LsSet(VB2_VIEWER_KEY, '2');
+  vb2LsSet(VB2_PLAT_KEY, vb2Plat);
+  return true;
+}
+
 let lvController = null;
 function openSnapshot(htmlUrl, title) {
   // 1.0 (classic): always the flat-HTML iframe + enhanceSnapshot stepper view.
-  if (viewerMode !== '2') { setViewerModeNote(''); showInFrame(htmlUrl, title); return; }
+  if (viewerMode !== '2') { setViewerModeNote(''); vb2TipClearAll(); showInFrame(htmlUrl, title); return; }
   // 2.0 (in-place): prefer the position-aware frames JSON; gracefully fall back to
   // the classic view when this VI has no frames JSON yet (e.g. before the backend
   // that emits <blob>.json has rendered it).
@@ -819,6 +948,7 @@ function openSnapshot(htmlUrl, title) {
 
 // Render the in-place diagram into #vi-canvas (same-origin parent document).
 function showInPlace(frames, htmlUrl, title) {
+  frameRequestId++;
   document.getElementById('vi-title').textContent = title;
   const open = document.getElementById('open-link');
   open.href = htmlUrl; open.style.display = 'inline';
@@ -849,6 +979,7 @@ function renderActivePane() {
   canvas.style.display = 'block';
   if (lvController) { try { lvController.destroy(); } catch (e) {} }
   lvController = window.LVRender.render(canvas, vb2Frames, { rootIndex: showBD ? 1 : 0 });
+  vb2SyncTips();
 }
 
 function syncPaneToggle() {
@@ -866,6 +997,38 @@ function syncPaneToggle() {
 function hidePaneToggle() {
   const wrap = document.getElementById('pane-toggle');
   if (wrap) wrap.classList.remove('show');
+}
+
+function vb2SyncTips() {
+  vb2TipClearAll();
+  if (viewerMode !== '2' || !currentSnapshot || currentDiffVi) return;
+  const main = document.getElementById('main');
+  if (!main) return;
+  if (vb2Pane !== 'bd') {
+    if (!vb2TipHidden('bd') && vb2HasBD()) {
+      const btn = document.querySelector('#pane-toggle button[data-pane="bd"]');
+      if (btn) {
+        const r = btn.getBoundingClientRect();
+        const host = main.getBoundingClientRect();
+        vb2TipShow('bd', btn,
+          'Open the block diagram',
+          'This button switches the 2.0 viewer from the front panel to the VI\'s block diagram, where the case and event selectors live.',
+          (r.left - host.left) + 8,
+          (r.bottom - host.top) + 12);
+      }
+    }
+    return;
+  }
+  const sel = document.querySelector('#vi-canvas .lvr-sel');
+  if (sel && !vb2TipHidden('selectors')) {
+    const r = sel.getBoundingClientRect();
+    const host = main.getBoundingClientRect();
+    vb2TipShow('selectors', sel,
+      'Page through cases',
+      'Use these arrows to step through each case, event, or sequence frame in place without changing the zoom.',
+      (r.left - host.left) + 8,
+      (r.top - host.top) - 4);
+  }
 }
 
 // Linux / Windows platform sub-switch for the 2.0 view. It stays available even
@@ -895,6 +1058,7 @@ function hideVb2PlatToggle() {
 function showNeedsToken(htmlUrl, title) {
   // 2.0 empty state: this VI has no frames JSON yet (no render exists, run in
   // progress, or the run failed). The 2.0 controller below reflects the real state.
+  frameRequestId++;
   const canvas = document.getElementById('vi-canvas');
   if (canvas) canvas.style.display = 'none';
   if (lvController) { try { lvController.destroy(); } catch (e) {} lvController = null; }
@@ -919,7 +1083,9 @@ function showNeedsToken(htmlUrl, title) {
 }
 
 function showInFrame(url, title) {
+  const requestId = ++frameRequestId;
   // Leaving any in-place render: hide the canvas and restore the iframe.
+  vb2TipClearAll();
   const canvas = document.getElementById('vi-canvas');
   if (canvas) canvas.style.display = 'none';
   const ntf = document.getElementById('vi-needtoken'); if (ntf) ntf.style.display = 'none';
@@ -940,14 +1106,47 @@ function showInFrame(url, title) {
   document.getElementById('viewer').style.display = 'block';
   const frame = document.getElementById('vi-frame');
   setViewerLoading(true);
-  // The snapshot is same-origin (gh-pages), so we can restyle its DOM on load to
-  // make images fit/zoom and turn a Case/Event structure's frames into a stepper.
-  frame.onload = () => {
-    try { enhanceSnapshot(frame.contentDocument); }
-    catch (e) { /* cross-origin or unexpected DOM: fall back to the raw snapshot */ }
-    setViewerLoading(false);
-  };
-  frame.src = url;
+  fetch(url, { method: 'HEAD', cache: 'no-store' })
+    .then(r => { if (!r.ok) throw new Error(String(r.status)); return r; })
+    .then(() => {
+      if (requestId !== frameRequestId) return;
+      // The snapshot is same-origin (gh-pages), so we can restyle its DOM on load to
+      // make images fit/zoom and turn a Case/Event structure's frames into a stepper.
+      frame.onload = () => {
+        try { enhanceSnapshot(frame.contentDocument); }
+        catch (e) { /* cross-origin or unexpected DOM: fall back to the raw snapshot */ }
+        setViewerLoading(false);
+      };
+      frame.src = url;
+    })
+    .catch(() => { if (requestId === frameRequestId) showMissingDocument(url, title); });
+}
+
+function showMissingDocument(url, title) {
+  vb2TipClearAll();
+  const frame = document.getElementById('vi-frame');
+  if (frame) { frame.removeAttribute('src'); frame.style.display = 'none'; }
+  const canvas = document.getElementById('vi-canvas'); if (canvas) canvas.style.display = 'none';
+  if (lvController) { try { lvController.destroy(); } catch (e) {} lvController = null; }
+  const drf = document.getElementById('vi-diffrun'); if (drf) drf.style.display = 'none';
+  const nt = document.getElementById('vi-needtoken'); if (nt) nt.style.display = 'block';
+  document.getElementById('vi-title').textContent = title;
+  const open = document.getElementById('open-link'); if (open) { open.href = url; open.style.display = 'inline'; }
+  const hint = document.getElementById('viewer-hint'); if (hint) hint.style.display = 'none';
+  document.getElementById('empty').style.display = 'none';
+  document.getElementById('viewer').style.display = 'block';
+  hideRegenLink(); hidePaneToggle(); hideVb2PlatToggle();
+  try { if (window.__lvciVB2 && window.__lvciVB2.cancel) window.__lvciVB2.cancel(); } catch (e) {}
+  const tokp = document.getElementById('nt-tokp'); if (tokp) tokp.style.display = 'none';
+  const state = document.getElementById('nt-state'); if (state) state.style.display = 'block';
+  const icon = document.getElementById('nt-state-icon'); if (icon) icon.textContent = '!';
+  const stTitle = document.getElementById('nt-state-title'); if (stTitle) stTitle.textContent = 'Snapshot document not found';
+  const msg = document.getElementById('nt-state-msg');
+  if (msg) msg.innerHTML = 'This revision lists <strong>' + escapeHtml(title) + '</strong>, but its snapshot HTML has not been published yet. Populate history to generate missing VI Browser documents for older revisions.';
+  const actions = document.getElementById('nt-state-actions');
+  if (actions) actions.innerHTML = '<a href="' + escapeHtml(populateHistoryUrl()) + '" style="padding:9px 18px;border-radius:8px;background:#2da44e;color:#fff;font-weight:600;text-decoration:none">Populate history</a><a href="' + escapeHtml(url) + '" target="_blank" rel="noopener" style="color:var(--link);font-weight:600">Open raw URL</a>';
+  const status = document.getElementById('nt-state-status'); if (status) status.textContent = '';
+  setViewerLoading(false);
 }
 
 // ───────────────────────────────────────────────────────────────────────────
@@ -1293,6 +1492,7 @@ function setPlatformToggle(viRel) {
 }
 
 function openVI(row) {
+  vbCloseFilesDrawer();                  // collapse the mobile VI-list drawer once a VI is chosen
   setActiveRow(row);
   currentDiffRow = row;
   currentDiffVi = null;
@@ -1312,6 +1512,7 @@ function openVI(row) {
 // Open a changed VI's side-by-side diff report (from the selected container), or
 // its snapshot when no diff report exists. Wires the toolbar link + platform switch.
 function openDiff(viRel, type, row) {
+  vbCloseFilesDrawer();                  // collapse the mobile VI-list drawer once a diff is chosen
   const chgInfo = changeMap[viRel];
   // A NEW VI has no previous version to diff against. The tree badge opens its
   // snapshot and the Diff toggle is disabled for it, so this is reachable only via
@@ -1409,6 +1610,7 @@ function showDiffRun(viRel, type, mode) {
   drVi = viRel;
   drType = type || (changeMap[viRel] || {}).type || 'modified';
   // Tear down the other viewer surfaces.
+  vb2TipClearAll();
   const canvas = document.getElementById('vi-canvas'); if (canvas) canvas.style.display = 'none';
   if (lvController) { try { lvController.destroy(); } catch (e) {} lvController = null; }
   const frameEl = document.getElementById('vi-frame'); if (frameEl) frameEl.style.display = 'none';
@@ -1631,12 +1833,28 @@ function enterReportLens(key, sha) {
   if (open)  open.href = viewer;
   if (loading) loading.classList.add('show');
   frame.title = info.label + ' report';
-  frame.onload = function () { if (loading) loading.classList.remove('show'); };
-  frame.src = bare;
   document.body.classList.add('lens-report');
   curLens = key;
   syncUrl();
+  frame.onload = function () { if (loading) loading.classList.remove('show'); };
+  fetch(bare, { method: 'HEAD', cache: 'no-store' })
+    .then(r => { if (!r.ok) throw new Error(String(r.status)); return r; })
+    .then(() => { frame.removeAttribute('srcdoc'); frame.src = bare; })
+    .catch(() => showMissingLensDocument(frame, info, sha, bare));
   return true;
+}
+
+function showMissingLensDocument(frame, info, sha, rawUrl) {
+  const title = (info ? info.label : 'Report') + ' document not found';
+  const hist = populateHistoryUrl();
+  frame.removeAttribute('src');
+  frame.srcdoc = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+    + '<style>body{margin:0;min-height:100vh;display:grid;place-items:center;font:14px/1.55 -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;color:#57606a;background:#fff}main{max-width:560px;padding:32px;text-align:center}h1{margin:0 0 10px;color:#1f2328;font-size:1.45em}.btn{display:inline-block;margin:8px 6px 0;padding:9px 18px;border-radius:8px;background:#2da44e;color:#fff;text-decoration:none;font-weight:700}.link{color:#0969da;font-weight:700}</style></head><body><main>'
+    + '<h1>' + escapeHtml(title) + '</h1>'
+    + '<p>This revision has no published ' + escapeHtml(info ? info.label : 'report') + ' document for <code>' + escapeHtml(sha || '') + '</code> yet. Populate history to generate missing report documents for older revisions.</p>'
+    + '<a class="btn" target="_top" href="' + escapeHtml(hist) + '">Populate history</a>'
+    + '<a class="link" target="_blank" rel="noopener" href="' + escapeHtml(rawUrl || '') + '">Open raw URL</a>'
+    + '</main></body></html>';
 }
 function exitReportLens(skipUrl) {
   if (curLens === 'snapshots') return;
@@ -1687,6 +1905,39 @@ document.getElementById('changed-only').addEventListener('change', e => {
   syncUrl();
   renderList(document.getElementById('search').value);
 });
+// ── Mobile VI-list drawer ────────────────────────────────────────────────
+// On narrow screens the VI tree is an off-canvas drawer so the viewer fills the
+// screen. The toolbar "VIs" button toggles it; the scrim, the drawer's close
+// button, or selecting a VI collapses it. On desktop the toggle is hidden, so the
+// body class is never set and the sidebar stays a normal column (workflow intact).
+function vbFilesDrawerOpen() {
+  document.body.classList.add('vb-files-open');
+  const b = document.getElementById('mobile-files');
+  if (b) b.setAttribute('aria-expanded', 'true');
+}
+function vbCloseFilesDrawer() {
+  if (!document.body.classList.contains('vb-files-open')) return;
+  document.body.classList.remove('vb-files-open');
+  const b = document.getElementById('mobile-files');
+  if (b) b.setAttribute('aria-expanded', 'false');
+}
+function vbToggleFilesDrawer() {
+  if (document.body.classList.contains('vb-files-open')) vbCloseFilesDrawer();
+  else vbFilesDrawerOpen();
+}
+(function wireFilesDrawer() {
+  const t = document.getElementById('mobile-files'); if (t) t.addEventListener('click', vbToggleFilesDrawer);
+  const c = document.getElementById('vb-files-close'); if (c) c.addEventListener('click', vbCloseFilesDrawer);
+  const s = document.getElementById('vb-scrim'); if (s) s.addEventListener('click', vbCloseFilesDrawer);
+  // Leaving the mobile breakpoint (e.g. rotate to landscape) clears the drawer so
+  // it can never strand an open overlay on a wide layout.
+  if (window.matchMedia) {
+    const mq = window.matchMedia('(max-width:720px)');
+    const onChange = () => { if (!mq.matches) vbCloseFilesDrawer(); };
+    if (mq.addEventListener) mq.addEventListener('change', onChange); else if (mq.addListener) mq.addListener(onChange);
+  }
+})();
+
 document.getElementById('expand-all').addEventListener('click', () => {
   if (treeRoot) allFolderPaths(treeRoot).forEach(p => expanded.add(p));
   renderList(document.getElementById('search').value);
@@ -1761,6 +2012,7 @@ document.querySelectorAll('#viewer-toggle button').forEach(btn => {
     // 1.0 / 2.0 — a snapshot sub-mode.
     const leavingDiff = (openView === 'diff');
     if (v === viewerMode && !leavingDiff) return;
+    vb2LsSet(VB2_VIEWER_KEY, v);
     viewerMode = v;
     if (leavingDiff && openViRel) {
       // Leaving the diff view: re-open this VI's snapshot in the chosen mode.
@@ -1794,6 +2046,7 @@ document.querySelectorAll('#pane-toggle button').forEach(btn => {
 document.querySelectorAll('#vb2-plat-toggle button').forEach(btn => {
   btn.addEventListener('click', () => {
     if (btn.dataset.plat2 === vb2Plat) return;
+    vb2LsSet(VB2_PLAT_KEY, btn.dataset.plat2);
     vb2Plat = btn.dataset.plat2;
     syncUrl();
     if (currentSnapshot && !currentDiffVi) openSnapshot(currentSnapshot.html, currentSnapshot.title);
@@ -1908,7 +2161,7 @@ else document.addEventListener('lvci:ready', lvciPlaceRevInContextBar);
   function dispatchTokenUrl() {
     return "https://github.com/settings/personal-access-tokens/new?name=" + encodeURIComponent("LabVIEW CI dispatch") + "&description=" + encodeURIComponent("Dispatch CI runs for " + repo) + "&target_name=" + encodeURIComponent(repo.split("/")[0]) + "&actions=write";
   }
-  function buildWfUrl() { return "https://github.com/" + esc(repo) + "/actions/workflows/build-toimages-image.yml"; }
+  function buildWfUrl() { return "https://github.com/" + esc(repo) + "/actions/workflows/build-labview-linux-image.yml"; }
   function defaultBranch(token) {
     return gh("/repos/" + repo, token).then(ghJson).then(function (d) { return (d && d.default_branch) || "main"; }).catch(function () { return "main"; });
   }
@@ -2000,6 +2253,35 @@ else document.addEventListener('lvci:ready', lvciPlaceRevInContextBar);
     var sa = $("nt-state-actions"); if (sa) sa.addEventListener("click", function (e) { var t = e.target; if (t && t.id === "nt-state-rerun") { e.preventDefault(); vb2Rerun(); } });
   }
   window.__lvciVB2 = { resolve: vb2Resolve, cancel: vb2Cancel };
+
+  // Resizable sidebar divider
+  const divider = document.getElementById('divider');
+  const sidebar = document.getElementById('sidebar');
+  if (divider && sidebar) {
+    divider.addEventListener('pointerdown', () => {
+      const startX = event.clientX;
+      const startWidth = sidebar.offsetWidth;
+      document.body.classList.add('resizing');
+      
+      function onMove(e) {
+        const delta = e.clientX - startX;
+        const newWidth = Math.max(220, Math.min(startWidth + delta, window.innerWidth * 0.6));
+        sidebar.style.width = newWidth + 'px';
+      }
+      
+      function onEnd() {
+        document.body.classList.remove('resizing');
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onEnd);
+        document.removeEventListener('pointercancel', onEnd);
+      }
+      
+      document.addEventListener('pointermove', onMove);
+      document.addEventListener('pointerup', onEnd);
+      document.addEventListener('pointercancel', onEnd);
+    });
+  }
+
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();
 </script>

@@ -1,4 +1,5 @@
 name: Mass Compile — Windows Container
+run-name: Mass Compile Windows container - ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.commit_sha || github.event.pull_request.head.sha || github.sha }}
 
 on:
   pull_request:
@@ -34,16 +35,16 @@ permissions:
   pages: write
   statuses: write
   packages: read
-  actions: read   # so wait-for-worker-image.sh can read the worker-image build runs
+  actions: write  # wait-for-worker-image.sh reads worker-image build runs and starts the first build on a fresh fork
 
-# Serialize report deploys to gh-pages. peaceiris/actions-gh-pages clones, commits,
-# and pushes the branch; two report jobs pushing at once make the loser's push bounce
-# with "! [rejected] (fetch first)", so its report never deploys (dashboard 404).
-# A shared group across the report-deploy workflows (mass compile + VI Analyzer)
-# makes them queue instead of racing. cancel-in-progress:false so a queued run still
-# publishes rather than being dropped.
+# Each activity+revision gets its OWN concurrency group so different activities
+# (and different revisions) run in PARALLEL, and re-dispatching the SAME
+# activity+revision queues behind the in-flight one instead of cancelling it.
+# gh-pages push races between parallel report deploys are handled by the
+# retry-safe publish-gh-pages action (it re-fetches gh-pages and retries the push),
+# so serialising the whole job is no longer needed.
 concurrency:
-  group: report-pages-deploy
+  group: ${{ github.workflow }}-${{ github.event.inputs.commit_sha || github.sha }}
   cancel-in-progress: false
 
 jobs:
@@ -60,8 +61,17 @@ jobs:
           INPUT="${{ github.event.inputs.commit_sha }}"
           if [ -n "$INPUT" ]; then
             # Expand abbreviated SHA to full 40-char SHA via API
-            FULL=$(gh api "repos/${{ github.repository }}/commits/$INPUT" --jq '.sha')
-            echo "sha=$FULL" >> "$GITHUB_OUTPUT"
+            if printf '%s' "$INPUT" | grep -Eiq '^[0-9a-f]{40}$'; then
+              # Already a full commit SHA - use it directly. Skipping the gh API
+              # round-trip keeps a transient rate-limit (HTTP 403) from hard-failing
+              # the whole run at 'Determine target SHA'.
+              echo "sha=$INPUT" >> "$GITHUB_OUTPUT"
+            else
+              # A short SHA / ref: try to expand it, but fall back to the raw input
+              # (never abort) if the API call fails or is rate-limited.
+              FULL=$(gh api "repos/${{ github.repository }}/commits/$INPUT" --jq '.sha' 2>/dev/null || true)
+              echo "sha=${FULL:-$INPUT}" >> "$GITHUB_OUTPUT"
+            fi
           else
             echo "sha=${{ github.sha }}" >> "$GITHUB_OUTPUT"
           fi
@@ -90,7 +100,7 @@ jobs:
         shell: bash
         run: |
           git fetch --no-tags origin "${{ github.event.repository.default_branch }}"
-          git checkout FETCH_HEAD -- .github/labview .github/workflows
+          git checkout FETCH_HEAD -- .github/labview .github/workflows .github/actions/publish-gh-pages
 
       # The Configure dialog writes the selected container tag to
       # config.container.use in .github/labview-ci.yml selects the shared Windows
@@ -246,12 +256,10 @@ jobs:
 
       - name: Deploy report to GitHub Pages
         if: steps.report.outputs.exists == 'true'
-        uses: peaceiris/actions-gh-pages@v4.1.0
+        uses: ./.github/actions/publish-gh-pages
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ${{ github.workspace }}/ci-out/masscompile
           destination_dir: masscompile/${{ steps.sha.outputs.sha }}
-          keep_files: true
 
       - name: Post commit status
         if: always()
@@ -283,6 +291,10 @@ jobs:
           else
             DESC="Mass Compile $STATE"
           fi
+          # A pull failure means the compile never ran; make the status say so.
+          if [ "${{ steps.pull.outcome }}" != "success" ]; then
+            DESC="Worker image unavailable - build it via Configure Workers"
+          fi
           curl -s -X POST \
             -H "Authorization: token $GH_TOKEN" \
             -H "Accept: application/vnd.github+json" \
@@ -291,4 +303,11 @@ jobs:
 
       - name: Fail the job if compile failed
         if: always() && (steps.pull.outcome != 'success' || steps.compile.outcome != 'success')
-        run: exit 1
+        shell: bash
+        run: |
+          if [ "${{ steps.pull.outcome }}" != "success" ]; then
+            echo "::error::The worker container image could not be pulled, so Mass Compile never ran. If it has never been built for this repository, run 'Build LabVIEW CI Image' (Actions) or use Configure Workers on the dashboard, then re-run this job."
+          else
+            echo "::error::Mass Compile failed - open the compile step log or the report above."
+          fi
+          exit 1

@@ -1,4 +1,5 @@
 name: Run Unit Tests — Windows Container
+run-name: Unit Tests Windows container - ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.commit_sha || github.event.pull_request.head.sha || github.sha }}
 
 # Runs the configured LabVIEW unit-test frameworks (Caraya / VI Tester / UTF)
 # headlessly inside the project's CI worker image, normalises their JUnit XML into
@@ -49,13 +50,16 @@ permissions:
   pages: write
   statuses: write
   packages: read
-  actions: read   # so wait-for-worker-image.sh can read the worker-image build runs
+  actions: write  # wait-for-worker-image.sh reads worker-image build runs and starts the first build on a fresh fork
 
-# Share the report-deploy concurrency group with the other report workflows so
-# gh-pages pushes queue instead of racing (a loser's push bounces with
-# "fetch first" and its report never deploys).
+# Each activity+revision gets its OWN concurrency group so different activities
+# (and different revisions) run in PARALLEL, and re-dispatching the SAME
+# activity+revision queues behind the in-flight one instead of cancelling it.
+# gh-pages push races between parallel report deploys are handled by the
+# retry-safe publish-gh-pages action (it re-fetches gh-pages and retries the push),
+# so serialising the whole job is no longer needed.
 concurrency:
-  group: report-pages-deploy
+  group: ${{ github.workflow }}-${{ github.event.inputs.commit_sha || github.sha }}
   cancel-in-progress: false
 
 jobs:
@@ -71,8 +75,17 @@ jobs:
         run: |
           INPUT="${{ github.event.inputs.commit_sha }}"
           if [ -n "$INPUT" ]; then
-            FULL=$(gh api "repos/${{ github.repository }}/commits/$INPUT" --jq '.sha')
-            echo "sha=$FULL" >> "$GITHUB_OUTPUT"
+            if printf '%s' "$INPUT" | grep -Eiq '^[0-9a-f]{40}$'; then
+              # Already a full commit SHA - use it directly. Skipping the gh API
+              # round-trip keeps a transient rate-limit (HTTP 403) from hard-failing
+              # the whole run at 'Determine target SHA'.
+              echo "sha=$INPUT" >> "$GITHUB_OUTPUT"
+            else
+              # A short SHA / ref: try to expand it, but fall back to the raw input
+              # (never abort) if the API call fails or is rate-limited.
+              FULL=$(gh api "repos/${{ github.repository }}/commits/$INPUT" --jq '.sha' 2>/dev/null || true)
+              echo "sha=${FULL:-$INPUT}" >> "$GITHUB_OUTPUT"
+            fi
           else
             echo "sha=${{ github.sha }}" >> "$GITHUB_OUTPUT"
           fi
@@ -99,7 +112,7 @@ jobs:
         shell: bash
         run: |
           git fetch --no-tags origin "${{ github.event.repository.default_branch }}"
-          git checkout FETCH_HEAD -- .github/labview .github/workflows
+          git checkout FETCH_HEAD -- .github/labview .github/workflows .github/actions/publish-gh-pages
 
       # Per-action container selection: config.container.actions.unit-tests wins,
       # then config.container.use. With neither set, default to the shared custom
@@ -252,12 +265,10 @@ jobs:
 
       - name: Deploy report to GitHub Pages
         if: steps.report.outputs.exists == 'true'
-        uses: peaceiris/actions-gh-pages@v4.1.0
+        uses: ./.github/actions/publish-gh-pages
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ${{ github.workspace }}/ci-out/unit-tests
           destination_dir: unit-tests/${{ steps.sha.outputs.sha }}
-          keep_files: true
 
       - name: Post commit status
         if: always()
@@ -285,6 +296,10 @@ jobs:
             REPORT_URL="${{ env.PAGES_URL }}/unit-tests/${{ steps.sha.outputs.sha }}/index.html"
           else
             REPORT_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          fi
+          # A pull failure means the tests never ran; make the status say so.
+          if [ "${{ steps.pull.outcome }}" != "success" ]; then
+            DESC="Worker image unavailable - build it via Configure Workers"
           fi
           curl -s -X POST \
             -H "Authorization: token $GH_TOKEN" \

@@ -1,4 +1,4 @@
-# Baking VIPM (VIPC) dependencies into the Windows CI worker
+# Baking VIPM (VIPC) dependencies into the CI workers
 
 This folder holds everything the Windows CI worker needs to install **VIPM**
 (JKI VI Package Manager) packages into the LabVIEW container image at build time,
@@ -19,9 +19,10 @@ false "no unit tests found".
 | File | Role |
 | --- | --- |
 | `install-vipc.ps1` | Build-time hook. Uses the VIPM CLI already present in the shared VIPM base image, launches headless LabVIEW, then installs the packages listed in every staged `*.vipc`. A failed bake fails the image build unless `VIPM_ALLOW_MISSING_PACKAGES=1` is explicitly set. |
-| `ci-tooling.vipc` | The default CI-tooling configuration (Antidoc CLI, Caraya, VI Tester, UTF JUnit Report). Generated from the two JSON files below. |
-| `ci-tooling.packages.json` / `ci-tooling.defaults.json` | Inputs used by `build-tooling-vipc.py` to (re)generate `ci-tooling.vipc`. |
-| `build-tooling-vipc.py` | Regenerates `ci-tooling.vipc` from the JSON inputs. |
+| `install-vipc-linux.sh` | Linux build-time hook. Starts Xvfb and headless LabVIEW, clears the runtime-only `LV_RTE_HEADLESS` default while the VIPM engine starts, extracts each VIPC's `config.xml`, installs the resulting `name@version` specs with the VIPM 26.3 CLI, forces phase progress in CI logs, and prints focused process/display diagnostics when a package action fails. |
+| `ci-tooling.vipc` | The default CI-tooling configuration (Caraya, VI Tester, LUnit base + CLI, UTF JUnit Report, G Image). This committed file is the **source of truth** and must remain VIPM-openable. Edit it in VIPM when changing dependency intent. |
+| `ci-tooling.packages.json` / `ci-tooling.defaults.json` | Optional metadata and automation inputs used by dashboards/config tools and by ad-hoc regeneration. They are **not authoritative** for what gets installed at build time. |
+| `build-tooling-vipc.py` | Optional helper to build a real VIPM-openable VIPC from JSON inputs. It resolves each package (and its dependency closure) against the public VIPM indexes and downloads each package's real spec + icon. Stdlib only, but **requires network** to the public indexes. |
 
 ---
 
@@ -74,18 +75,38 @@ add-on must never be able to break the whole worker:
    domain dependencies the project's VIs load against) must install or the build
    fails.
 3. **Tooling VIPCs (`ci-tooling*.vipc`) are best-effort.** Their add-ons
-   (Antidoc, Caraya, VI Tester) are opportunistic: if one wedges the headless VIPM
-   engine — Antidoc's large dependency tree is the known offender — the script
-   warns and continues, and the image is still published. The required essentials
-   above are already installed, so UTF still works. Bake a wedge-prone add-on from
-   its own dedicated VIPC if you need it guaranteed in the worker.
+   (Antidoc, Caraya, LUnit base + CLI, VI Tester) are opportunistic: if one wedges
+   the headless VIPM engine — Antidoc's large dependency tree is the known offender
+   — the script warns and continues, and the image is still published. The required
+   essentials above are already installed, so UTF still works. Bake a wedge-prone
+   add-on from its own dedicated VIPC if you need it guaranteed in the worker.
 
 This ordering is why the main `build-labview-image.yml` produces a working,
 UTF-capable image even when Antidoc cannot currently be baked headless.
 
-To add **custom** project dependencies: commit a `.vipc` (made in the VIPM
-editor, or generated like `ci-tooling.vipc`) at the repo root or under
+To add **custom** project dependencies: commit a `.vipc` (typically created in
+the VIPM editor) at the repo root or under
 `.github/labview/vipm/`, then rebuild the image. No script changes are needed.
+
+### Baking a package that is on no VIPM repository (commit its `.vip`)
+
+A package published on **no** VIPM repository — e.g. an in-house framework — cannot
+be resolved by name from the public indexes. Rather than standing up a private VIPM
+mirror, **commit the package's `.vip` file to the repo** and reference the package in
+a `.vipc`:
+
+1. Commit the `.vip` anywhere outside `.github/` (the build stages every repo `*.vip`
+   into `.github/labview/vipm/`, next to the VIPCs). Keep VIPM's canonical export name
+   `<package-id>-<version>.vip` so its id + version are read correctly.
+2. Reference that package (id + version) in a `.vipc` you apply (a project
+   `Dependencies.vipc` or `ci-tooling`). The `.vipc` must also list the package's
+   dependency closure (OpenG, etc.), because dependencies are **not** read out of the
+   committed `.vip` — they are resolved from the `.vipc` like any other package.
+
+When applying that `.vipc`, `install-vipc.ps1` uses the committed `.vip` **in preference
+to the public mirror** (and it is the only way a no-index package resolves at all). A
+committed `.vip` that is **not** referenced by any applied `.vipc` is never installed on
+its own.
 
 ---
 
@@ -225,6 +246,29 @@ Fix: set **`VIPM_TIMEOUT`** (seconds) to override the default/CI-adjusted
 timeout. The script sets `VIPM_TIMEOUT=900`. See
 <https://docs.vipm.io/latest/cli/environment-variables/>.
 
+If `vipm refresh --force` reports `wait for VIPM startup`, the Desktop engine
+is unresponsive and package installs will hit the same timeout. The script
+restarts the headless LabVIEW/VIPM stack once (`VIPM_MAX_REFRESH_RESTARTS=1` by
+default); if the refresh handshake still fails, it stops before attempting any
+packages.
+
+Two known causes, one symptom — increasing `VIPM_TIMEOUT` or changing the
+dependency declaration helps with neither:
+
+1. **A global headless default.** The VIPM Desktop engine is a LabVIEW-runtime
+   app: with `LV_RTE_HEADLESS=1` in its environment it runs but never completes
+   the CLI's startup handshake. The worker base bakes that variable for
+   g-cli/Antidoc, and it silently broke **every** Windows dependency bake from
+   2026-08-01 to 2026-08-21 (probe-proven: the same base passes the moment the
+   variable is cleared). The script now clears it for its own process tree;
+   see the preflight/launch sections.
+2. **Container memory.** The engine's package-list refresh alone peaks over
+   1.3 GB on LabVIEW 2026 Q3; a memory-capped build container (Windows `docker
+   build` can default to a low cap, unlike `docker run`) starves it into the
+   identical wedge. The build workflows pass `docker build -m 8GB`, and the
+   script's memory preflight fails fast with this diagnosis when less than
+   ~2.5 GB is visible.
+
 ### 7. CLI command shape (26.3 Rust/clap CLI)
 
 Verified against `vipm install --help` and the
@@ -247,6 +291,9 @@ changed shape vs. the older `2026.1.0` build — mind the differences:**
 - `-y` / `--yes` **does** exist in 26.3 (skips the confirm prompt when installing
   **from a file**), but the script relies on the `VIPM_NONINTERACTIVE` /
   `VIPM_ASSUME_YES` env vars instead, so it isn't needed.
+- The Linux hook adds `--show-progress --verbose` so a CI log records whether a
+   package is resolving, extracting files, or running its own post-install action.
+   These flags add observability only; they do not bypass package scripts.
 - The `config.xml`-only `.vipc` produced by VIPM/project tooling is **not**
   reliably accepted by `vipm install <file.vipc>` directly in a Windows Server
   Core build. VIPM can return exit `0` while printing `No packages were installed`.
@@ -267,6 +314,11 @@ changed shape vs. the older `2026.1.0` build — mind the differences:**
 | `VIPM_NONINTERACTIVE` | `1` | Never block on prompts. |
 | `VIPM_ASSUME_YES` | `1` | Auto-confirm. |
 | `VIPM_TIMEOUT` | `900` | Override the per-operation timeout (seconds). |
+| `VIPM_DESKTOP_LIVELINESS_TIMEOUT` | `900` (Linux) | Maximum silent interval while the VIPM Desktop engine performs a package operation. |
+| `VIPM_DEBUG` | `1` (Linux) | Ask the CLI for diagnostic detail alongside the Linux hook's forced progress output. |
+| `VIPM_MAX_REFRESH_RESTARTS` | `1` | Number of clean LabVIEW/VIPM restarts after a refresh startup-handshake timeout. Set to `0` to fail immediately. |
+| `VIPM_ALLOW_LOW_MEMORY` | _(unset)_ | Set to `1` to attempt the install even when the container shows <~2.5 GB of memory (the preflight otherwise fails fast, since the VIPM engine cannot start under the Windows `docker build` default memory cap). |
+| `VIPM_DESKTOP_LIVELINESS_TIMEOUT` | `= VIPM_TIMEOUT` (900) | Seconds of Desktop silence the CLI tolerates before declaring `made no progress ... VIPM Desktop may be stuck` (its default is 60s). Large packages (e.g. `wovalab_lib_asciidoc_for_labview`) run post-install actions that are silently busy for minutes; the script raises this to the per-operation timeout so a healthy install is not aborted. |
 | `VIPM_REQUIRED_PACKAGES` | UTF JUnit essentials | Comma/semicolon list of `name@version` installed FIRST as required (build fails if they fail). Default: `ni_lib_utf_junit_report@1.0.1.43,ni_lib_junit_results_api@1.0.1.6,ni_lib_simple_xml@1.0.0.4`. Set to `-` to disable the required pre-install. |
 | `VIPM_PUBLIC_REPO_URL` | this repo's clone URL | Public Git repo `origin` used to satisfy Community Edition's public-repo requirement. |
 | `VIPM_ALLOW_MISSING_PACKAGES` | _(unset)_ | Set to `1` only for emergency best-effort builds; otherwise a failed REQUIRED package fails the image build. (Best-effort `ci-tooling*.vipc` add-ons never fail the build regardless.) |
@@ -287,10 +339,13 @@ changed shape vs. the older `2026.1.0` build — mind the differences:**
 | `Cannot determine repository visibility: … git: program not found` (exit 6) | No git binary on `PATH`. VIPM shells out to `git` to verify the repo is public. The Dockerfile bakes portable MinGit into `C:\git`; check the "Downloading portable Git" step succeeded (`GIT_INSTALLER_URL`). |
 | `IO error: Failed to load …Settings.ini … (os error 2)` | VIPM `Settings.ini` missing — the script's seed step didn't run (no LabVIEW found?). |
 | `Operation 'VIPM command 'library_list'' timed out after 330s` | Short build-time timeout and/or an old CLI. Use VIPM 26.3+ and raise `VIPM_TIMEOUT`. |
+| `wait for VIPM startup` during `vipm refresh` | The VIPM Desktop engine started but never completed the CLI handshake. Cause 1: `LV_RTE_HEADLESS=1` in its environment (a LabVIEW-runtime app cannot finish starting under the global headless default; the script clears it for its process tree — broke every bake Aug 2026). Cause 2: a memory-capped build container (refresh peaks >1.3 GB on LabVIEW 2026 Q3) — build with `docker build -m 8GB`; the preflight names this when <~2.5 GB is visible. The hook restarts the stack once, then fails before package installs. |
+| `VIPM command 'package_set_install' made no progress for 60.0s` (exit 124) | The CLI's 60s liveliness watchdog fired while VIPM Desktop was silently busy on a big package's install actions (asciidoc/antidoc are minutes-long). Not actually stuck: the script sets `VIPM_DESKTOP_LIVELINESS_TIMEOUT` to the `VIPM_TIMEOUT` ceiling so healthy installs ride it out. |
 | `error: unexpected argument '--refresh' found` (exit 2) | 26.3 removed `--refresh` from `install`. Run the standalone `vipm refresh` first; don't pass `--refresh` to `install`. |
 | `error: unexpected argument '--labview-version' found` (exit 2) | Global options must go **before** the `install` subcommand: `vipm --labview-version 2026 install <pkgs>`. The script also falls back to the bare form (active target from `Settings.ini`). |
 | `Applying VI Package Configuration ...` followed by `No packages were installed` with exit 0 | Treat it as a no-op failure, not success. The script forces fallback to parsed package specs and then local public-index package files. |
 | Package install reports "not found" | In Free/Community Windows containers this usually means VIPM's resolver index is empty even after `refresh`. The script falls back to direct public-index `.vip` / `.ogp` downloads and local-file installs; if that also fails, check package URLs, MD5s, and whether the package is in a custom/private repo. |
+| `[VIPM] ... Executing PostInstall Custom Action` then timeout | The package's own post-install VI did not return. `VIPM_NONINTERACTIVE` only controls CLI prompts, and VIPM 26.3 exposes no supported way to skip package scripts. The Linux hook preserves package contents, prints its phase/process/display diagnostics, and fails the image build rather than publishing an incomplete worker. Use a headless-compatible package release or resolve the package's install action upstream. |
 
 ---
 
