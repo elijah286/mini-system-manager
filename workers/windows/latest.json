@@ -1,7 +1,7 @@
-﻿{
-    "version":  "win-b9dc32069489",
-    "platform":  "windows",
-    "manifest_url":  "https://elijah286.github.io/mini-system-manager/workers/windows/win-b9dc32069489/manifest.html",
-    "build_date":  "2026-08-01T06:58:16Z",
-    "git_sha":  "6148be2811390a9ba6f969a95ac614430907e525"
+{
+  "version": "win-c6221662a861",
+  "platform": "windows",
+  "manifest_url": "https://elijah286.github.io/mini-system-manager/workers/windows/win-c6221662a861/manifest.html",
+  "build_date": "2026-09-04T12:52:06Z",
+  "git_sha": "0ee9f939675507605ef3a1bde143cbdfe35e9a82"
 }
